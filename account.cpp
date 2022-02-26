@@ -32,18 +32,17 @@ void Account::importFile()
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
-    QList<Operation> ops;
     QTextStream in(&file);
     while (!in.atEnd()) {
         QString line = in.readLine();
-        ops.append(process_line(line));
+        process_line(line);
     }
 
-    for (auto op = ops.begin(); op!= ops.end(); ++op)
-        addOperation(op->date(), op->category(), op->amount(), op->description());
+//    for (auto op = ops.begin(); op!= ops.end(); ++op)
+//        addOperation(op->date(), op->category(), op->amount(), op->description());
 }
 
-Operation Account::process_line(QString line)
+void Account::process_line(QString line)
 {
     QStringList infos = line.split(QLatin1Char(';'));
 
@@ -51,7 +50,8 @@ Operation Account::process_line(QString line)
     QDate op_date(date.at(2).toInt(),date.at(1).toInt(),date.at(0).toInt());
     QString cat = getOperationCategory(infos.at(1));
 
-    return Operation(op_date, infos.at(1), _locale.toDouble(infos.at(2)), cat, "");
+    // Reflechir a comment proprement appeler addOperation en dehors de la lecture du fichier
+    addOperation(op_date, infos.at(1), _locale.toDouble(infos.at(2)), cat);
 }
 
 QString Account::getOperationCategory(const QString &des)
@@ -66,14 +66,15 @@ QString Account::getOperationCategory(const QString &des)
 
 void Account::addOperation(QDate date, const QString &des, double amount, const QString &cat)
 {
-    opsModel->insertRows(0, 1, QModelIndex());
+    int pos = opsModel->rowCount();
+    opsModel->insertRows(pos, 1, QModelIndex());
 
-    QModelIndex index = opsModel->index(0, 0, QModelIndex());
+    QModelIndex index = opsModel->index(pos, 0, QModelIndex());
     opsModel->setData(index, date, Qt::EditRole);
-    index = opsModel->index(0, 1, QModelIndex());
+    index = opsModel->index(pos, 1, QModelIndex());
     opsModel->setData(index, cat, Qt::EditRole);
-    index = opsModel->index(0, 2, QModelIndex());
+    index = opsModel->index(pos, 2, QModelIndex());
     opsModel->setData(index, amount, Qt::EditRole);
-    index = opsModel->index(0, 3, QModelIndex());
+    index = opsModel->index(pos, 3, QModelIndex());
     opsModel->setData(index, des, Qt::EditRole);
 }

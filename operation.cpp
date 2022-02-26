@@ -13,15 +13,6 @@ Operation::Operation(QDate date, const QString &des, double amount, const QStrin
 //    qDebug() << _date << _amount << _description << _category << _type;
 }
 
-Operation::Operation(const Operation & other)
-{
-    _date = other._date;
-    _amount = other._amount;
-    _description = other._description;
-    _type = other._type;
-    _category = other._category;
-}
-
 QDate Operation::date()
 {
     return _date;

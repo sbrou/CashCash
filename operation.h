@@ -9,7 +9,6 @@ class Operation : public QObject
     Q_OBJECT
 public:
     explicit Operation(QDate date, const QString &comment, double amount, const QString &cat, const QString &type, QObject *parent = nullptr);
-    Operation(const Operation &);
 
     QDate date();
     QString category();

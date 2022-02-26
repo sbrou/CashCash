@@ -40,7 +40,7 @@ private:
 
 
     // Methodes
-    Operation process_line(QString line);
+    void process_line(QString line);
 
 };
 
