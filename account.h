@@ -22,6 +22,7 @@ public:
 public slots:
     void importFile();
     void addOperation(QDate date, const QString &des, double amount, const QString &cat);
+    void setStandardRules();
 
 signals:
 

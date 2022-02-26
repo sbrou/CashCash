@@ -22,7 +22,9 @@ Account::Account(QString title, QWidget *parent)
 
     connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
 
-    show();
+    setStandardRules();
+
+//    show();
 }
 
 void Account::importFile()
@@ -77,4 +79,23 @@ void Account::addOperation(QDate date, const QString &des, double amount, const 
     opsModel->setData(index, amount, Qt::EditRole);
     index = opsModel->index(pos, 3, QModelIndex());
     opsModel->setData(index, des, Qt::EditRole);
+}
+
+void Account::setStandardRules()
+{
+    _rules.insert("CARREFOUR","FOOD");
+    _rules.insert("HOMESERVE","HOUSE");
+    _rules.insert("PHARMACIE","HEALTH");
+    _rules.insert("FNAC","HOBBIES");
+    _rules.insert("Maxi Zoo","MAIKO");
+    _rules.insert("CHANTURGUE","HOUSE");
+    _rules.insert("TotalEnergies","HOUSE");
+    _rules.insert("PROXISERV","HOUSE");
+    _rules.insert("AVANSSUR","HOUSE");
+    _rules.insert("JOINT","JOINT");
+    _rules.insert("T2C","TRANSPORT");
+    _rules.insert("FR5110011000207555808944J","SAVING");
+    _rules.insert("BOUYGUES","SUBSCRIPTIONS");
+    _rules.insert("Deezer","SUBSCRIPTIONS");
+    _rules.insert("ASTEK","SALARY");
 }
