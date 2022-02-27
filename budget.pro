@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     account.cpp \
+    addcatdialog.cpp \
     addopdialog.cpp \
     category.cpp \
     catschart.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
     account.h \
+    addcatdialog.h \
     addopdialog.h \
     category.h \
     catschart.h \
@@ -29,6 +31,7 @@ HEADERS += \
 
 FORMS += \
     account.ui \
+    addcatdialog.ui \
     addopdialog.ui \
     mainwindow.ui
 

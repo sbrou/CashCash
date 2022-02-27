@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include <addopdialog.h>
+#include <addcatdialog.h>
 
 Account::Account(QString title, QWidget *parent)
     : QWidget{parent}
@@ -22,16 +23,12 @@ Account::Account(QString title, QWidget *parent)
     ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection); // ExtendedSelection pour pouvoir supprimer plusieurs d'un coup
 
-    connect(ui->opsView->selectionModel(),
-        SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-        this, SIGNAL(selectedOpsChanged(QItemSelection)));
-
 //    connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
 
     setStandardCategories();
     setStandardRules();
 
-//    catsPie = new CatsChart(&_categories, ui->qgbCats);
+//    catsPie = new CatsChart(&_opsCategories, ui->qgbCats);
 //    catsPie->setRenderHint(QPainter::Antialiasing);
 //    catsPie->show();
 
@@ -58,7 +55,7 @@ void Account::importFile()
 
 void Account::addOperation()
 {
-    AddOpDialog aoDiag(_categories.keys());
+    AddOpDialog aoDiag(_opsCategories.keys());
 
     if (aoDiag.exec()) {
         QDate date = aoDiag.date();
@@ -73,7 +70,6 @@ void Account::addOperation()
 void Account::editOperation()
 {
     QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
-
     QModelIndexList indexes = selectionModel->selectedRows();
     QModelIndex index, i;
     QDate date;
@@ -101,7 +97,7 @@ void Account::editOperation()
         des = varDes.toString();
     }
 
-    AddOpDialog aoDialog(_categories.keys());
+    AddOpDialog aoDialog(_opsCategories.keys());
     aoDialog.setWindowTitle(tr("Editer une opération"));
 
     aoDialog.setDate(date);
@@ -130,6 +126,27 @@ void Account::editOperation()
     }
 }
 
+void Account::removeOperation()
+{
+    QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
+    QModelIndexList indexes = selectionModel->selectedRows();
+    QModelIndex index;
+
+    foreach (index, indexes) {
+        int row = index.row();
+        opsModel->removeRows(row, 1, QModelIndex());
+    }
+}
+
+void Account::addCategory()
+{
+    addCatDialog acDiag;
+
+    if (acDiag.exec()) {
+        _opsCategories.insert(acDiag.title(), new Category(acDiag.type()));
+    }
+}
+
 void Account::process_line(QString line)
 {
     QStringList infos = line.split(QLatin1Char(';'));
@@ -147,8 +164,8 @@ QString Account::affect_category(const QString &des, double amount)
     for (auto rule = _rules.cbegin(); rule != _rules.cend(); ++rule)
     {
         if (des.contains(rule.key())) {
-            Categories::iterator it_cat = _categories.find(rule.value());
-            if (it_cat != _categories.end()) {
+            Categories::iterator it_cat = _opsCategories.find(rule.value());
+            if (it_cat != _opsCategories.end()) {
                 it_cat.value()->addOperation(amount);
                 return it_cat.key();
             }
@@ -175,7 +192,6 @@ void Account::add_operation(QDate date, const QString &des, double amount, const
 void Account::update_actions(const QItemSelection& selected)
 {
     QModelIndexList indexes = selected.indexes();
-    qDebug() << "selection size : " << indexes.size();
 
     if (!indexes.isEmpty()) {
         removeOpAct->setEnabled(true);
@@ -189,17 +205,17 @@ void Account::update_actions(const QItemSelection& selected)
 
 void Account::setStandardCategories()
 {
-    _categories.insert("-NONE-", new Category());
-    _categories.insert("FOOD", new Category(Category::SPENDING));
-    _categories.insert("HOUSE", new Category(Category::SPENDING));
-    _categories.insert("HEALTH", new Category(Category::SPENDING));
-    _categories.insert("HOBBIES", new Category(Category::SPENDING));
-    _categories.insert("MAIKO", new Category(Category::SPENDING));
-    _categories.insert("JOINT", new Category(Category::SPENDING));
-    _categories.insert("TRANSPORT", new Category(Category::SPENDING));
-    _categories.insert("SAVING", new Category(Category::SAVING));
-    _categories.insert("SUBSCRIPTIONS", new Category(Category::SPENDING));
-    _categories.insert("SALARY", new Category(Category::INCOME));
+    _opsCategories.insert("-NONE-", new Category());
+    _opsCategories.insert("FOOD", new Category(Category::SPENDING));
+    _opsCategories.insert("HOUSE", new Category(Category::SPENDING));
+    _opsCategories.insert("HEALTH", new Category(Category::SPENDING));
+    _opsCategories.insert("HOBBIES", new Category(Category::SPENDING));
+    _opsCategories.insert("MAIKO", new Category(Category::SPENDING));
+    _opsCategories.insert("JOINT", new Category(Category::SPENDING));
+    _opsCategories.insert("TRANSPORT", new Category(Category::SPENDING));
+    _opsCategories.insert("SAVING", new Category(Category::SAVING));
+    _opsCategories.insert("SUBSCRIPTIONS", new Category(Category::SPENDING));
+    _opsCategories.insert("SALARY", new Category(Category::INCOME));
 }
 
 void Account::setStandardRules()
@@ -246,23 +262,20 @@ void Account::createToolBar()
      removeOpAct = new QAction(tr("&Remove"), this);
      removeOpAct->setEnabled(false);
      toolBar->addAction(removeOpAct);
-//     connect(removeOpAct, SIGNAL(triggered()),
-//         addressWidget, SLOT(removeEntry()));
+     connect(removeOpAct, SIGNAL(triggered()),
+         this, SLOT(removeOperation()));
 
      toolBar->addSeparator();
 
      addCatAct = new QAction(tr("&Add Category..."), this);
      toolBar->addAction(addCatAct);
-//     connect(addCatAct, SIGNAL(triggered()),
-//         this, SLOT(addCategory()));
+     connect(addCatAct, SIGNAL(triggered()),
+         this, SLOT(addCategory()));
 
      manBudgetAct = new QAction(tr("&Budget..."), this);
      toolBar->addAction(manBudgetAct);
 //     connect(manBudgetAct, SIGNAL(triggered()),
 //         this, SLOT(manageBudget()));
-
-//     connect(this, SIGNAL(selectedOpsChanged(QItemSelection)),
-//         this, SLOT(update_actions(QItemSelection)));
 
      connect(ui->opsView->selectionModel(),
          SIGNAL(selectionChanged(QItemSelection,QItemSelection)),

@@ -30,6 +30,8 @@ public slots:
     void importFile();
     void addOperation();
     void editOperation();
+    void removeOperation();
+    void addCategory();
 
 signals:
 
@@ -43,10 +45,11 @@ private:
     QLocale _locale;
     QString _title;
 
-    Categories _categories;
-
-    QMap<QString,QString> _rules;
+    Categories _opsCategories;
     QMap<QString,QString> _opsType;
+
+    Categories _catsTypes;
+    QMap<QString,QString> _rules;
 
     OperationsTableModel* opsModel;
 //    CatsChart* catsPie;
