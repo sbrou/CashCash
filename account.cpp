@@ -4,6 +4,8 @@
 #include <QFileDialog>
 #include <QDebug>
 
+#include <addopdialog.h>
+
 Account::Account(QString title, QWidget *parent)
     : QWidget{parent}
     , ui(new Ui::Account)
@@ -13,17 +15,27 @@ Account::Account(QString title, QWidget *parent)
     ui->setupUi(this);
 
     opsModel = new OperationsTableModel(this);
-    ui->qtvOps->setModel(opsModel);
-    ui->qtvOps->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->qtvOps->horizontalHeader()->setStretchLastSection(true);
-    ui->qtvOps->verticalHeader()->hide();
-    ui->qtvOps->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->qtvOps->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->opsView->setModel(opsModel);
+    ui->opsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->opsView->horizontalHeader()->setStretchLastSection(true);
+    ui->opsView->verticalHeader()->hide();
+    ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection); // ExtendedSelection pour pouvoir supprimer plusieurs d'un coup
 
-    connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
+    connect(ui->opsView->selectionModel(),
+        SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+        this, SIGNAL(selectedOpsChanged(QItemSelection)));
 
+//    connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
+
+    setStandardCategories();
     setStandardRules();
 
+//    catsPie = new CatsChart(&_categories, ui->qgbCats);
+//    catsPie->setRenderHint(QPainter::Antialiasing);
+//    catsPie->show();
+
+    createToolBar();
 //    show();
 }
 
@@ -44,29 +56,108 @@ void Account::importFile()
 //        addOperation(op->date(), op->category(), op->amount(), op->description());
 }
 
+void Account::addOperation()
+{
+    AddOpDialog aoDiag(_categories.keys());
+
+    if (aoDiag.exec()) {
+        QDate date = aoDiag.date();
+        double amount = aoDiag.amount();
+        QString cat = aoDiag.category();
+        QString des = aoDiag.description();
+
+        add_operation(date, des, amount, cat);
+    }
+}
+
+void Account::editOperation()
+{
+    QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
+
+    QModelIndexList indexes = selectionModel->selectedRows();
+    QModelIndex index, i;
+    QDate date;
+    double amount;
+    QString cat;
+    QString des;
+    int row = -1;
+
+    foreach (index, indexes) {
+        row = index.row();
+        i = opsModel->index(row, 0, QModelIndex());
+        QVariant varDate = opsModel->data(i, Qt::DisplayRole);
+        date = varDate.toDate();
+
+        i = opsModel->index(row, 1, QModelIndex());
+        QVariant varCat = opsModel->data(i, Qt::DisplayRole);
+        cat = varCat.toString();
+
+        i = opsModel->index(row, 2, QModelIndex());
+        QVariant varAmount = opsModel->data(i, Qt::DisplayRole);
+        amount = varAmount.toDouble();
+
+        i = opsModel->index(row, 3, QModelIndex());
+        QVariant varDes = opsModel->data(i, Qt::DisplayRole);
+        des = varDes.toString();
+    }
+
+    AddOpDialog aoDialog(_categories.keys());
+    aoDialog.setWindowTitle(tr("Editer une opération"));
+
+    aoDialog.setDate(date);
+    aoDialog.setAmount(amount);
+    aoDialog.setCategory(cat);
+    aoDialog.setDescription(des);
+
+    if (aoDialog.exec()) {
+        QDate newDate = aoDialog.date();
+        double newAmount = aoDialog.amount();
+        QString newCat = aoDialog.category();
+        QString newDes = aoDialog.description();
+
+
+        i = opsModel->index(row, 0, QModelIndex());
+        opsModel->setData(i, newDate, Qt::EditRole);
+
+        i = opsModel->index(row, 1, QModelIndex());
+        opsModel->setData(i, newCat, Qt::EditRole);
+
+        i = opsModel->index(row, 2, QModelIndex());
+        opsModel->setData(i, newAmount, Qt::EditRole);
+
+        i = opsModel->index(row, 3, QModelIndex());
+        opsModel->setData(i, newDes, Qt::EditRole);
+    }
+}
+
 void Account::process_line(QString line)
 {
     QStringList infos = line.split(QLatin1Char(';'));
 
     QStringList date = infos.at(0).split(QLatin1Char('/'));
     QDate op_date(date.at(2).toInt(),date.at(1).toInt(),date.at(0).toInt());
-    QString cat = getOperationCategory(infos.at(1));
+    QString cat = affect_category(infos.at(1),_locale.toDouble(infos.at(2)));
 
     // Reflechir a comment proprement appeler addOperation en dehors de la lecture du fichier
-    addOperation(op_date, infos.at(1), _locale.toDouble(infos.at(2)), cat);
+    add_operation(op_date, infos.at(1), _locale.toDouble(infos.at(2)), cat);
 }
 
-QString Account::getOperationCategory(const QString &des)
+QString Account::affect_category(const QString &des, double amount)
 {
     for (auto rule = _rules.cbegin(); rule != _rules.cend(); ++rule)
     {
-        if (des.contains(rule.key()))
-            return rule.value();
+        if (des.contains(rule.key())) {
+            Categories::iterator it_cat = _categories.find(rule.value());
+            if (it_cat != _categories.end()) {
+                it_cat.value()->addOperation(amount);
+                return it_cat.key();
+            }
+        }
     }
-    return "";
+    return "-NONE-";
 }
 
-void Account::addOperation(QDate date, const QString &des, double amount, const QString &cat)
+void Account::add_operation(QDate date, const QString &des, double amount, const QString &cat)
 {
     int pos = opsModel->rowCount();
     opsModel->insertRows(pos, 1, QModelIndex());
@@ -79,6 +170,36 @@ void Account::addOperation(QDate date, const QString &des, double amount, const 
     opsModel->setData(index, amount, Qt::EditRole);
     index = opsModel->index(pos, 3, QModelIndex());
     opsModel->setData(index, des, Qt::EditRole);
+}
+
+void Account::update_actions(const QItemSelection& selected)
+{
+    QModelIndexList indexes = selected.indexes();
+    qDebug() << "selection size : " << indexes.size();
+
+    if (!indexes.isEmpty()) {
+        removeOpAct->setEnabled(true);
+        if (indexes.size() == 4)
+            editOpAct->setEnabled(true);
+    } else {
+        removeOpAct->setEnabled(false);
+        editOpAct->setEnabled(false);
+    }
+}
+
+void Account::setStandardCategories()
+{
+    _categories.insert("-NONE-", new Category());
+    _categories.insert("FOOD", new Category(Category::SPENDING));
+    _categories.insert("HOUSE", new Category(Category::SPENDING));
+    _categories.insert("HEALTH", new Category(Category::SPENDING));
+    _categories.insert("HOBBIES", new Category(Category::SPENDING));
+    _categories.insert("MAIKO", new Category(Category::SPENDING));
+    _categories.insert("JOINT", new Category(Category::SPENDING));
+    _categories.insert("TRANSPORT", new Category(Category::SPENDING));
+    _categories.insert("SAVING", new Category(Category::SAVING));
+    _categories.insert("SUBSCRIPTIONS", new Category(Category::SPENDING));
+    _categories.insert("SALARY", new Category(Category::INCOME));
 }
 
 void Account::setStandardRules()
@@ -99,3 +220,52 @@ void Account::setStandardRules()
     _rules.insert("Deezer","SUBSCRIPTIONS");
     _rules.insert("ASTEK","SALARY");
 }
+
+void Account::createToolBar()
+ {
+     toolBar = new QToolBar(this);
+
+     importOpAct = new QAction(tr("&Import..."), this);
+     toolBar->addAction(importOpAct);
+     connect(importOpAct, SIGNAL(triggered()),
+         this, SLOT(importFile()));
+
+     toolBar->addSeparator();
+
+     addOpAct = new QAction(tr("&Add..."), this);
+     toolBar->addAction(addOpAct);
+     connect(addOpAct, SIGNAL(triggered()),
+         this, SLOT(addOperation()));
+
+     editOpAct = new QAction(tr("&Edit..."), this);
+     editOpAct->setEnabled(false);
+     toolBar->addAction(editOpAct);
+     connect(editOpAct, SIGNAL(triggered()),
+         this, SLOT(editOperation()));
+
+     removeOpAct = new QAction(tr("&Remove"), this);
+     removeOpAct->setEnabled(false);
+     toolBar->addAction(removeOpAct);
+//     connect(removeOpAct, SIGNAL(triggered()),
+//         addressWidget, SLOT(removeEntry()));
+
+     toolBar->addSeparator();
+
+     addCatAct = new QAction(tr("&Add Category..."), this);
+     toolBar->addAction(addCatAct);
+//     connect(addCatAct, SIGNAL(triggered()),
+//         this, SLOT(addCategory()));
+
+     manBudgetAct = new QAction(tr("&Budget..."), this);
+     toolBar->addAction(manBudgetAct);
+//     connect(manBudgetAct, SIGNAL(triggered()),
+//         this, SLOT(manageBudget()));
+
+//     connect(this, SIGNAL(selectedOpsChanged(QItemSelection)),
+//         this, SLOT(update_actions(QItemSelection)));
+
+     connect(ui->opsView->selectionModel(),
+         SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+         this, SLOT(update_actions(QItemSelection)));
+
+ }

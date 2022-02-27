@@ -7,15 +7,29 @@ class Category : public QObject
 {
     Q_OBJECT
 public:
-    explicit Category(QString title, QObject *parent = nullptr);
+    enum Type
+    {
+        NONE=0x0,
+        SPENDING=0x1,
+        INCOME=0x2,
+        SAVING=0x4
+    };
+
+//    explicit Category(const QString& title, QObject *parent = nullptr);
+    explicit Category(QObject *parent = nullptr);
+    explicit Category(Category::Type type, QObject *parent = nullptr);
+
+//    QString title();
+    double amount();
+    void addOperation(double amount);
 
 signals:
 
 private:
     unsigned _type;
-    QString _title;
+//    QString _title;
     double _budget;
-    double _total;
+    double _amount;
 
 };
 

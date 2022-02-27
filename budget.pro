@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,7 +10,9 @@ CONFIG += c++11
 
 SOURCES += \
     account.cpp \
+    addopdialog.cpp \
     category.cpp \
+    catschart.cpp \
     main.cpp \
     mainwindow.cpp \
     operation.cpp \
@@ -18,13 +20,16 @@ SOURCES += \
 
 HEADERS += \
     account.h \
+    addopdialog.h \
     category.h \
+    catschart.h \
     mainwindow.h \
     operation.h \
     operationsmodel.h
 
 FORMS += \
     account.ui \
+    addopdialog.ui \
     mainwindow.ui
 
 TRANSLATIONS += \
