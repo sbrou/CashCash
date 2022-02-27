@@ -23,6 +23,11 @@ double Category::amount()
     return _amount;
 }
 
+Category::Type Category::type()
+{
+    return _type;
+}
+
 void Category::addOperation(double amount)
 {
     _amount += amount;

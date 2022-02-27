@@ -1,24 +1,28 @@
 #include "catschart.h"
 
+#include <QPieLegendMarker>
+
 CatsChart::CatsChart(Categories *cats, QWidget *parent)
     : QChartView(parent),
       _cats(cats)
 {
     _series = new QPieSeries();
     for (auto it = _cats->begin(); it != _cats->end(); ++it) {
-        qDebug() << "splice : " << it.key() << it.value()->amount();
-        _series->append(it.key(),it.value()->amount());
+        if (it.value()->type() == Category::SPENDING)
+            _series->append(it.key(),it.value()->amount());
     }
 
     _series->setLabelsVisible(false);
 
-    QChart *chart = new QChart();
-    chart->addSeries(_series);
-    chart->setTitle("Categories");
-    chart->legend()->setMarkerShape(QLegend::MarkerShapeCircle);
+    _chart = new QChart();
+    _chart->addSeries(_series);
+    _chart->legend()->setMarkerShape(QLegend::MarkerShapeCircle);
+    _chart->legend()->setAlignment(Qt::AlignRight);
 
-    setChart(chart);
+    setChart(_chart);
     setRenderHint(QPainter::Antialiasing);
+
+    updateLegendMarkers();
 
     setMinimumSize(386,258);
 
@@ -33,4 +37,20 @@ void CatsChart::updateSlice(const QString & label, double value)
         if ((*cat)->label() == label)
             (*cat)->setValue(value);
     }
+
+    updateLegendMarkers();
+}
+
+void CatsChart::updateLegendMarkers()
+{
+    const auto markers = _chart->legend()->markers(_series);
+    for (QLegendMarker *marker : markers) {
+        QPieLegendMarker *pieMarker = qobject_cast<QPieLegendMarker *>(marker);
+        pieMarker->setLabel(QString("%1 %2€ %3%")
+                            .arg(pieMarker->slice()->label())
+                            .arg(pieMarker->slice()->value())
+                            .arg(pieMarker->slice()->percentage() * 100, 0, 'f', 2));
+//        pieMarker->setFont(QFont("Arial", 8));
+    }
+
 }

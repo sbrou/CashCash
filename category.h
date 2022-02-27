@@ -21,12 +21,13 @@ public:
     explicit Category(Category::Type type, QObject *parent = nullptr);
 
     double amount();
+    Type type();
     void addOperation(double amount);
 
 signals:
 
 private:
-    unsigned _type;
+    Type _type;
     double _budget;
     double _amount;
 

@@ -232,7 +232,7 @@ void Account::update_actions(const QItemSelection& selected)
 
 void Account::setStandardCategories()
 {
-    _opsCategories.insert("-NONE-", new Category());
+    _opsCategories.insert("-NONE-", new Category(Category::SPENDING));
     _opsCategories.insert("FOOD", new Category(Category::SPENDING));
     _opsCategories.insert("HOUSE", new Category(Category::SPENDING));
     _opsCategories.insert("HEALTH", new Category(Category::SPENDING));

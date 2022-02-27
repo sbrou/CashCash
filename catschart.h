@@ -18,6 +18,9 @@ private:
     Categories* _cats;
 
     QPieSeries *_series;
+    QChart *_chart;
+
+    void updateLegendMarkers();
 };
 
 #endif // CATSCHART_H
