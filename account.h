@@ -14,8 +14,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Account; }
 QT_END_NAMESPACE
 
-typedef QMap<QString,Category*> Categories;
-
 class Account : public QWidget
 {
     Q_OBJECT
@@ -32,8 +30,6 @@ public slots:
     void editOperation();
     void removeOperation();
     void addCategory();
-
-signals:
 
 private slots:
     void update_actions(const QItemSelection& selected);
@@ -52,9 +48,10 @@ private:
     QMap<QString,QString> _rules;
 
     OperationsTableModel* opsModel;
-//    CatsChart* catsPie;
+    CatsChart* catsPie;
 
     void createToolBar();
+    void updateCatsPie();
 
     QToolBar *toolBar;
     QAction *importOpAct;

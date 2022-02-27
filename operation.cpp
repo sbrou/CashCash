@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-Operation::Operation(QDate date, const QString &des, double amount, const QString &cat, const QString &type, QObject *parent)
+Operation::Operation(QDate date, const QString &des, double amount, const QString & cat, const QString &type, QObject *parent)
     : QObject{parent},
       _date(date),
       _amount(amount),
@@ -22,6 +22,7 @@ QString Operation::category()
 {
     return _category;
 }
+
 
 double Operation::amount()
 {

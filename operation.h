@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QDate>
 
+#include <category.h>
+
 class Operation : public QObject
 {
     Q_OBJECT

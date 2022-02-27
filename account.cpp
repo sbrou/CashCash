@@ -28,9 +28,7 @@ Account::Account(QString title, QWidget *parent)
     setStandardCategories();
     setStandardRules();
 
-//    catsPie = new CatsChart(&_opsCategories, ui->qgbCats);
-//    catsPie->setRenderHint(QPainter::Antialiasing);
-//    catsPie->show();
+    catsPie = new CatsChart(&_opsCategories, ui->catsWidget);
 
     createToolBar();
 //    show();
@@ -123,6 +121,18 @@ void Account::editOperation()
 
         i = opsModel->index(row, 3, QModelIndex());
         opsModel->setData(i, newDes, Qt::EditRole);
+
+        Categories::iterator it_cat = _opsCategories.find(cat);
+        if (it_cat != _opsCategories.end()) {
+            it_cat.value()->addOperation(-amount);
+            catsPie->updateSlice(cat,it_cat.value()->amount());
+        }
+
+        it_cat = _opsCategories.find(newCat);
+        if (it_cat != _opsCategories.end()) {
+            it_cat.value()->addOperation(newAmount);
+            catsPie->updateSlice(newCat,it_cat.value()->amount());
+        }
     }
 }
 
@@ -134,6 +144,21 @@ void Account::removeOperation()
 
     foreach (index, indexes) {
         int row = index.row();
+
+        QModelIndex i = opsModel->index(row, 1, QModelIndex());
+        QVariant varCat = opsModel->data(i, Qt::DisplayRole);
+        QString cat = varCat.toString();
+
+        i = opsModel->index(row, 2, QModelIndex());
+        QVariant varAmount = opsModel->data(i, Qt::DisplayRole);
+        double amount = varAmount.toDouble();
+
+        Categories::iterator it_cat = _opsCategories.find(cat);
+        if (it_cat != _opsCategories.end()) {
+            it_cat.value()->addOperation(-amount);
+            catsPie->updateSlice(cat,it_cat.value()->amount());
+        }
+
         opsModel->removeRows(row, 1, QModelIndex());
     }
 }
@@ -187,6 +212,8 @@ void Account::add_operation(QDate date, const QString &des, double amount, const
     opsModel->setData(index, amount, Qt::EditRole);
     index = opsModel->index(pos, 3, QModelIndex());
     opsModel->setData(index, des, Qt::EditRole);
+
+    catsPie->updateSlice(cat,amount);
 }
 
 void Account::update_actions(const QItemSelection& selected)
@@ -238,47 +265,48 @@ void Account::setStandardRules()
 }
 
 void Account::createToolBar()
- {
-     toolBar = new QToolBar(this);
+{
+    toolBar = new QToolBar(this);
 
-     importOpAct = new QAction(tr("&Import..."), this);
-     toolBar->addAction(importOpAct);
-     connect(importOpAct, SIGNAL(triggered()),
-         this, SLOT(importFile()));
+    importOpAct = new QAction(tr("&Import..."), this);
+    toolBar->addAction(importOpAct);
+    connect(importOpAct, SIGNAL(triggered()),
+            this, SLOT(importFile()));
 
-     toolBar->addSeparator();
+    toolBar->addSeparator();
 
-     addOpAct = new QAction(tr("&Add..."), this);
-     toolBar->addAction(addOpAct);
-     connect(addOpAct, SIGNAL(triggered()),
-         this, SLOT(addOperation()));
+    addOpAct = new QAction(tr("&Add..."), this);
+    toolBar->addAction(addOpAct);
+    connect(addOpAct, SIGNAL(triggered()),
+            this, SLOT(addOperation()));
 
-     editOpAct = new QAction(tr("&Edit..."), this);
-     editOpAct->setEnabled(false);
-     toolBar->addAction(editOpAct);
-     connect(editOpAct, SIGNAL(triggered()),
-         this, SLOT(editOperation()));
+    editOpAct = new QAction(tr("&Edit..."), this);
+    editOpAct->setEnabled(false);
+    toolBar->addAction(editOpAct);
+    connect(editOpAct, SIGNAL(triggered()),
+            this, SLOT(editOperation()));
 
-     removeOpAct = new QAction(tr("&Remove"), this);
-     removeOpAct->setEnabled(false);
-     toolBar->addAction(removeOpAct);
-     connect(removeOpAct, SIGNAL(triggered()),
-         this, SLOT(removeOperation()));
+    removeOpAct = new QAction(tr("&Remove"), this);
+    removeOpAct->setEnabled(false);
+    toolBar->addAction(removeOpAct);
+    connect(removeOpAct, SIGNAL(triggered()),
+            this, SLOT(removeOperation()));
 
-     toolBar->addSeparator();
+    toolBar->addSeparator();
 
-     addCatAct = new QAction(tr("&Add Category..."), this);
-     toolBar->addAction(addCatAct);
-     connect(addCatAct, SIGNAL(triggered()),
-         this, SLOT(addCategory()));
+    addCatAct = new QAction(tr("&Add Category..."), this);
+    toolBar->addAction(addCatAct);
+    connect(addCatAct, SIGNAL(triggered()),
+            this, SLOT(addCategory()));
 
-     manBudgetAct = new QAction(tr("&Budget..."), this);
-     toolBar->addAction(manBudgetAct);
-//     connect(manBudgetAct, SIGNAL(triggered()),
-//         this, SLOT(manageBudget()));
+    manBudgetAct = new QAction(tr("&Budget..."), this);
+    toolBar->addAction(manBudgetAct);
+    //     connect(manBudgetAct, SIGNAL(triggered()),
+    //         this, SLOT(manageBudget()));
 
-     connect(ui->opsView->selectionModel(),
-         SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-         this, SLOT(update_actions(QItemSelection)));
+    connect(ui->opsView->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(update_actions(QItemSelection)));
 
- }
+}
+
