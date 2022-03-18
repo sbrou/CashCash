@@ -5,6 +5,9 @@
 #include <QItemSelection>
 #include <QToolBar>
 
+#include <QtSql>
+#include <QtWidgets>
+
 #include "operation.h"
 #include "category.h"
 #include "operationsmodel.h"
@@ -66,6 +69,10 @@ private:
     void add_operation(QDate date, const QString &des, double amount, const QString &cat);
     QString affect_category(const QString &des, double amount);
 
+
+    void showError(const QSqlError &err);
+    QSqlRelationalTableModel *model;
+    int categoryIdx, tagIdx;
 };
 
 #endif // ACCOUNT_H

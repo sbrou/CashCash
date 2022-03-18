@@ -12,17 +12,19 @@ class AddOpDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddOpDialog(QStringList categories, QWidget *parent = nullptr);
+    explicit AddOpDialog(QStringList categories, QStringList tags, QWidget *parent = nullptr);
     ~AddOpDialog();
 
     QDate date();
     double amount();
-    QString category();
+    int category();
+    int tag();
     QString description();
 
     void setDate(QDate);
     void setAmount(double);
-    void setCategory(const QString &);
+    void setCategory(int);
+    void setTag(int);
     void setDescription(const QString &);
 
 private:

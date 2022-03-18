@@ -1,5 +1,6 @@
 #include "catschart.h"
 
+#include <QLegendMarker>
 #include <QPieLegendMarker>
 
 CatsChart::CatsChart(Categories *cats, QWidget *parent)
@@ -38,19 +39,40 @@ void CatsChart::updateSlice(const QString & label, double value)
             (*cat)->setValue(value);
     }
 
+    qDebug() << "--------------------------------------------------------";
+    categories = _series->slices();
+    for (auto cat = categories.begin(); cat != categories.end(); ++cat)
+    {
+        qDebug() << (*cat)->label() << (*cat)->value();
+    }
+
     updateLegendMarkers();
+    _chart->legend()->show();
+    resize(QSize(400,400));
 }
 
 void CatsChart::updateLegendMarkers()
 {
     const auto markers = _chart->legend()->markers(_series);
+    qDebug() << "before update";
     for (QLegendMarker *marker : markers) {
         QPieLegendMarker *pieMarker = qobject_cast<QPieLegendMarker *>(marker);
+        qDebug() << pieMarker->label();
+    }
+
+    for (QLegendMarker *marker : markers) {
+        QPieLegendMarker *pieMarker = qobject_cast<QPieLegendMarker *>(marker);
+//        qDebug() << pieMarker->slice()->label() << pieMarker->slice()->value();
         pieMarker->setLabel(QString("%1 %2€ %3%")
                             .arg(pieMarker->slice()->label())
                             .arg(pieMarker->slice()->value())
                             .arg(pieMarker->slice()->percentage() * 100, 0, 'f', 2));
 //        pieMarker->setFont(QFont("Arial", 8));
+//        pieMarker->setVisible(true);
     }
-
+    qDebug() << "after update";
+    for (QLegendMarker *marker : markers) {
+        QPieLegendMarker *pieMarker = qobject_cast<QPieLegendMarker *>(marker);
+        qDebug() << pieMarker->label();
+    }
 }

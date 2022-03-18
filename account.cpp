@@ -7,6 +7,8 @@
 #include <addopdialog.h>
 #include <addcatdialog.h>
 
+#include "initdb.h"
+
 Account::Account(QString title, QWidget *parent)
     : QWidget{parent}
     , ui(new Ui::Account)
@@ -15,11 +17,96 @@ Account::Account(QString title, QWidget *parent)
 {
     ui->setupUi(this);
 
+    if (!QSqlDatabase::drivers().contains("QSQLITE"))
+            QMessageBox::critical(
+                        this,
+                        "Unable to load database",
+                        "This demo needs the SQLITE driver"
+                        );
+
+        // Initialize the database:
+        QSqlError err = initDb();
+        if (err.type() != QSqlError::NoError) {
+            showError(err);
+            return;
+        }
+
+        // Create the data model:
+        model = new QSqlRelationalTableModel(ui->opsView);
+        model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+        model->setTable("operations");
+
+        // Remember the indexes of the columns:
+        categoryIdx = model->fieldIndex("category");
+        tagIdx = model->fieldIndex("tag");
+
+        // Set the relations to the other database tables:
+        model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
+        model->setRelation(tagIdx, QSqlRelation("tags", "id", "name"));
+
+        // Set the localized header captions:
+        model->setHeaderData(categoryIdx, Qt::Horizontal, tr("Category"));
+        model->setHeaderData(tagIdx, Qt::Horizontal, tr("Tag"));
+        model->setHeaderData(model->fieldIndex("op_date"),
+                             Qt::Horizontal, tr("Date"));
+        model->setHeaderData(model->fieldIndex("amount"), Qt::Horizontal, tr("Amount"));
+        model->setHeaderData(model->fieldIndex("description"),
+                             Qt::Horizontal, tr("Description"));
+
+        // Populate the model:
+        if (!model->select()) {
+            showError(model->lastError());
+            return;
+        }
+
+        // Set the model and hide the ID column:
+        ui ->opsView->setModel(model);
+        ui ->opsView->setColumnHidden(model->fieldIndex("id"), true);
+        ui ->opsView->setCurrentIndex(model->index(0, 0));
+        ui->opsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        ui->opsView->horizontalHeader()->setStretchLastSection(true);
+        ui->opsView->verticalHeader()->hide();
+        ui->opsView->clearSpans();
+        ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+//        // Initialize the Author combo box:
+//        ui.authorEdit->setModel(model->relationModel(authorIdx));
+//        ui.authorEdit->setModelColumn(
+//                    model->relationModel(authorIdx)->fieldIndex("name"));
+
+//        ui.genreEdit->setModel(model->relationModel(genreIdx));
+//        ui.genreEdit->setModelColumn(
+//                    model->relationModel(genreIdx)->fieldIndex("name"));
+
+//        // Lock and prohibit resizing of the width of the rating column:
+//        ui ->opsView->horizontalHeader()->setSectionResizeMode(
+//                    model->fieldIndex("rating"),
+//                    QHeaderView::ResizeToContents);
+
+//        QDataWidgetMapper *mapper = new QDataWidgetMapper(this);
+//        mapper->setModel(model);
+//        mapper->setItemDelegate(new BookDelegate(this));
+//        mapper->addMapping(ui.titleEdit, model->fieldIndex("title"));
+//        mapper->addMapping(ui.yearEdit, model->fieldIndex("year"));
+//        mapper->addMapping(ui.authorEdit, authorIdx);
+//        mapper->addMapping(ui.genreEdit, genreIdx);
+//        mapper->addMapping(ui.ratingEdit, model->fieldIndex("rating"));
+
+//        connect(ui ->opsView->selectionModel(),
+//                &QItemSelectionModel::currentRowChanged,
+//                mapper,
+//                &QDataWidgetMapper::setCurrentModelIndex
+//                );
+
+    /*
+
     opsModel = new OperationsTableModel(this);
     ui->opsView->setModel(opsModel);
     ui->opsView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->opsView->horizontalHeader()->setStretchLastSection(true);
     ui->opsView->verticalHeader()->hide();
+    ui->opsView->clearSpans();
     ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection); // ExtendedSelection pour pouvoir supprimer plusieurs d'un coup
 
@@ -29,9 +116,14 @@ Account::Account(QString title, QWidget *parent)
     setStandardRules();
 
     catsPie = new CatsChart(&_opsCategories, ui->catsWidget);
-
+    */
     createToolBar();
-//    show();
+}
+
+void Account::showError(const QSqlError &err)
+{
+    QMessageBox::critical(this, "Unable to initialize Database",
+                    "Error initializing database: " + err.text());
 }
 
 void Account::importFile()
@@ -241,7 +333,7 @@ void Account::setStandardCategories()
     _opsCategories.insert("JOINT", new Category(Category::SPENDING));
     _opsCategories.insert("TRANSPORT", new Category(Category::SPENDING));
     _opsCategories.insert("SAVING", new Category(Category::SAVING));
-    _opsCategories.insert("SUBSCRIPTIONS", new Category(Category::SPENDING));
+    _opsCategories.insert("SUBS", new Category(Category::SPENDING));
     _opsCategories.insert("SALARY", new Category(Category::INCOME));
 }
 
@@ -259,8 +351,8 @@ void Account::setStandardRules()
     _rules.insert("JOINT","JOINT");
     _rules.insert("T2C","TRANSPORT");
     _rules.insert("FR5110011000207555808944J","SAVING");
-    _rules.insert("BOUYGUES","SUBSCRIPTIONS");
-    _rules.insert("Deezer","SUBSCRIPTIONS");
+    _rules.insert("BOUYGUES","SUBS");
+    _rules.insert("Deezer","SUBS");
     _rules.insert("ASTEK","SALARY");
 }
 
