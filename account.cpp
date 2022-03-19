@@ -69,7 +69,7 @@ Account::Account(QString title, QWidget *parent)
         ui->opsView->verticalHeader()->hide();
         ui->opsView->clearSpans();
         ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection);
+        ui->opsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
         ui->opsView->resizeColumnsToContents();
 
 //    connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
@@ -160,29 +160,21 @@ void Account::addOperation()
 
 void Account::removeOperation()
 {
+    int ok = QMessageBox::warning(this,QStringLiteral("Supprimer les opérations sélectionnées"),
+                                  QStringLiteral("Etes-vous sûr de vouloir supprimer les opérations sélectionnées?"),
+                                  QMessageBox::Yes,QMessageBox::No);
+    if(ok == QMessageBox::No)
+        return;
+
     QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
     QModelIndexList indexes = selectionModel->selectedRows();
     QModelIndex index;
 
     foreach (index, indexes) {
         int row = index.row();
-
-        QModelIndex i = opsModel->index(row, 1, QModelIndex());
-        QVariant varCat = opsModel->data(i, Qt::DisplayRole);
-        QString cat = varCat.toString();
-
-        i = opsModel->index(row, 2, QModelIndex());
-        QVariant varAmount = opsModel->data(i, Qt::DisplayRole);
-        double amount = varAmount.toDouble();
-
-        Categories::iterator it_cat = _opsCategories.find(cat);
-        if (it_cat != _opsCategories.end()) {
-            it_cat.value()->addOperation(-amount);
-            catsPie->updateSlice(cat,it_cat.value()->amount());
-        }
-
-        opsModel->removeRows(row, 1, QModelIndex());
+        model->removeRows(row,1);
     }
+    model->submitAll();
 }
 
 void Account::addCategory()
