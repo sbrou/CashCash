@@ -3,7 +3,7 @@
 
 #include <QtSql>
 
-void addOperation(QSqlQuery &q, QDate date, const QVariant &categoryId,
+void addOperationInDB(QSqlQuery &q, QDate date, const QVariant &categoryId,
              double amount, const QVariant &tagId, const QString &description)
 {
     q.addBindValue(date);
@@ -14,14 +14,14 @@ void addOperation(QSqlQuery &q, QDate date, const QVariant &categoryId,
     q.exec();
 }
 
-QVariant addCategory(QSqlQuery &q, const QString &name)
+QVariant addCategoryInDB(QSqlQuery &q, const QString &name)
 {
     q.addBindValue(name);
     q.exec();
     return q.lastInsertId();
 }
 
-QVariant addTag(QSqlQuery &q, const QString &name)
+QVariant addTagInDB(QSqlQuery &q, const QString &name)
 {
     q.addBindValue(name);
     q.exec();
@@ -77,32 +77,32 @@ QSqlError initDb()
 
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
-    QVariant essId = addTag(q, QLatin1String("ESSENTIAL"));
-    QVariant wanId = addTag(q, QLatin1String("WANTING"));
-    QVariant savId = addTag(q, QLatin1String("SAVING"));
-    QVariant excId = addTag(q, QLatin1String("EXCEPTIONAL"));
-    QVariant incId = addTag(q, QLatin1String("INCOME"));
+    QVariant essId = addTagInDB(q, QLatin1String("ESSENTIAL"));
+    QVariant wanId = addTagInDB(q, QLatin1String("WANTING"));
+    QVariant savId = addTagInDB(q, QLatin1String("SAVING"));
+    QVariant excId = addTagInDB(q, QLatin1String("EXCEPTIONAL"));
+    QVariant incId = addTagInDB(q, QLatin1String("INCOME"));
 
     if (!q.prepare(INSERT_CATEGORY_SQL))
         return q.lastError();
-    QVariant foodId = addCategory(q, QLatin1String("FOOD"));
-    QVariant houseId = addCategory(q, QLatin1String("HOUSE"));
-    QVariant hobbiesId = addCategory(q, QLatin1String("HOBBIES"));
-    QVariant salaryId = addCategory(q, QLatin1String("SALARY"));
-    QVariant livretId = addCategory(q, QLatin1String("LIVRET"));
+    QVariant foodId = addCategoryInDB(q, QLatin1String("FOOD"));
+    QVariant houseId = addCategoryInDB(q, QLatin1String("HOUSE"));
+    QVariant hobbiesId = addCategoryInDB(q, QLatin1String("HOBBIES"));
+    QVariant salaryId = addCategoryInDB(q, QLatin1String("SALARY"));
+    QVariant livretId = addCategoryInDB(q, QLatin1String("LIVRET"));
 
     if (!q.prepare(INSERT_OPERATION_SQL))
         return q.lastError();
-    addOperation(q, QDate(2022, 1, 31), salaryId, 1857.29, incId, QLatin1String("VIREMENT DE ASTEK"));
-    addOperation(q, QDate(2022, 1, 31), hobbiesId, -10.99, wanId, QLatin1String("ACHAT CB Deezer"));
-    addOperation(q, QDate(2022, 1, 31), hobbiesId, -7.8, wanId, QLatin1String("ACHAT CB BARAKA JEUX"));
-    addOperation(q, QDate(2022, 2, 7), houseId, -550, essId, QLatin1String("PRELEVEMENT DE SARL CHANTURGUE"));
-    addOperation(q, QDate(2022, 2, 7), houseId, -30, essId, QLatin1String("PRELEVEMENT DE TotalEnergies"));
-    addOperation(q, QDate(2022, 2, 7), houseId, -138, essId, QLatin1String("PRELEVEMENT DE TotalEnergies"));
-    addOperation(q, QDate(2022, 2, 21), foodId, -35.30, essId, QLatin1String("ACHAT CB CARREFOUR"));
-    addOperation(q, QDate(2022, 2, 3), foodId, -23.76, essId, QLatin1String("ACHAT CB CARREFOUR"));
-    addOperation(q, QDate(2022, 2, 1), livretId, -100, savId, QLatin1String("VIREMENT PERMANENT POUR MLE BROU SOPIE"));
-    addOperation(q, QDate(2022, 2, 3), houseId, -300, excId, QLatin1String("VIREMENT POUR COMPTE JOINT"));
+    addOperationInDB(q, QDate(2022, 1, 31), salaryId, 1857.29, incId, QLatin1String("VIREMENT DE ASTEK"));
+    addOperationInDB(q, QDate(2022, 1, 31), hobbiesId, -10.99, wanId, QLatin1String("ACHAT CB Deezer"));
+    addOperationInDB(q, QDate(2022, 1, 31), hobbiesId, -7.8, wanId, QLatin1String("ACHAT CB BARAKA JEUX"));
+    addOperationInDB(q, QDate(2022, 2, 7), houseId, -550, essId, QLatin1String("PRELEVEMENT DE SARL CHANTURGUE"));
+    addOperationInDB(q, QDate(2022, 2, 7), houseId, -30, essId, QLatin1String("PRELEVEMENT DE TotalEnergies"));
+    addOperationInDB(q, QDate(2022, 2, 7), houseId, -138, essId, QLatin1String("PRELEVEMENT DE TotalEnergies"));
+    addOperationInDB(q, QDate(2022, 2, 21), foodId, -35.30, essId, QLatin1String("ACHAT CB CARREFOUR"));
+    addOperationInDB(q, QDate(2022, 2, 3), foodId, -23.76, essId, QLatin1String("ACHAT CB CARREFOUR"));
+    addOperationInDB(q, QDate(2022, 2, 1), livretId, -100, savId, QLatin1String("VIREMENT PERMANENT POUR MLE BROU SOPIE"));
+    addOperationInDB(q, QDate(2022, 2, 3), houseId, -300, excId, QLatin1String("VIREMENT POUR COMPTE JOINT"));
 
     return QSqlError();
 }

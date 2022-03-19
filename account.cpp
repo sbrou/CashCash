@@ -38,7 +38,9 @@ Account::Account(QString title, QWidget *parent)
 
         // Remember the indexes of the columns:
         categoryIdx = model->fieldIndex("category");
+        qDebug() << "in main : " << categoryIdx;
         tagIdx = model->fieldIndex("tag");
+        qDebug() << "in main : " << tagIdx;
 
         // Set the relations to the other database tables:
         model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
@@ -143,22 +145,46 @@ void Account::importFile()
 //        addOperation(op->date(), op->category(), op->amount(), op->description());
 }
 
-void Account::addOperation()
-{
-    AddOpDialog aoDiag(_opsCategories.keys());
-
-    if (aoDiag.exec()) {
-        QDate date = aoDiag.date();
-        double amount = aoDiag.amount();
-        QString cat = aoDiag.category();
-        QString des = aoDiag.description();
-
-        add_operation(date, des, amount, cat);
-    }
-}
-
 void Account::editOperation()
 {
+    int idx = (int) ui->opsView->currentIndex().row();
+    qDebug() << idx;
+    AddOpDialog aoDiag(idx, model);
+    qDebug() << model->record(idx);
+    int cat_idx = model->record(idx).value("categories_name_2").toInt();
+    qDebug() << cat_idx;
+    QString cat = model->record(idx).value(2).toString();
+    int tag_idx = model->record(idx).value("name").toInt();
+    qDebug() << tag_idx;
+    QString tag = model->record(idx).value(4).toString();
+    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"),cat);
+    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"),tag);
+
+    if (aoDiag.exec()) {
+//        QSqlQuery q(INSERT_OPERATION_SQL);
+//        addOperationInDB(q, aoDiag.date(), aoDiag.category(), aoDiag.amount(), aoDiag.tag(), aoDiag.description());
+    }
+
+//    model->submitAll();
+//    if (!model->select()) {
+//        showError(model->lastError());
+//        return;
+//    }
+//    ui ->opsView->setModel(model);
+}
+
+void Account::addOperation()
+{
+//    AddOpDialog aoDiag((int) ui->opsView->currentIndex().row(), model);
+//    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
+//    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"));
+
+//    if (aoDiag.exec()) {
+////        QSqlQuery q(INSERT_OPERATION_SQL):
+//          // prerapre query first
+////        addOperationInDB(q, aoDiag.date(), aoDiag.category(), aoDiag.amount(), aoDiag.tag(), aoDiag.description());
+//    }
+    /*
     QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
     QModelIndexList indexes = selectionModel->selectedRows();
     QModelIndex index, i;
@@ -187,7 +213,7 @@ void Account::editOperation()
         des = varDes.toString();
     }
 
-    AddOpDialog aoDialog(_opsCategories.keys());
+    AddOpDialog aoDialog();
     aoDialog.setWindowTitle(tr("Editer une opération"));
 
     aoDialog.setDate(date);
@@ -226,7 +252,7 @@ void Account::editOperation()
             catsPie->updateSlice(newCat,it_cat.value()->amount());
         }
     }
-}
+*/}
 
 void Account::removeOperation()
 {
@@ -373,7 +399,7 @@ void Account::createToolBar()
             this, SLOT(addOperation()));
 
     editOpAct = new QAction(tr("&Edit..."), this);
-    editOpAct->setEnabled(false);
+//    editOpAct->setEnabled(false);
     toolBar->addAction(editOpAct);
     connect(editOpAct, SIGNAL(triggered()),
             this, SLOT(editOperation()));

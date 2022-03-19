@@ -2,18 +2,63 @@
 #include "ui_addopdialog.h"
 
 #include <QDoubleValidator>
+#include <QPushButton>
 
-AddOpDialog::AddOpDialog(QStringList categories, QWidget *parent) :
+AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddOpDialog)
 {
     ui->setupUi(this);
 
+    QPushButton *ok = ui->buttonBox->button(ui->buttonBox->Ok);
+    QPushButton *cancel = ui->buttonBox->button(ui->buttonBox->Cancel);
+
+    connect(ok, &QPushButton::clicked, this, &AddOpDialog::submit);
+    connect(cancel, &QPushButton::clicked, this, &AddOpDialog::revert);
+
+    ui->qdeDate->setDate(QDate::currentDate());
+
     QDoubleValidator * amountValidator = new QDoubleValidator(ui->qleAmount);
     amountValidator->setLocale(QLocale::German);
     ui->qleAmount->setValidator(amountValidator);
 
-    ui->qcbCat->addItems(categories);
+//    int categoryIdx = model->fieldIndex("category");
+//    qDebug() << model->fieldIndex("category");
+//    int tagIdx = model->fieldIndex("tag");
+//    qDebug() << model->fieldIndex("tag");
+//    qDebug() << id;
+//    ui->qcbCat->setModel(model->relationModel(2));
+//    ui->qcbCat->setModelColumn(model->relationModel(2)->fieldIndex("name"));
+//    ui->qcbTag->setModel(model->relationModel(4));
+//    ui->qcbTag->setModelColumn(model->relationModel(tagIdx)->fieldIndex("name"));
+
+    qDebug() << "in AddOp " << model->record(opId);
+//    cat_idx = model->record(opId).value("categories_name_2").toInt();
+//    tag_idx = model->record(opId).value("name").toInt();
+
+    opId = id;
+
+    mapper = new QDataWidgetMapper(this);
+    mapper->setModel(model);
+    mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
+    mapper->setItemDelegate(new QSqlRelationalDelegate(mapper));
+    mapper->addMapping(ui->qdeDate, 1);
+    mapper->addMapping(ui->qleAmount, 3);
+    mapper->addMapping(ui->qcbCat, 2);
+    mapper->addMapping(ui->qcbTag, 4);
+    mapper->addMapping(ui->qleDes, 5, "text");
+    mapper->setCurrentIndex(id);
+}
+
+void AddOpDialog::revert()
+{
+    mapper->revert();
+}
+
+void AddOpDialog::submit()
+{
+    mapper->submit();
+    mapper->setCurrentIndex(opId);
 }
 
 AddOpDialog::~AddOpDialog()
@@ -31,9 +76,14 @@ double AddOpDialog::amount()
     return ui->qleAmount->text().toDouble();
 }
 
-QString AddOpDialog::category()
+int AddOpDialog::category()
 {
-    return ui->qcbCat->currentText();
+    return ui->qcbCat->currentIndex();
+}
+
+int AddOpDialog::tag()
+{
+    return ui->qcbTag->currentIndex();
 }
 
 QString AddOpDialog::description()
@@ -51,14 +101,31 @@ void AddOpDialog::setAmount(double amount)
     ui->qleAmount->setText(QString::number(amount));
 }
 
-void AddOpDialog::setCategory(const QString& cat)
+void AddOpDialog::setCategory(int cat)
 {
-    int index = ui->qcbCat->findText(cat);
-    if (index != -1)
-        ui->qcbCat->setCurrentIndex(index);
+    ui->qcbCat->setCurrentIndex(cat);
+}
+
+void AddOpDialog::setTag(int tag)
+{
+    ui->qcbTag->setCurrentIndex(tag);
 }
 
 void AddOpDialog::setDescription(const QString& des)
 {
     ui->qleDes->setText(des);
+}
+
+void AddOpDialog::fillCategories(QSqlTableModel * model, int field, const QString & cat)
+{
+    ui->qcbCat->setModel(model);
+    ui->qcbCat->setModelColumn(field);
+    ui->qcbCat->setCurrentText(cat);
+}
+
+void AddOpDialog::fillTags(QSqlTableModel * model , int field, const QString & tag)
+{
+    ui->qcbTag->setModel(model);
+    ui->qcbTag->setModelColumn(field);
+    ui->qcbTag->setCurrentText(tag);
 }
