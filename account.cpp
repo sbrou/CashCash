@@ -38,9 +38,7 @@ Account::Account(QString title, QWidget *parent)
 
         // Remember the indexes of the columns:
         categoryIdx = model->fieldIndex("category");
-        qDebug() << "in main : " << categoryIdx;
         tagIdx = model->fieldIndex("tag");
-        qDebug() << "in main : " << tagIdx;
 
         // Set the relations to the other database tables:
         model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
@@ -62,63 +60,25 @@ Account::Account(QString title, QWidget *parent)
         }
 
         // Set the model and hide the ID column:
-        ui ->opsView->setModel(model);
-        ui ->opsView->setColumnHidden(model->fieldIndex("id"), true);
-        ui ->opsView->setCurrentIndex(model->index(0, 0));
+        ui->opsView->setModel(model);
+        ui->opsView->setItemDelegate(new QSqlRelationalDelegate(ui->opsView));
+//        ui->opsView->setColumnHidden(model->fieldIndex("id"), true);
+        ui->opsView->setCurrentIndex(model->index(0, 0));
         ui->opsView->setSelectionBehavior(QAbstractItemView::SelectRows);
         ui->opsView->horizontalHeader()->setStretchLastSection(true);
         ui->opsView->verticalHeader()->hide();
         ui->opsView->clearSpans();
         ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
         ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-//        // Initialize the Author combo box:
-//        ui.authorEdit->setModel(model->relationModel(authorIdx));
-//        ui.authorEdit->setModelColumn(
-//                    model->relationModel(authorIdx)->fieldIndex("name"));
-
-//        ui.genreEdit->setModel(model->relationModel(genreIdx));
-//        ui.genreEdit->setModelColumn(
-//                    model->relationModel(genreIdx)->fieldIndex("name"));
-
-//        // Lock and prohibit resizing of the width of the rating column:
-//        ui ->opsView->horizontalHeader()->setSectionResizeMode(
-//                    model->fieldIndex("rating"),
-//                    QHeaderView::ResizeToContents);
-
-//        QDataWidgetMapper *mapper = new QDataWidgetMapper(this);
-//        mapper->setModel(model);
-//        mapper->setItemDelegate(new BookDelegate(this));
-//        mapper->addMapping(ui.titleEdit, model->fieldIndex("title"));
-//        mapper->addMapping(ui.yearEdit, model->fieldIndex("year"));
-//        mapper->addMapping(ui.authorEdit, authorIdx);
-//        mapper->addMapping(ui.genreEdit, genreIdx);
-//        mapper->addMapping(ui.ratingEdit, model->fieldIndex("rating"));
-
-//        connect(ui ->opsView->selectionModel(),
-//                &QItemSelectionModel::currentRowChanged,
-//                mapper,
-//                &QDataWidgetMapper::setCurrentModelIndex
-//                );
-
-    /*
-
-    opsModel = new OperationsTableModel(this);
-    ui->opsView->setModel(opsModel);
-    ui->opsView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->opsView->horizontalHeader()->setStretchLastSection(true);
-    ui->opsView->verticalHeader()->hide();
-    ui->opsView->clearSpans();
-    ui->opsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->opsView->setSelectionMode(QAbstractItemView::SingleSelection); // ExtendedSelection pour pouvoir supprimer plusieurs d'un coup
+        ui->opsView->resizeColumnsToContents();
 
 //    connect(ui->qpbImportFile, SIGNAL(clicked()), this, SLOT(importFile()));
 
-    setStandardCategories();
-    setStandardRules();
+//    setStandardCategories();
+//    setStandardRules();
 
-    catsPie = new CatsChart(&_opsCategories, ui->catsWidget);
-    */
+//    catsPie = new CatsChart(&_opsCategories, ui->catsWidget);
+
     createToolBar();
 }
 
@@ -148,111 +108,55 @@ void Account::importFile()
 void Account::editOperation()
 {
     int idx = (int) ui->opsView->currentIndex().row();
-    qDebug() << idx;
+
     AddOpDialog aoDiag(idx, model);
-    qDebug() << model->record(idx);
-    int cat_idx = model->record(idx).value("categories_name_2").toInt();
-    qDebug() << cat_idx;
+    aoDiag.setWindowTitle(tr("Editer une opération"));
     QString cat = model->record(idx).value(2).toString();
-    int tag_idx = model->record(idx).value("name").toInt();
-    qDebug() << tag_idx;
     QString tag = model->record(idx).value(4).toString();
     aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"),cat);
     aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"),tag);
 
-    if (aoDiag.exec()) {
-//        QSqlQuery q(INSERT_OPERATION_SQL);
-//        addOperationInDB(q, aoDiag.date(), aoDiag.category(), aoDiag.amount(), aoDiag.tag(), aoDiag.description());
-    }
-
-//    model->submitAll();
-//    if (!model->select()) {
-//        showError(model->lastError());
-//        return;
-//    }
-//    ui ->opsView->setModel(model);
+    aoDiag.exec();
 }
 
 void Account::addOperation()
 {
-//    AddOpDialog aoDiag((int) ui->opsView->currentIndex().row(), model);
-//    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
-//    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"));
+    AddOpDialog aoDiag;
+    aoDiag.setWindowTitle(tr("Ajouter une opération"));
+    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
+    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"));
 
-//    if (aoDiag.exec()) {
-////        QSqlQuery q(INSERT_OPERATION_SQL):
-//          // prerapre query first
-////        addOperationInDB(q, aoDiag.date(), aoDiag.category(), aoDiag.amount(), aoDiag.tag(), aoDiag.description());
-//    }
-    /*
-    QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
-    QModelIndexList indexes = selectionModel->selectedRows();
-    QModelIndex index, i;
-    QDate date;
-    double amount;
-    QString cat;
-    QString des;
-    int row = -1;
-
-    foreach (index, indexes) {
-        row = index.row();
-        i = opsModel->index(row, 0, QModelIndex());
-        QVariant varDate = opsModel->data(i, Qt::DisplayRole);
-        date = varDate.toDate();
-
-        i = opsModel->index(row, 1, QModelIndex());
-        QVariant varCat = opsModel->data(i, Qt::DisplayRole);
-        cat = varCat.toString();
-
-        i = opsModel->index(row, 2, QModelIndex());
-        QVariant varAmount = opsModel->data(i, Qt::DisplayRole);
-        amount = varAmount.toDouble();
-
-        i = opsModel->index(row, 3, QModelIndex());
-        QVariant varDes = opsModel->data(i, Qt::DisplayRole);
-        des = varDes.toString();
+    if (aoDiag.exec()) {
+        int row = 0;
+        bool st = model->insertRows(row, 1);
+        qDebug() << st;
+        st = model->setData(model->index(row, 0), model->rowCount());
+        qDebug() << model->rowCount() << st;
+        st = model->setData(model->index(row, 1), aoDiag.date());
+        qDebug() << aoDiag.date() << st;
+        st = model->setData(model->index(row, 2), aoDiag.category());
+        qDebug() << aoDiag.category() << st;
+        st = model->setData(model->index(row, 3), aoDiag.amount());
+        qDebug() << aoDiag.amount() << st;
+        st = model->setData(model->index(row, 4), aoDiag.tag());
+        qDebug() << aoDiag.tag() << st;
+        st = model->setData(model->index(row, 5), aoDiag.description());
+        qDebug() << aoDiag.description() << st;
+        st = model->submitAll();
+        qDebug() << st;
     }
+//        Categories::iterator it_cat = _opsCategories.find(cat);
+//        if (it_cat != _opsCategories.end()) {
+//            it_cat.value()->addOperation(-amount);
+//            catsPie->updateSlice(cat,it_cat.value()->amount());
+//        }
 
-    AddOpDialog aoDialog();
-    aoDialog.setWindowTitle(tr("Editer une opération"));
-
-    aoDialog.setDate(date);
-    aoDialog.setAmount(amount);
-    aoDialog.setCategory(cat);
-    aoDialog.setDescription(des);
-
-    if (aoDialog.exec()) {
-        QDate newDate = aoDialog.date();
-        double newAmount = aoDialog.amount();
-        QString newCat = aoDialog.category();
-        QString newDes = aoDialog.description();
-
-
-        i = opsModel->index(row, 0, QModelIndex());
-        opsModel->setData(i, newDate, Qt::EditRole);
-
-        i = opsModel->index(row, 1, QModelIndex());
-        opsModel->setData(i, newCat, Qt::EditRole);
-
-        i = opsModel->index(row, 2, QModelIndex());
-        opsModel->setData(i, newAmount, Qt::EditRole);
-
-        i = opsModel->index(row, 3, QModelIndex());
-        opsModel->setData(i, newDes, Qt::EditRole);
-
-        Categories::iterator it_cat = _opsCategories.find(cat);
-        if (it_cat != _opsCategories.end()) {
-            it_cat.value()->addOperation(-amount);
-            catsPie->updateSlice(cat,it_cat.value()->amount());
-        }
-
-        it_cat = _opsCategories.find(newCat);
-        if (it_cat != _opsCategories.end()) {
-            it_cat.value()->addOperation(newAmount);
-            catsPie->updateSlice(newCat,it_cat.value()->amount());
-        }
-    }
-*/}
+//        it_cat = _opsCategories.find(newCat);
+//        if (it_cat != _opsCategories.end()) {
+//            it_cat.value()->addOperation(newAmount);
+//            catsPie->updateSlice(newCat,it_cat.value()->amount());
+//        }
+}
 
 void Account::removeOperation()
 {
@@ -340,7 +244,7 @@ void Account::update_actions(const QItemSelection& selected)
 
     if (!indexes.isEmpty()) {
         removeOpAct->setEnabled(true);
-        if (indexes.size() == 4)
+        if (indexes.size() == model->columnCount())
             editOpAct->setEnabled(true);
     } else {
         removeOpAct->setEnabled(false);

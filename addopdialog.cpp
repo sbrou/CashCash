@@ -4,23 +4,37 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 
-AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::AddOpDialog)
+void AddOpDialog::init()
 {
     ui->setupUi(this);
-
-    QPushButton *ok = ui->buttonBox->button(ui->buttonBox->Ok);
-    QPushButton *cancel = ui->buttonBox->button(ui->buttonBox->Cancel);
-
-    connect(ok, &QPushButton::clicked, this, &AddOpDialog::submit);
-    connect(cancel, &QPushButton::clicked, this, &AddOpDialog::revert);
 
     ui->qdeDate->setDate(QDate::currentDate());
 
     QDoubleValidator * amountValidator = new QDoubleValidator(ui->qleAmount);
     amountValidator->setLocale(QLocale::German);
     ui->qleAmount->setValidator(amountValidator);
+}
+
+AddOpDialog::AddOpDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::AddOpDialog),
+    opId(-1)
+{
+    init();
+}
+
+
+AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::AddOpDialog)
+{
+    init();
+
+    QPushButton *ok = ui->buttonBox->button(ui->buttonBox->Ok);
+    QPushButton *cancel = ui->buttonBox->button(ui->buttonBox->Cancel);
+
+    connect(ok, &QPushButton::clicked, this, &AddOpDialog::submit);
+    connect(cancel, &QPushButton::clicked, this, &AddOpDialog::revert);
 
 //    int categoryIdx = model->fieldIndex("category");
 //    qDebug() << model->fieldIndex("category");
@@ -32,7 +46,7 @@ AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *paren
 //    ui->qcbTag->setModel(model->relationModel(4));
 //    ui->qcbTag->setModelColumn(model->relationModel(tagIdx)->fieldIndex("name"));
 
-    qDebug() << "in AddOp " << model->record(opId);
+//    qDebug() << "in AddOp " << model->record(opId);
 //    cat_idx = model->record(opId).value("categories_name_2").toInt();
 //    tag_idx = model->record(opId).value("name").toInt();
 
@@ -78,12 +92,12 @@ double AddOpDialog::amount()
 
 int AddOpDialog::category()
 {
-    return ui->qcbCat->currentIndex();
+    return ui->qcbCat->currentIndex()+1;
 }
 
 int AddOpDialog::tag()
 {
-    return ui->qcbTag->currentIndex();
+    return ui->qcbTag->currentIndex()+1;
 }
 
 QString AddOpDialog::description()
@@ -120,12 +134,14 @@ void AddOpDialog::fillCategories(QSqlTableModel * model, int field, const QStrin
 {
     ui->qcbCat->setModel(model);
     ui->qcbCat->setModelColumn(field);
-    ui->qcbCat->setCurrentText(cat);
+    if (!cat.isEmpty())
+        ui->qcbCat->setCurrentText(cat);
 }
 
 void AddOpDialog::fillTags(QSqlTableModel * model , int field, const QString & tag)
 {
     ui->qcbTag->setModel(model);
     ui->qcbTag->setModelColumn(field);
-    ui->qcbTag->setCurrentText(tag);
+    if (!tag.isEmpty())
+        ui->qcbTag->setCurrentText(tag);
 }

@@ -14,6 +14,7 @@ class AddOpDialog : public QDialog
     Q_OBJECT
 
 public:
+    explicit AddOpDialog(QWidget *parent = nullptr);
     explicit AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent = nullptr);
     ~AddOpDialog();
 
@@ -29,14 +30,16 @@ public:
     void setTag(int);
     void setDescription(const QString &);
 
-    void fillCategories(QSqlTableModel * model, int field, const QString & cat);
-    void fillTags(QSqlTableModel * model , int field, const QString & tag);
+    void fillCategories(QSqlTableModel * model, int field, const QString & cat = "");
+    void fillTags(QSqlTableModel * model , int field, const QString & tag = "");
 
 private slots:
     void revert();
     void submit();
 
 private:
+    void init();
+
     Ui::AddOpDialog *ui;
     QDataWidgetMapper *mapper = nullptr;
     int opId;
