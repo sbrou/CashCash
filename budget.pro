@@ -14,6 +14,8 @@ SOURCES += \
     addopdialog.cpp \
     category.cpp \
     catschart.cpp \
+    drilldownchart.cpp \
+    drilldownslice.cpp \
     main.cpp \
     mainwindow.cpp \
     operation.cpp \
@@ -25,6 +27,8 @@ HEADERS += \
     addopdialog.h \
     category.h \
     catschart.h \
+    drilldownchart.h \
+    drilldownslice.h \
     initdb.h \
     mainwindow.h \
     operation.h \

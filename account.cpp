@@ -2,6 +2,7 @@
 #include "ui_account.h"
 
 #include <QFileDialog>
+#include <QPushButton>
 #include <QDebug>
 
 #include <addopdialog.h>
@@ -16,6 +17,7 @@ Account::Account(QString title, QWidget *parent)
     , _title(title)
 {
     ui->setupUi(this);
+    connect(ui->qpbTest, &QPushButton::clicked, this, &Account::selectTest);
 
     if (!QSqlDatabase::drivers().contains("QSQLITE"))
             QMessageBox::critical(
@@ -35,6 +37,7 @@ Account::Account(QString title, QWidget *parent)
         model = new QSqlRelationalTableModel(ui->opsView);
         model->setEditStrategy(QSqlTableModel::OnManualSubmit);
         model->setTable("operations");
+        model->setSort(1, Qt::DescendingOrder);
 
         // Remember the indexes of the columns:
         categoryIdx = model->fieldIndex("category");
@@ -79,6 +82,44 @@ Account::Account(QString title, QWidget *parent)
 
 //    catsPie = new CatsChart(&_opsCategories, ui->catsWidget);
 
+    chart = new DrilldownChart();
+    chart->setTheme(QChart::ChartThemeLight);
+    chart->setAnimationOptions(QChart::AllAnimations);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignRight);
+
+    QPieSeries *yearSeries = new QPieSeries(ui->catsWidget);
+    yearSeries->setName("Sales by year - All");
+
+    const QStringList months = {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+        const QStringList names = {
+            "Jane", "John", "Axel", "Mary", "Susan", "Bob"
+        };
+
+        for (const QString &name : names) {
+            QPieSeries *series = new QPieSeries(ui->catsWidget);
+            series->setName("Sales by month - " + name);
+
+            for (const QString &month : months)
+                *series << new DrilldownSlice(QRandomGenerator::global()->bounded(1000), month, yearSeries);
+
+            QObject::connect(series, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
+
+            *yearSeries << new DrilldownSlice(series->sum(), name, series);
+        }
+
+        QObject::connect(yearSeries, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
+
+        chart->changeSeries(yearSeries);
+
+        QChartView *chartView = new QChartView(chart);
+        chartView->setRenderHint(QPainter::Antialiasing);
+
+
+    chartView = new QChartView(chart, ui->catsWidget);
+    chartView->setMinimumSize(380,260);
     createToolBar();
 }
 
@@ -121,6 +162,7 @@ void Account::editOperation()
 
 void Account::addOperation()
 {
+
     AddOpDialog aoDiag;
     aoDiag.setWindowTitle(tr("Ajouter une opération"));
     aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
@@ -180,9 +222,31 @@ void Account::removeOperation()
 void Account::addCategory()
 {
     addCatDialog acDiag;
+    acDiag.setWindowTitle(tr("Ajouter une catégorie"));
 
     if (acDiag.exec()) {
-        _opsCategories.insert(acDiag.title(), new Category(acDiag.type()));
+//        int row = 0;
+//        bool st = cat_model->insertRows(row, 1);
+//        qDebug() << st;
+//        st = cat_model->setData(model->index(row, 0), cat_model->rowCount());
+//        qDebug() << cat_model->rowCount() << st;
+//        st = cat_model->setData(model->index(row, 1), acDiag.title());
+//        qDebug() << acDiag.title() << st;
+//        st = cat_model->submitAll();
+//        qDebug() << st;
+
+
+//        QSqlQuery q(model->database());
+//        if (!q.prepare(INSERT_CATEGORY_SQL))
+//            QMessageBox::critical(this,QStringLiteral("Erreur"),
+//                                              q.lastError().text());
+//        QVariant newId = addCategoryInDB(q, acDiag.title());
+//        qDebug() << newId;
+//        bool st = model->submitAll();
+//        qDebug() << st;
+//        model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
+//        model->select();
+
     }
 }
 
@@ -324,3 +388,23 @@ void Account::createToolBar()
 
 }
 
+void Account::selectTest()
+{
+//    qDebug() << model->filter();
+//    model->setFilter(QString("category='1'"));
+//    QSqlQuery query = model->query();
+//    while (query.next()) {
+//        qDebug() << query.value(0);
+//    }
+
+    double total = 0.;
+
+    QSqlQuery query("SELECT * FROM operations WHERE category=4",model->database());
+    qDebug() << query.isActive();
+    while (query.next()) {
+        qDebug() << query.value(5).toString();
+        total += query.value(3).toDouble();
+    }
+
+    qDebug() << "total = " << total;
+}

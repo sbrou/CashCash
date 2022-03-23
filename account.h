@@ -13,6 +13,9 @@
 #include "operationsmodel.h"
 #include "catschart.h"
 
+#include "drilldownchart.h"
+#include "drilldownslice.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class Account; }
 QT_END_NAMESPACE
@@ -33,6 +36,7 @@ public slots:
     void editOperation();
     void removeOperation();
     void addCategory();
+    void selectTest();
 
 private slots:
     void update_actions(const QItemSelection& selected);
@@ -52,6 +56,9 @@ private:
 
     OperationsTableModel* opsModel;
     CatsChart* catsPie;
+
+    DrilldownChart *chart;
+    QChartView *chartView;
 
     void createToolBar();
     void updateCatsPie();

@@ -2,6 +2,8 @@
 #define ADDCATDIALOG_H
 
 #include <QDialog>
+#include <QtSql>
+#include <QDataWidgetMapper>
 
 #include "category.h"
 
@@ -15,13 +17,22 @@ class addCatDialog : public QDialog
 
 public:
     explicit addCatDialog(QWidget *parent = nullptr);
+    explicit addCatDialog(int id, QSqlRelationalTableModel *model, QWidget *parent = nullptr);
     ~addCatDialog();
 
     QString title();
     Category::Type type();
 
+private slots:
+    void revert();
+    void submit();
+
 private:
+    void init();
+
     Ui::addCatDialog *ui;
+    QDataWidgetMapper *mapper = nullptr;
+    int catId;
 };
 
 #endif // ADDCATDIALOG_H

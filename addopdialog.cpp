@@ -52,13 +52,21 @@ AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *paren
 
     opId = id;
 
+    qDebug() << "in AddOpDIalog";
+    QSqlQuery query("SELECT name FROM categories",model->database());
+    while (query.next()) {
+        qDebug() << query.value(0).toString();
+    }
+
+    qDebug() << model->fieldIndex("categories_name_2");
+
     mapper = new QDataWidgetMapper(this);
     mapper->setModel(model);
     mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
-    mapper->setItemDelegate(new QSqlRelationalDelegate(mapper));
+    mapper->setItemDelegate(new QSqlRelationalDelegate(this));
     mapper->addMapping(ui->qdeDate, 1);
     mapper->addMapping(ui->qleAmount, 3);
-    mapper->addMapping(ui->qcbCat, 2);
+    mapper->addMapping(ui->qcbCat, model->fieldIndex("categories_name_2"));
     mapper->addMapping(ui->qcbTag, 4);
     mapper->addMapping(ui->qleDes, 5, "text");
     mapper->setCurrentIndex(id);
@@ -78,6 +86,8 @@ void AddOpDialog::submit()
 AddOpDialog::~AddOpDialog()
 {
     delete ui;
+    mapper->deleteLater();
+//    model->deleteLater();
 }
 
 QDate AddOpDialog::date()
