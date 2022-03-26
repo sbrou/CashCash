@@ -42,7 +42,7 @@ class DrilldownSlice : public QPieSlice
     Q_OBJECT
 
 public:
-    DrilldownSlice(qreal value, QString label, QAbstractSeries *drilldownSeries);
+    DrilldownSlice(qreal value, QString label, QColor color, QAbstractSeries *drilldownSeries);
     virtual ~DrilldownSlice();
     QAbstractSeries *drilldownSeries() const;
 

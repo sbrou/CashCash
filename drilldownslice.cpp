@@ -31,10 +31,11 @@
 
 QT_USE_NAMESPACE
 
-DrilldownSlice::DrilldownSlice(qreal value, QString label, QAbstractSeries *drilldownSeries)
+DrilldownSlice::DrilldownSlice(qreal value, QString label, QColor color, QAbstractSeries *drilldownSeries)
     : m_drilldownSeries(drilldownSeries),
       m_label(label)
 {
+    setColor(color);
     setValue(value);
     updateLabel();
     setLabelFont(QFont("Arial", 8));

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QItemSelection>
 #include <QToolBar>
+#include <QGridLayout>
 
 #include <QtSql>
 #include <QtWidgets>
@@ -41,6 +42,16 @@ public slots:
 private slots:
     void update_actions(const QItemSelection& selected);
 
+    void activateDateFilter(bool on);
+    void applyFromDateFilter(QDate);
+    void applyToDateFilter(QDate);
+
+    void activateCatFilter(bool on);
+    void applyCatFilter(int);
+
+    void activateTagFilter(bool on);
+    void applyTagFilter(int);
+
 private:
     // Attributs
     Ui::Account *ui;
@@ -62,6 +73,10 @@ private:
 
     void createToolBar();
     void updateCatsPie();
+    void updatePie();
+    void initTabFilters();
+
+    void setDateFilter();
 
     QToolBar *toolBar;
     QAction *importOpAct;
@@ -80,6 +95,12 @@ private:
     void showError(const QSqlError &err);
     QSqlRelationalTableModel *model;
     int categoryIdx, tagIdx;
+
+    QDataWidgetMapper * filterMapper;
+    QDate dateFrom;
+    QDate dateTo;
+
+//    QGridLayout *accountLayout;
 };
 
 #endif // ACCOUNT_H
