@@ -71,7 +71,3 @@ QString addCatDialog::title()
     return ui->qleTitle->text();
 }
 
-Category::Type addCatDialog::type()
-{
-    return static_cast<Category::Type>(ui->qcbType->currentData().toUInt());
-}

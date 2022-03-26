@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QDebug>
 
+#include <QPieSeries>
+
 #include <addopdialog.h>
 #include <addcatdialog.h>
 
@@ -204,7 +206,7 @@ void Account::importFile()
     QTextStream in(&file);
     while (!in.atEnd()) {
         QString line = in.readLine();
-        process_line(line);
+//        process_line(line);
     }
 }
 
@@ -249,17 +251,6 @@ void Account::addOperation()
         st = model->submitAll();
         qDebug() << st;
     }
-//        Categories::iterator it_cat = _opsCategories.find(cat);
-//        if (it_cat != _opsCategories.end()) {
-//            it_cat.value()->addOperation(-amount);
-//            catsPie->updateSlice(cat,it_cat.value()->amount());
-//        }
-
-//        it_cat = _opsCategories.find(newCat);
-//        if (it_cat != _opsCategories.end()) {
-//            it_cat.value()->addOperation(newAmount);
-//            catsPie->updateSlice(newCat,it_cat.value()->amount());
-//        }
 }
 
 void Account::removeOperation()
@@ -287,102 +278,13 @@ void Account::addCategory()
     acDiag.setWindowTitle(tr("Ajouter une catégorie"));
 
     if (acDiag.exec()) {
-//        int row = 0;
-//        bool st = cat_model->insertRows(row, 1);
-//        qDebug() << st;
-//        st = cat_model->setData(model->index(row, 0), cat_model->rowCount());
-//        qDebug() << cat_model->rowCount() << st;
-//        st = cat_model->setData(model->index(row, 1), acDiag.title());
-//        qDebug() << acDiag.title() << st;
-//        st = cat_model->submitAll();
-//        qDebug() << st;
 
-
-//        QSqlQuery q(model->database());
-//        if (!q.prepare(INSERT_CATEGORY_SQL))
-//            QMessageBox::critical(this,QStringLiteral("Erreur"),
-//                                              q.lastError().text());
-//        QVariant newId = addCategoryInDB(q, acDiag.title());
-//        qDebug() << newId;
-//        bool st = model->submitAll();
-//        qDebug() << st;
-//        model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
-//        model->select();
-
-    }
-}
-
-void Account::process_line(QString line)
-{
-    QStringList infos = line.split(QLatin1Char(';'));
-
-    QStringList date = infos.at(0).split(QLatin1Char('/'));
-    QDate op_date(date.at(2).toInt(),date.at(1).toInt(),date.at(0).toInt());
-    QString cat = affect_category(infos.at(1),_locale.toDouble(infos.at(2)));
-
-    // Reflechir a comment proprement appeler addOperation en dehors de la lecture du fichier
-    add_operation(op_date, infos.at(1), _locale.toDouble(infos.at(2)), cat);
-}
-
-QString Account::affect_category(const QString &des, double amount)
-{
-    for (auto rule = _rules.cbegin(); rule != _rules.cend(); ++rule)
-    {
-        if (des.contains(rule.key())) {
-            Categories::iterator it_cat = _opsCategories.find(rule.value());
-            if (it_cat != _opsCategories.end()) {
-                it_cat.value()->addOperation(amount);
-                return it_cat.key();
-            }
-        }
-    }
-    return "-NONE-";
-}
-
-void Account::add_operation(QDate date, const QString &des, double amount, const QString &cat)
-{
-    int pos = opsModel->rowCount();
-    opsModel->insertRows(pos, 1, QModelIndex());
-
-    QModelIndex index = opsModel->index(pos, 0, QModelIndex());
-    opsModel->setData(index, date, Qt::EditRole);
-    index = opsModel->index(pos, 1, QModelIndex());
-    opsModel->setData(index, cat, Qt::EditRole);
-    index = opsModel->index(pos, 2, QModelIndex());
-    opsModel->setData(index, amount, Qt::EditRole);
-    index = opsModel->index(pos, 3, QModelIndex());
-    opsModel->setData(index, des, Qt::EditRole);
-
-    catsPie->updateSlice(cat,amount);
-}
-
-void Account::update_actions(const QItemSelection& selected)
-{
-    QModelIndexList indexes = selected.indexes();
-
-    if (!indexes.isEmpty()) {
-        removeOpAct->setEnabled(true);
-        if (indexes.size() == model->columnCount())
-            editOpAct->setEnabled(true);
-    } else {
-        removeOpAct->setEnabled(false);
-        editOpAct->setEnabled(false);
     }
 }
 
 void Account::setStandardCategories()
 {
-    _opsCategories.insert("-NONE-", new Category(Category::SPENDING));
-    _opsCategories.insert("FOOD", new Category(Category::SPENDING));
-    _opsCategories.insert("HOUSE", new Category(Category::SPENDING));
-    _opsCategories.insert("HEALTH", new Category(Category::SPENDING));
-    _opsCategories.insert("HOBBIES", new Category(Category::SPENDING));
-    _opsCategories.insert("MAIKO", new Category(Category::SPENDING));
-    _opsCategories.insert("JOINT", new Category(Category::SPENDING));
-    _opsCategories.insert("TRANSPORT", new Category(Category::SPENDING));
-    _opsCategories.insert("SAVING", new Category(Category::SAVING));
-    _opsCategories.insert("SUBS", new Category(Category::SPENDING));
-    _opsCategories.insert("SALARY", new Category(Category::INCOME));
+
 }
 
 void Account::setStandardRules()
@@ -448,6 +350,20 @@ void Account::createToolBar()
             SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(update_actions(QItemSelection)));
 
+}
+
+void Account::update_actions(const QItemSelection& selected)
+{
+    QModelIndexList indexes = selected.indexes();
+
+    if (!indexes.isEmpty()) {
+        removeOpAct->setEnabled(true);
+        if (indexes.size() == 4)
+            editOpAct->setEnabled(true);
+    } else {
+        removeOpAct->setEnabled(false);
+        editOpAct->setEnabled(false);
+    }
 }
 
 void Account::selectTest()

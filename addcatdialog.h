@@ -5,8 +5,6 @@
 #include <QtSql>
 #include <QDataWidgetMapper>
 
-#include "category.h"
-
 namespace Ui {
 class addCatDialog;
 }
@@ -21,7 +19,6 @@ public:
     ~addCatDialog();
 
     QString title();
-    Category::Type type();
 
 private slots:
     void revert();

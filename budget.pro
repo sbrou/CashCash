@@ -12,27 +12,19 @@ SOURCES += \
     account.cpp \
     addcatdialog.cpp \
     addopdialog.cpp \
-    category.cpp \
-    catschart.cpp \
     drilldownchart.cpp \
     drilldownslice.cpp \
     main.cpp \
-    mainwindow.cpp \
-    operation.cpp \
-    operationsmodel.cpp
+    mainwindow.cpp
 
 HEADERS += \
     account.h \
     addcatdialog.h \
     addopdialog.h \
-    category.h \
-    catschart.h \
     drilldownchart.h \
     drilldownslice.h \
     initdb.h \
-    mainwindow.h \
-    operation.h \
-    operationsmodel.h
+    mainwindow.h
 
 FORMS += \
     account.ui \

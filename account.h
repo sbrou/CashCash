@@ -8,11 +8,7 @@
 
 #include <QtSql>
 #include <QtWidgets>
-
-#include "operation.h"
-#include "category.h"
-#include "operationsmodel.h"
-#include "catschart.h"
+#include <QChartView>
 
 #include "drilldownchart.h"
 #include "drilldownslice.h"
@@ -59,20 +55,12 @@ private:
     QLocale _locale;
     QString _title;
 
-    Categories _opsCategories;
-    QMap<QString,QString> _opsType;
-
-    Categories _catsTypes;
     QMap<QString,QString> _rules;
-
-    OperationsTableModel* opsModel;
-    CatsChart* catsPie;
 
     DrilldownChart *chart;
     QChartView *chartView;
 
     void createToolBar();
-    void updateCatsPie();
     void updatePie();
     void initTabFilters();
 
@@ -85,12 +73,6 @@ private:
     QAction *removeOpAct;
     QAction *addCatAct;
     QAction *manBudgetAct;
-
-    // Methodes
-    void process_line(QString line);
-    void add_operation(QDate date, const QString &des, double amount, const QString &cat);
-    QString affect_category(const QString &des, double amount);
-
 
     void showError(const QSqlError &err);
     QSqlRelationalTableModel *model;
