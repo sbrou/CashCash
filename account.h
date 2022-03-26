@@ -27,6 +27,7 @@ public:
     void setStandardRules();
     void setStandardCategories();
 
+
 public slots:
     void importFile();
     void addOperation();
@@ -34,6 +35,9 @@ public slots:
     void removeOperation();
     void addCategory();
     void selectTest();
+
+    void saveFile();
+    QSqlError loadFile();
 
 private slots:
     void update_actions(const QItemSelection& selected);
@@ -85,6 +89,8 @@ private:
     QDate dateFrom;
     QDate dateTo;
 
+    QSqlError readCategories(const QString& query, const QJsonArray &catsArray);
+    QSqlError readOperations(const QJsonArray &opsArray);
 //    QGridLayout *accountLayout;
 };
 

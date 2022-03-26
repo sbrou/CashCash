@@ -31,10 +31,20 @@ Account::Account(QString title, QWidget *parent)
 
     // Initialize the database:
     QSqlError err = initDb();
+
     if (err.type() != QSqlError::NoError) {
         showError(err);
         return;
     }
+
+    //// **** Temporaire **** ////
+    err = loadFile();
+    if (err.type() != QSqlError::NoError) {
+        showError(err);
+        return;
+    }
+    //// **** Temporaire **** ////
+
 
     // Create the data model:
     model = new QSqlRelationalTableModel(ui->opsView);
@@ -103,6 +113,7 @@ Account::Account(QString title, QWidget *parent)
 
     createToolBar();
 
+    connect(ui->qpbSaveFile, SIGNAL(clicked()), this, SLOT(saveFile()));
 }
 
 bool Account::commitOnDatabase()
@@ -114,6 +125,7 @@ bool Account::commitOnDatabase()
         qDebug() << "commiting on database";
         model->database().commit();
         model->select();
+        updatePie();
     }
 
     return st;
@@ -129,6 +141,18 @@ void Account::updatePie()
 {
     QPieSeries *tagsSeries = new QPieSeries(ui->catsWidget);
     tagsSeries->setName("Tags");
+
+
+    model->select();
+    QSqlQuery qu("SELECT * FROM operations WHERE category=1");
+    while (qu.next()) {
+//        qDebug() << "tag : " << qu.value(0);
+//        qDebug() << "      " << qu.value(1);
+//        qDebug() << "      " << qu.value(2);
+//        qDebug() << "      " << qu.value(3);
+//        qDebug() << "      " << qu.value(4);
+//        qDebug() << "      " << qu.value(5);
+    }
 
     QMap<int,QString> map_tags;
     QMap<int,QColor> tags_colors;
@@ -148,11 +172,11 @@ void Account::updatePie()
     QMap<int,QColor> cats_colors;
     q.exec("SELECT * FROM categories WHERE type=0");
     while (q.next()) {
-//        qDebug() << "cat : " << q.value(0);
-//        qDebug() << "cat " << q.value(1);
+        //        qDebug() << "cat : " << q.value(0);
+        //        qDebug() << "cat " << q.value(1);
         map_cats.insert(q.value(0).toInt(), q.value(1).toString());
         QString color = QString("#%1").arg(q.value(2).toString());
-//        qDebug() << color << QColor(color);
+        //        qDebug() << color << QColor(color);
         cats_colors.insert(q.value(0).toInt(), QColor(color));
     }
 
@@ -463,4 +487,207 @@ void Account::activateTagFilter(bool on)
 void Account::applyTagFilter(int tag)
 {
     model->setFilter(QString("tag='%1'").arg(tag+1));
+}
+
+void Account::saveFile()
+{
+    QString saveFilename = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                    "D:/sopie/Documents/untitled.bsx",
+                                                    tr("BSX files (*.bsx)"));
+    QFile saveFile(saveFilename);
+
+    commitOnDatabase();
+
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+            qWarning("Couldn't open save file.");
+            return;
+        }
+
+    QJsonObject accObject;
+    QSqlQuery q;
+
+//    write(accObject);
+
+    ///// Write Cats /////
+
+    QJsonArray catsArray;
+
+    q.exec("SELECT * FROM categories");
+    while (q.next()) {
+        QJsonObject cat;
+        cat["name"] = q.value(1).toString();
+        cat["color"] = q.value(2).toString();
+        cat["type"] = q.value(3).toInt();
+
+        catsArray.append(cat);
+    }
+    accObject["categories"] = catsArray;
+
+    ///// Write Tags /////
+
+    QJsonArray tagsArray;
+
+    q.exec("SELECT * FROM tags");
+    while (q.next()) {
+        QJsonObject tag;
+        tag["name"] = q.value(1).toString();
+        tag["color"] = q.value(2).toString();
+        tag["type"] = q.value(3).toInt();
+
+        tagsArray.append(tag);
+    }
+    accObject["tags"] = tagsArray;
+
+    ///// Write Operations /////
+
+    QJsonArray opsArray;
+
+    q.exec("SELECT * FROM operations");
+    while (q.next()) {
+        QJsonObject op;
+        op["date"] = q.value(1).toString();
+        op["category"] = q.value(2).toInt();
+        op["amount"] = q.value(3).toDouble();
+        op["tag"] = q.value(4).toInt();
+        op["description"] = q.value(5).toString();
+        op["type"] = q.value(6).toInt();
+
+        opsArray.append(op);
+    }
+    accObject["operations"] = opsArray;
+
+    saveFile.write(QCborValue::fromJsonValue(accObject).toCbor());
+}
+
+QSqlError Account::loadFile()
+{
+    QSqlError err;
+
+    QString loadFilename = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                        "D:/sopie/Documents",
+                                                        tr("BSX files (*.bsx)"));
+    QFile loadFile(loadFilename);
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file.");
+        return QSqlError("Couldn't open save file.","",QSqlError::UnknownError);
+    }
+
+    QByteArray saveData = loadFile.readAll();
+
+    QJsonDocument loadDoc(QJsonDocument(QCborValue::fromCbor(saveData).toMap().toJsonObject()));
+    QJsonObject loadObject = loadDoc.object();
+    QSqlQuery q;
+
+    ///// Read Cats /////
+
+    if (loadObject.contains("categories") && loadObject["categories"].isArray()) {
+        q.exec("TRUNCATE TABLE categories");
+        QJsonArray catsArray = loadObject["categories"].toArray();
+        QSqlError err = readCategories(INSERT_CATEGORY_SQL, catsArray);
+    }
+
+    ///// Read Tags /////
+
+    if (loadObject.contains("tags") && loadObject["tags"].isArray()) {
+        q.exec("TRUNCATE TABLE tags");
+        QJsonArray tagsArray = loadObject["tags"].toArray();
+        QSqlError err = readCategories(INSERT_TAG_SQL, tagsArray);
+    }
+
+    ///// Read Operations /////
+    if (loadObject.contains("operations") && loadObject["operations"].isArray()) {
+        q.exec("TRUNCATE TABLE operations");
+        QJsonArray opsArray = loadObject["operations"].toArray();
+        QSqlError err = readOperations(opsArray);
+    }
+
+    return err;
+}
+
+
+QSqlError Account::readCategories(const QString& query, const QJsonArray &catsArray)
+{
+    QSqlQuery q;
+    if (!q.prepare(query))
+        return q.lastError();
+
+    for (int catIndex = 0; catIndex < catsArray.size(); ++catIndex) {
+        QJsonObject catObject = catsArray[catIndex].toObject();
+
+        QString name;
+        QString color;
+        int type;
+
+        if (catObject.contains("name") && catObject["name"].isString())
+            name = catObject["name"].toString();
+        else
+            continue;
+
+        if (catObject.contains("color") && catObject["color"].isString())
+            color = catObject["color"].toString();
+        else
+            continue;
+
+        if (catObject.contains("type") && catObject["type"].isDouble())
+            type = catObject["type"].toInt();
+        else
+            continue;
+
+        addCategoryInDB(q, name, color, type);
+    }
+
+    return q.lastError();
+}
+
+QSqlError Account::readOperations(const QJsonArray &opsArray)
+{
+    QSqlQuery q;
+    if (!q.prepare(INSERT_OPERATION_SQL))
+        return q.lastError();
+
+    for (int opIndex = 0; opIndex < opsArray.size(); ++opIndex)
+    {
+        QJsonObject opObject = opsArray[opIndex].toObject();
+
+        QDate date;
+        int category;
+        double amount;
+        int tag;
+        QString description;
+        int type;
+
+        if (opObject.contains("date") && opObject["date"].isString())
+            date = QDate::fromString(opObject["date"].toString(), "yyyy-MM-dd");
+        else
+            continue;
+
+        if (opObject.contains("category") && opObject["category"].isDouble())
+            category = opObject["category"].toInt();
+        else
+            continue;
+
+        if (opObject.contains("amount") && (opObject["amount"].isDouble()))
+            amount = opObject["amount"].toDouble();
+        else
+            continue;
+
+        if (opObject.contains("tag") && (opObject["tag"].isDouble()))
+            tag = opObject["tag"].toInt();
+        else
+            continue;
+
+        if (opObject.contains("description") && (opObject["description"].isString()))
+            description = opObject["description"].toString();
+        else
+            continue;
+
+        if (opObject.contains("type") && (opObject["type"].isDouble()))
+            type = opObject["type"].toInt();
+        else
+            continue;
+
+        addOperationInDB(q, date, category, amount, tag, description, type);
+    }
+
+    return q.lastError();
 }

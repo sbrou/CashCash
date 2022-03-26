@@ -60,6 +60,8 @@ const auto INSERT_TAG_SQL = QLatin1String(R"(
     insert into tags(name, color, type) values(?, ?, ?)
     )");
 
+QSqlError manualInit(QSqlQuery &q);
+
 QSqlError initDb()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -69,8 +71,9 @@ QSqlError initDb()
         return db.lastError();
 
     QStringList tables = db.tables();
-    if (tables.contains("books", Qt::CaseInsensitive)
-        && tables.contains("authors", Qt::CaseInsensitive))
+    if (tables.contains("operations", Qt::CaseInsensitive)
+        && tables.contains("categories", Qt::CaseInsensitive)
+        && tables.contains("tags", Qt::CaseInsensitive))
         return QSqlError();
 
     QSqlQuery q;
@@ -81,6 +84,13 @@ QSqlError initDb()
     if (!q.exec(TAGS_SQL))
         return q.lastError();
 
+//    manualInit(q);
+
+    return QSqlError();
+}
+
+QSqlError manualInit(QSqlQuery &q)
+{
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
     QVariant essId = addTagInDB(q, QLatin1String("ESSENTIAL"), QLatin1String("BA4A00"));
@@ -110,7 +120,6 @@ QSqlError initDb()
     addOperationInDB(q, QDate(2022, 2, 1), livretId, -100, savId, QLatin1String("VIREMENT PERMANENT POUR MLE BROU SOPIE"));
     addOperationInDB(q, QDate(2022, 2, 3), houseId, -300, excId, QLatin1String("VIREMENT POUR COMPTE JOINT"));
 
-    return QSqlError();
+    return q.lastError();
 }
-
 #endif // INITDB_H
