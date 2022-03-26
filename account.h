@@ -74,9 +74,12 @@ private:
     QAction *addCatAct;
     QAction *manBudgetAct;
 
+
+    bool commitOnDatabase();
     void showError(const QSqlError &err);
     QSqlRelationalTableModel *model;
     int categoryIdx, tagIdx;
+    unsigned _nbOperations;
 
     QDataWidgetMapper * filterMapper;
     QDate dateFrom;

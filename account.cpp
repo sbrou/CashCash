@@ -17,6 +17,7 @@ Account::Account(QString title, QWidget *parent)
     , ui(new Ui::Account)
     , _locale(QLocale::German)
     , _title(title)
+    , _nbOperations(0)
 {
     ui->setupUi(this);
     connect(ui->qpbTest, &QPushButton::clicked, this, &Account::selectTest);
@@ -64,6 +65,9 @@ Account::Account(QString title, QWidget *parent)
         return;
     }
 
+    _nbOperations = model->rowCount();
+    qDebug() << "number of operations : " << _nbOperations;
+
     // Set the model and hide the ID column:
     ui->opsView->setModel(model);
     ui->opsView->setItemDelegate(new QSqlRelationalDelegate(ui->opsView));
@@ -101,6 +105,20 @@ Account::Account(QString title, QWidget *parent)
 
 }
 
+bool Account::commitOnDatabase()
+{
+    model->database().transaction();
+    bool st = model->submitAll();
+    if (st)
+    {
+        qDebug() << "commiting on database";
+        model->database().commit();
+        model->select();
+    }
+
+    return st;
+}
+
 void Account::showError(const QSqlError &err)
 {
     QMessageBox::critical(this, "Unable to initialize Database",
@@ -116,13 +134,13 @@ void Account::updatePie()
     QMap<int,QColor> tags_colors;
     QSqlQuery q("SELECT * FROM tags WHERE type=0");
     while (q.next()) {
-        qDebug() << "tag : " << q.value(0);
-        qDebug() << "tag : " << q.value(1);
-        qDebug() << "tag : " << q.value(2);
-        qDebug() << "tag : " << q.value(3);
+//        qDebug() << "tag : " << q.value(0);
+//        qDebug() << "tag : " << q.value(1);
+//        qDebug() << "tag : " << q.value(2);
+//        qDebug() << "tag : " << q.value(3);
         map_tags.insert(q.value(0).toInt(), q.value(1).toString());
         QString color = QString("#%1").arg(q.value(2).toString());
-        qDebug() << color << QColor(color);
+//        qDebug() << color << QColor(color);
         tags_colors.insert(q.value(0).toInt(), QColor(color));
     }
 
@@ -130,11 +148,11 @@ void Account::updatePie()
     QMap<int,QColor> cats_colors;
     q.exec("SELECT * FROM categories WHERE type=0");
     while (q.next()) {
-        qDebug() << "cat : " << q.value(0);
-        qDebug() << "cat " << q.value(1);
+//        qDebug() << "cat : " << q.value(0);
+//        qDebug() << "cat " << q.value(1);
         map_cats.insert(q.value(0).toInt(), q.value(1).toString());
         QString color = QString("#%1").arg(q.value(2).toString());
-        qDebug() << color << QColor(color);
+//        qDebug() << color << QColor(color);
         cats_colors.insert(q.value(0).toInt(), QColor(color));
     }
 
@@ -144,10 +162,10 @@ void Account::updatePie()
         series->setName("Categories in " + tag.value());
 
         q.exec(QString("SELECT category, SUM (amount) FROM operations WHERE (tag=%1 AND type=0) GROUP BY category").arg(tag.key()));
-        qDebug() << "BOUCLE : " << tag.key() << " : " << tag.value();
+//        qDebug() << "BOUCLE : " << tag.key() << " : " << tag.value();
         while (q.next()) {
-            qDebug() << q.value(0);
-            qDebug() << q.value(1);
+//            qDebug() << q.value(0);
+//            qDebug() << q.value(1);
             int id = q.value(0).toInt();
             *series << new DrilldownSlice(q.value(1).toDouble(), map_cats[id], cats_colors[id], tagsSeries);
         }
@@ -222,34 +240,27 @@ void Account::editOperation()
     aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"),tag);
 
     aoDiag.exec();
+    commitOnDatabase();
 }
 
 void Account::addOperation()
 {
-
     AddOpDialog aoDiag;
     aoDiag.setWindowTitle(tr("Ajouter une opération"));
     aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
     aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"));
 
     if (aoDiag.exec()) {
+        ++_nbOperations;
         int row = 0;
-        bool st = model->insertRows(row, 1);
-        qDebug() << st;
-        st = model->setData(model->index(row, 0), model->rowCount());
-        qDebug() << model->rowCount() << st;
-        st = model->setData(model->index(row, 1), aoDiag.date());
-        qDebug() << aoDiag.date() << st;
-        st = model->setData(model->index(row, 2), aoDiag.category());
-        qDebug() << aoDiag.category() << st;
-        st = model->setData(model->index(row, 3), aoDiag.amount());
-        qDebug() << aoDiag.amount() << st;
-        st = model->setData(model->index(row, 4), aoDiag.tag());
-        qDebug() << aoDiag.tag() << st;
-        st = model->setData(model->index(row, 5), aoDiag.description());
-        qDebug() << aoDiag.description() << st;
-        st = model->submitAll();
-        qDebug() << st;
+        model->insertRows(row, 1);
+        model->setData(model->index(row, 0), _nbOperations);
+        model->setData(model->index(row, 1), aoDiag.date());
+        model->setData(model->index(row, 2), aoDiag.category());
+        model->setData(model->index(row, 3), aoDiag.amount());
+        model->setData(model->index(row, 4), aoDiag.tag());
+        model->setData(model->index(row, 5), aoDiag.description());
+        commitOnDatabase();
     }
 }
 
@@ -269,7 +280,7 @@ void Account::removeOperation()
         int row = index.row();
         model->removeRows(row,1);
     }
-    model->submitAll();
+    commitOnDatabase();
 }
 
 void Account::addCategory()
@@ -277,8 +288,16 @@ void Account::addCategory()
     addCatDialog acDiag;
     acDiag.setWindowTitle(tr("Ajouter une catégorie"));
 
-    if (acDiag.exec()) {
+    if (acDiag.exec())
+    {
+        model->database().transaction();
 
+        QSqlQuery q;
+        if (!q.prepare(INSERT_CATEGORY_SQL))
+            qDebug() << q.lastError();
+
+        addCategoryInDB(q, acDiag.title(), QLatin1String("CA6F1E"));
+        model->database().commit();
     }
 }
 
@@ -379,7 +398,7 @@ void Account::selectTest()
 
 void Account::setDateFilter()
 {
-    qDebug() << "From " << dateFrom.toString(Qt::ISODateWithMs) << " To " << dateTo.toString(Qt::ISODateWithMs);
+//    qDebug() << "From " << dateFrom.toString(Qt::ISODateWithMs) << " To " << dateTo.toString(Qt::ISODateWithMs);
     model->setFilter(QString("(op_date>='%1' AND op_date<='%2')").arg(dateFrom.toString(Qt::ISODateWithMs)).arg(dateTo.toString(Qt::ISODateWithMs)));
 }
 
@@ -419,7 +438,7 @@ void Account::activateCatFilter(bool on)
     else
     {
         model->setFilter("");
-        qDebug() << model->filter();
+//        qDebug() << model->filter();
     }
 }
 
