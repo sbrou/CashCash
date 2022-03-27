@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/new_file_48px.png</file>
+        <file>images/open_document_48px.png</file>
+        <file>images/save_48px.png</file>
+        <file>images/close_window_48px.png</file>
+        <file>images/add_48px.png</file>
+        <file>images/category_48px.png</file>
+        <file>images/edit_48px.png</file>
+        <file>images/goal_48px.png</file>
+        <file>images/import_csv_48px.png</file>
+        <file>images/Remove_48px.png</file>
+        <file>images/tag_window_48px.png</file>
+        <file>images/euro_money_48px.png</file>
+    </qresource>
+</RCC>

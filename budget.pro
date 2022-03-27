@@ -12,24 +12,30 @@ SOURCES += \
     account.cpp \
     addcatdialog.cpp \
     addopdialog.cpp \
+    chartsview.cpp \
     drilldownchart.cpp \
     drilldownslice.cpp \
+    filtersdialog.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    operationsview.cpp
 
 HEADERS += \
     account.h \
     addcatdialog.h \
     addopdialog.h \
+    chartsview.h \
     drilldownchart.h \
     drilldownslice.h \
+    filtersdialog.h \
     initdb.h \
-    mainwindow.h
+    mainwindow.h \
+    operationsview.h
 
 FORMS += \
-    account.ui \
     addcatdialog.ui \
     addopdialog.ui \
+    filtersdialog.ui \
     mainwindow.ui
 
 TRANSLATIONS += \
@@ -41,3 +47,6 @@ CONFIG += embed_translations
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    budget.qrc
