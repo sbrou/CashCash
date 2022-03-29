@@ -86,7 +86,7 @@ void MainWindow::createActions()
     removeOpAct->setEnabled(false);
     removeOpAct->setStatusTip(tr("Delete the selected operations"));
     fileToolBar->addAction(removeOpAct);
-//    connect(removeOpAct, SIGNAL(triggered()), this, SLOT(removeOperation()));
+    connect(removeOpAct, SIGNAL(triggered()), _account, SLOT(removeOperation()));
 
     editOpAct = new QAction(QIcon(":/images/images/edit_48px.png"), tr("&Edit operation"), this);
     editOpAct->setEnabled(false);

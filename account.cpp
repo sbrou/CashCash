@@ -21,6 +21,7 @@ Account::Account(QString title, QWidget *parent)
     , _nbOperations(0)
 {
     accLayout = new QGridLayout(this);
+//    splitter = new QSplitter(this);
 
     if (!QSqlDatabase::drivers().contains("QSQLITE"))
         QMessageBox::critical(
@@ -198,21 +199,21 @@ void Account::addOperation()
 
 void Account::removeOperation()
 {
-//    int ok = QMessageBox::warning(this,QStringLiteral("Supprimer les opérations sélectionnées"),
-//                                  QStringLiteral("Etes-vous sûr de vouloir supprimer les opérations sélectionnées?"),
-//                                  QMessageBox::Yes,QMessageBox::No);
-//    if(ok == QMessageBox::No)
-//        return;
+    int ok = QMessageBox::warning(this,QStringLiteral("Supprimer les opérations sélectionnées"),
+                                  QStringLiteral("Etes-vous sûr de vouloir supprimer les opérations sélectionnées?"),
+                                  QMessageBox::Yes,QMessageBox::No);
+    if(ok == QMessageBox::No)
+        return;
 
-//    QItemSelectionModel *selectionModel = ui->opsView->selectionModel();
-//    QModelIndexList indexes = selectionModel->selectedRows();
-//    QModelIndex index;
+    QItemSelectionModel *selectionModel = opsView->table()->selectionModel();
+    QModelIndexList indexes = selectionModel->selectedRows();
+    QModelIndex index;
 
-//    foreach (index, indexes) {
-//        int row = index.row();
-//        model->removeRows(row,1);
-//    }
-//    commitOnDatabase();
+    foreach (index, indexes) {
+        int row = index.row();
+        model->removeRows(row,1);
+    }
+    commitOnDatabase();
 }
 
 void Account::addCategory()
@@ -255,13 +256,6 @@ void Account::setStandardRules()
     _rules.insert("BOUYGUES","SUBS");
     _rules.insert("Deezer","SUBS");
     _rules.insert("ASTEK","SALARY");
-}
-
-void Account::createToolBar()
-{
-//    connect(ui->opsView->selectionModel(),
-//            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-//            this, SLOT(update_actions(QItemSelection)));
 }
 
 void Account::selectTest()

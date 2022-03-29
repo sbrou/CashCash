@@ -9,6 +9,7 @@
 #include <QtSql>
 #include <QtWidgets>
 #include <QChartView>
+#include <QSplitter>
 
 #include "operationsview.h"
 #include "drilldownchart.h"
@@ -62,6 +63,7 @@ private:
     QLocale _locale;
     QString _title;
 
+//    QSplitter * splitter;
     QGridLayout *accLayout;
 
     QSqlRelationalTableModel *model;
@@ -75,7 +77,6 @@ private:
 
     QMap<QString,QString> _rules;
 
-    void createToolBar();
     void initTabFilters();
 
     void setDateFilter();
