@@ -106,7 +106,7 @@ void MainWindow::createActions()
     catAct->setStatusTip(tr("Create, edit or delete categories"));
     catAct->setEnabled(false);
     fileToolBar->addAction(catAct);
-//    connect(addCatAct, SIGNAL(triggered()), this, SLOT(addCategory()));
+    connect(catAct, SIGNAL(triggered()), _account, SLOT(showCategories()));
 
     tagAct = new QAction(QIcon(":/images/images/tag_window_48px.png"), tr("&Manage tags"), this);
     tagAct->setStatusTip(tr("Create, edit or delete tags"));

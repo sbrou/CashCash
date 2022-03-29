@@ -10,8 +10,9 @@ CONFIG += c++11
 
 SOURCES += \
     account.cpp \
-    addcatdialog.cpp \
     addopdialog.cpp \
+    catdialog.cpp \
+    catslist.cpp \
     chartsview.cpp \
     drilldownchart.cpp \
     drilldownslice.cpp \
@@ -22,8 +23,9 @@ SOURCES += \
 
 HEADERS += \
     account.h \
-    addcatdialog.h \
     addopdialog.h \
+    catdialog.h \
+    catslist.h \
     chartsview.h \
     drilldownchart.h \
     drilldownslice.h \
@@ -33,7 +35,6 @@ HEADERS += \
     operationsview.h
 
 FORMS += \
-    addcatdialog.ui \
     addopdialog.ui \
     filtersdialog.ui \
     mainwindow.ui

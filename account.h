@@ -35,11 +35,13 @@ public slots:
     void addOperation();
     void editOperation();
     void removeOperation();
-    void addCategory();
+//    void addCategory();
     void selectTest();
 
     void saveFile();
     QSqlError loadFile();
+
+    void showCategories();
 
 private slots:
     void activateDateFilter(bool on);
