@@ -108,6 +108,9 @@ void Account::initAccount()
     chartView = new ChartsView(model, this);
     accLayout->addWidget(chartView, 0, 1);
 
+    goalsView = new GoalsView(this);
+    accLayout->addWidget(goalsView, 1, 0, 1, 2);
+
     emit accountReady();
 }
 

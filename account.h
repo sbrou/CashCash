@@ -15,6 +15,7 @@
 #include "drilldownchart.h"
 #include "drilldownslice.h"
 #include "chartsview.h"
+#include "goalsview.h"
 
 class Account : public QWidget
 {
@@ -74,6 +75,7 @@ private:
 
     OperationsView *opsView;
     ChartsView *chartView;
+    GoalsView *goalsView;
 
     //////////////////////////////////////////////
 

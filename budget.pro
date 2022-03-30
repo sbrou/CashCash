@@ -17,6 +17,7 @@ SOURCES += \
     drilldownchart.cpp \
     drilldownslice.cpp \
     filtersdialog.cpp \
+    goalsview.cpp \
     main.cpp \
     mainwindow.cpp \
     operationsview.cpp
@@ -30,6 +31,7 @@ HEADERS += \
     drilldownchart.h \
     drilldownslice.h \
     filtersdialog.h \
+    goalsview.h \
     initdb.h \
     mainwindow.h \
     operationsview.h

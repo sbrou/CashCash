@@ -1,7 +1,7 @@
 #include "catslist.h"
 
-//#include "initdb.h"
 #include <QSqlQuery>
+#include <QSqlError>
 #include "catdialog.h"
 
 CatsList::CatsList(QSqlRelationalTableModel * mod, QWidget *parent)
@@ -55,13 +55,18 @@ void CatsList::addNewCategory()
     CatDialog diag;
     if (diag.exec())
     {
-//        catsView->addItem(diag.name());
-//        QSqlQuery q;
-//        if (!q.prepare(INSERT_CATEGORY_SQL))
-//            qDebug() << q.lastError().text();
-
-//        addCategoryInDB(q, diag.name(), diag.color(), diag.type());
+        catsView->addItem(diag.name());
+//        qDebug() << diag.name();
+//        QSqlQuery q("insert into categories(name, color, type) values(?, ?, ?)");
+//        q.addBindValue(diag.name());
+//        q.addBindValue(diag.color());
+//        q.addBindValue(diag.type());
+//        qDebug() << "before exec";
+//        q.exec();
+//        qDebug() << "after exec";
+//        qDebug() << q.lastError().text();
     }
+    qDebug() << "end";
 }
 
 void CatsList::editCategory()

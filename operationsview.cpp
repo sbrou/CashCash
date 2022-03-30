@@ -30,6 +30,7 @@ void OperationsView::loadModel(QSqlRelationalTableModel * mod)
     opsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     opsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
     opsTable->resizeColumnsToContents();
+    opsTable->setShowGrid(false);
     mainLayout->addWidget(opsTable);
 }
 
