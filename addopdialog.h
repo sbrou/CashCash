@@ -14,7 +14,7 @@ class AddOpDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddOpDialog(QWidget *parent = nullptr);
+    explicit AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent = nullptr);
     explicit AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent = nullptr);
     ~AddOpDialog();
 

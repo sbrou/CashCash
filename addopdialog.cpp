@@ -15,12 +15,19 @@ void AddOpDialog::init()
     ui->qleAmount->setValidator(amountValidator);
 }
 
-AddOpDialog::AddOpDialog(QWidget *parent) :
+AddOpDialog::AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddOpDialog),
     opId(-1)
 {
     init();
+
+    ui->qcbCat->setModel(cats);
+    ui->qcbCat->setModelColumn(1);
+
+    ui->qcbTag->setModel(tags);
+    ui->qcbTag->setModelColumn(1);
+
 }
 
 
@@ -86,7 +93,7 @@ void AddOpDialog::submit()
 AddOpDialog::~AddOpDialog()
 {
     delete ui;
-    mapper->deleteLater();
+//    mapper->deleteLater();
 //    model->deleteLater();
 }
 
@@ -142,6 +149,7 @@ void AddOpDialog::setDescription(const QString& des)
 
 void AddOpDialog::fillCategories(QSqlTableModel * model, int field, const QString & cat)
 {
+    qDebug() << field;
     ui->qcbCat->setModel(model);
     ui->qcbCat->setModelColumn(field);
     if (!cat.isEmpty())
@@ -150,6 +158,7 @@ void AddOpDialog::fillCategories(QSqlTableModel * model, int field, const QStrin
 
 void AddOpDialog::fillTags(QSqlTableModel * model , int field, const QString & tag)
 {
+    qDebug() << field;
     ui->qcbTag->setModel(model);
     ui->qcbTag->setModelColumn(field);
     if (!tag.isEmpty())

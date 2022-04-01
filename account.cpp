@@ -86,6 +86,9 @@ void Account::initAccount()
     model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
     model->setRelation(tagIdx, QSqlRelation("tags", "id", "name"));
 
+    cats_model = model->relationModel(categoryIdx);
+    tags_model = model->relationModel(tagIdx);
+
     // Set the localized header captions:
     model->setHeaderData(categoryIdx, Qt::Horizontal, tr("Category"));
     model->setHeaderData(tagIdx, Qt::Horizontal, tr("Tag"));
@@ -187,25 +190,25 @@ void Account::editOperation()
 
 void Account::addOperation()
 {
-    filtersDialog filter;
-    filter.exec();
-//    AddOpDialog aoDiag;
-//    aoDiag.setWindowTitle(tr("Ajouter une opération"));
-//    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"));
-//    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"));
+//    filtersDialog filter;
+//    filter.exec();
+    AddOpDialog aoDiag(cats_model, tags_model);
+    aoDiag.setWindowTitle(tr("Ajouter une opération"));
+//    aoDiag.fillCategories(cats_model, cats_model->fieldIndex("name"));
+//    aoDiag.fillTags(tags_model, tags_model->fieldIndex("name"));
 
-//    if (aoDiag.exec()) {
-//        ++_nbOperations;
-//        int row = 0;
-//        model->insertRows(row, 1);
-//        model->setData(model->index(row, 0), _nbOperations);
-//        model->setData(model->index(row, 1), aoDiag.date());
-//        model->setData(model->index(row, 2), aoDiag.category());
-//        model->setData(model->index(row, 3), aoDiag.amount());
-//        model->setData(model->index(row, 4), aoDiag.tag());
-//        model->setData(model->index(row, 5), aoDiag.description());
-//        commitOnDatabase();
-//    }
+    if (aoDiag.exec()) {
+        ++_nbOperations;
+        int row = 0;
+        model->insertRows(row, 1);
+        model->setData(model->index(row, 0), _nbOperations);
+        model->setData(model->index(row, 1), aoDiag.date());
+        model->setData(model->index(row, 2), aoDiag.category());
+        model->setData(model->index(row, 3), aoDiag.amount());
+        model->setData(model->index(row, 4), aoDiag.tag());
+        model->setData(model->index(row, 5), aoDiag.description());
+        commitOnDatabase();
+    }
 }
 
 void Account::removeOperation()

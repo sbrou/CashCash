@@ -70,6 +70,8 @@ private:
     QGridLayout *accLayout;
 
     QSqlRelationalTableModel *model;
+    QSqlTableModel *cats_model;
+    QSqlTableModel *tags_model;
     int categoryIdx, tagIdx;
     unsigned _nbOperations;
 
