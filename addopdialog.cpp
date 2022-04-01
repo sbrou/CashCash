@@ -4,7 +4,7 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 
-void AddOpDialog::init()
+void AddOpDialog::init(QSqlTableModel * cats, QSqlTableModel * tags)
 {
     ui->setupUi(this);
 
@@ -13,6 +13,12 @@ void AddOpDialog::init()
     QDoubleValidator * amountValidator = new QDoubleValidator(ui->qleAmount);
     amountValidator->setLocale(QLocale::German);
     ui->qleAmount->setValidator(amountValidator);
+
+    ui->qcbCat->setModel(cats);
+    ui->qcbCat->setModelColumn(1);
+
+    ui->qcbTag->setModel(tags);
+    ui->qcbTag->setModelColumn(1);
 }
 
 AddOpDialog::AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent) :
@@ -20,52 +26,22 @@ AddOpDialog::AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *
     ui(new Ui::AddOpDialog),
     opId(-1)
 {
-    init();
-
-    ui->qcbCat->setModel(cats);
-    ui->qcbCat->setModelColumn(1);
-
-    ui->qcbTag->setModel(tags);
-    ui->qcbTag->setModelColumn(1);
-
+    init(cats, tags);
 }
 
 
 AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::AddOpDialog)
+    ui(new Ui::AddOpDialog),
+    opId(id)
 {
-    init();
+    init(model->relationModel(2), model->relationModel(4));
 
     QPushButton *ok = ui->buttonBox->button(ui->buttonBox->Ok);
     QPushButton *cancel = ui->buttonBox->button(ui->buttonBox->Cancel);
 
     connect(ok, &QPushButton::clicked, this, &AddOpDialog::submit);
     connect(cancel, &QPushButton::clicked, this, &AddOpDialog::revert);
-
-//    int categoryIdx = model->fieldIndex("category");
-//    qDebug() << model->fieldIndex("category");
-//    int tagIdx = model->fieldIndex("tag");
-//    qDebug() << model->fieldIndex("tag");
-//    qDebug() << id;
-//    ui->qcbCat->setModel(model->relationModel(2));
-//    ui->qcbCat->setModelColumn(model->relationModel(2)->fieldIndex("name"));
-//    ui->qcbTag->setModel(model->relationModel(4));
-//    ui->qcbTag->setModelColumn(model->relationModel(tagIdx)->fieldIndex("name"));
-
-//    qDebug() << "in AddOp " << model->record(opId);
-//    cat_idx = model->record(opId).value("categories_name_2").toInt();
-//    tag_idx = model->record(opId).value("name").toInt();
-
-    opId = id;
-
-    qDebug() << "in AddOpDIalog";
-    QSqlQuery query("SELECT name FROM categories",model->database());
-    while (query.next()) {
-        qDebug() << query.value(0).toString();
-    }
-
-    qDebug() << model->fieldIndex("categories_name_2");
 
     mapper = new QDataWidgetMapper(this);
     mapper->setModel(model);
@@ -93,8 +69,8 @@ void AddOpDialog::submit()
 AddOpDialog::~AddOpDialog()
 {
     delete ui;
-//    mapper->deleteLater();
-//    model->deleteLater();
+    if (mapper != nullptr)
+        mapper->deleteLater();
 }
 
 QDate AddOpDialog::date()
@@ -147,20 +123,4 @@ void AddOpDialog::setDescription(const QString& des)
     ui->qleDes->setText(des);
 }
 
-void AddOpDialog::fillCategories(QSqlTableModel * model, int field, const QString & cat)
-{
-    qDebug() << field;
-    ui->qcbCat->setModel(model);
-    ui->qcbCat->setModelColumn(field);
-    if (!cat.isEmpty())
-        ui->qcbCat->setCurrentText(cat);
-}
 
-void AddOpDialog::fillTags(QSqlTableModel * model , int field, const QString & tag)
-{
-    qDebug() << field;
-    ui->qcbTag->setModel(model);
-    ui->qcbTag->setModelColumn(field);
-    if (!tag.isEmpty())
-        ui->qcbTag->setCurrentText(tag);
-}

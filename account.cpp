@@ -175,17 +175,14 @@ void Account::importFile()
 
 void Account::editOperation()
 {
-//    int idx = (int) ui->opsView->currentIndex().row();
+    int idx = (int) opsView->table()->currentIndex().row();
 
-//    AddOpDialog aoDiag(idx, model);
-//    aoDiag.setWindowTitle(tr("Editer une opération"));
-//    QString cat = model->record(idx).value(2).toString();
-//    QString tag = model->record(idx).value(4).toString();
-//    aoDiag.fillCategories(model->relationModel(categoryIdx), model->relationModel(categoryIdx)->fieldIndex("name"),cat);
-//    aoDiag.fillTags(model->relationModel(tagIdx), model->relationModel(tagIdx)->fieldIndex("name"),tag);
+    AddOpDialog aoDiag(idx, model);
+    aoDiag.setWindowTitle(tr("Edit an operation"));
+    aoDiag.setWindowIcon(QIcon(":/images/images/edit_48px.png"));
 
-//    aoDiag.exec();
-//    commitOnDatabase();
+    if (aoDiag.exec())
+        commitOnDatabase();
 }
 
 void Account::addOperation()
@@ -193,9 +190,8 @@ void Account::addOperation()
 //    filtersDialog filter;
 //    filter.exec();
     AddOpDialog aoDiag(cats_model, tags_model);
-    aoDiag.setWindowTitle(tr("Ajouter une opération"));
-//    aoDiag.fillCategories(cats_model, cats_model->fieldIndex("name"));
-//    aoDiag.fillTags(tags_model, tags_model->fieldIndex("name"));
+    aoDiag.setWindowTitle(tr("Add an operation"));
+    aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
 
     if (aoDiag.exec()) {
         ++_nbOperations;

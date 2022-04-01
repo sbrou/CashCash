@@ -92,7 +92,7 @@ void MainWindow::createActions()
     editOpAct->setEnabled(false);
     editOpAct->setStatusTip(tr("Edit the selected operation"));
     fileToolBar->addAction(editOpAct);
-//    connect(editOpAct, SIGNAL(triggered()), this, SLOT(editOperation()));
+    connect(editOpAct, SIGNAL(triggered()), _account, SLOT(editOperation()));
 
     importOpAct = new QAction(QIcon(":/images/images/import_csv_48px.png"), tr("&Import operations"), this);
     importOpAct->setStatusTip(tr("Import operations from a csv file"));

@@ -30,15 +30,12 @@ public:
     void setTag(int);
     void setDescription(const QString &);
 
-    void fillCategories(QSqlTableModel * model, int field, const QString & cat = "");
-    void fillTags(QSqlTableModel * model , int field, const QString & tag = "");
-
 private slots:
     void revert();
     void submit();
 
 private:
-    void init();
+    void init(QSqlTableModel * cats, QSqlTableModel * tags);
 
     Ui::AddOpDialog *ui;
     QDataWidgetMapper *mapper = nullptr;
