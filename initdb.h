@@ -84,7 +84,7 @@ QSqlError initDb()
     if (!q.exec(TAGS_SQL))
         return q.lastError();
 
-//    manualInit(q);
+    manualInit(q);
 
     return QSqlError();
 }
@@ -93,19 +93,19 @@ QSqlError manualInit(QSqlQuery &q)
 {
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
-    QVariant essId = addTagInDB(q, QLatin1String("ESSENTIAL"), QLatin1String("BA4A00"));
-    QVariant wanId = addTagInDB(q, QLatin1String("WANTING"), QLatin1String("D68910"));
-    QVariant savId = addTagInDB(q, QLatin1String("SAVING"), QLatin1String("28B463"));
-    QVariant excId = addTagInDB(q, QLatin1String("EXCEPTIONAL"), QLatin1String("BA4A00"));
-    QVariant incId = addTagInDB(q, QLatin1String("INCOME"), QLatin1String("2E86C1"), 1);
+    QVariant essId = addTagInDB(q, QLatin1String("ESSENTIAL"), QLatin1String("#BA4A00"));
+    QVariant wanId = addTagInDB(q, QLatin1String("WANTING"), QLatin1String("#D68910"));
+    QVariant savId = addTagInDB(q, QLatin1String("SAVING"), QLatin1String("#28B463"));
+    QVariant excId = addTagInDB(q, QLatin1String("EXCEPTIONAL"), QLatin1String("#BA4A00"));
+    QVariant incId = addTagInDB(q, QLatin1String("INCOME"), QLatin1String("#2E86C1"), 1);
 
     if (!q.prepare(INSERT_CATEGORY_SQL))
         return q.lastError();
-    QVariant foodId = addCategoryInDB(q, QLatin1String("FOOD"), QLatin1String("CA6F1E"));
-    QVariant houseId = addCategoryInDB(q, QLatin1String("HOUSE"), QLatin1String("D4AC0D"));
-    QVariant hobbiesId = addCategoryInDB(q, QLatin1String("HOBBIES"), QLatin1String("229954"));
-    QVariant salaryId = addCategoryInDB(q, QLatin1String("SALARY"), QLatin1String("17A589"), 1);
-    QVariant livretId = addCategoryInDB(q, QLatin1String("LIVRET"), QLatin1String("2471A3"));
+    QVariant foodId = addCategoryInDB(q, QLatin1String("FOOD"), QLatin1String("#CA6F1E"));
+    QVariant houseId = addCategoryInDB(q, QLatin1String("HOUSE"), QLatin1String("#D4AC0D"));
+    QVariant hobbiesId = addCategoryInDB(q, QLatin1String("HOBBIES"), QLatin1String("#229954"));
+    QVariant salaryId = addCategoryInDB(q, QLatin1String("SALARY"), QLatin1String("#17A589"), 1);
+    QVariant livretId = addCategoryInDB(q, QLatin1String("LIVRET"), QLatin1String("#2471A3"));
 
     if (!q.prepare(INSERT_OPERATION_SQL))
         return q.lastError();

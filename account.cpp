@@ -20,8 +20,11 @@ Account::Account(QString title, QWidget *parent)
     , _title(title)
     , _nbOperations(0)
 {
+//    setOrientation(Qt::Vertical);
+//    splitter = new QSplitter(Qt::Horizontal, this);
+
     accLayout = new QGridLayout(this);
-//    splitter = new QSplitter(this);
+
 
     if (!QSqlDatabase::drivers().contains("QSQLITE"))
         QMessageBox::critical(
@@ -104,12 +107,17 @@ void Account::initAccount()
     opsView->loadModel(model);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
     accLayout->addWidget(opsView, 0, 0);
+//    splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
     accLayout->addWidget(chartView, 0, 1);
+//    splitter->addWidget(chartView);
+
+//    addWidget(splitter);
 
     goalsView = new GoalsView(this);
     accLayout->addWidget(goalsView, 1, 0, 1, 2);
+//    addWidget(goalsView);
 
     emit accountReady();
 }

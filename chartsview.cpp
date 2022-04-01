@@ -51,7 +51,7 @@ void ChartsView::updatePie()
         map_tags.insert(q.value(0).toInt(), q.value(1).toString());
         QString color = QString("#%1").arg(q.value(2).toString());
 //        qDebug() << color << QColor(color);
-        tags_colors.insert(q.value(0).toInt(), QColor(color));
+        tags_colors.insert(q.value(0).toInt(), QColor(q.value(2).toString()));
     }
 
     QMap<int,QString> map_cats;
@@ -63,7 +63,7 @@ void ChartsView::updatePie()
         map_cats.insert(q.value(0).toInt(), q.value(1).toString());
         QString color = QString("#%1").arg(q.value(2).toString());
         //        qDebug() << color << QColor(color);
-        cats_colors.insert(q.value(0).toInt(), QColor(color));
+        cats_colors.insert(q.value(0).toInt(), QColor(q.value(2).toString()));
     }
 
     for (QMap<int,QString>::const_iterator tag = map_tags.constBegin(); tag != map_tags.constEnd(); ++tag)
