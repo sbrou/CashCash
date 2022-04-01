@@ -84,7 +84,7 @@ QSqlError initDb()
     if (!q.exec(TAGS_SQL))
         return q.lastError();
 
-    manualInit(q);
+//    manualInit(q);
 
     return QSqlError();
 }
