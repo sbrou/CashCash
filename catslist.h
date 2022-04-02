@@ -33,6 +33,8 @@ private:
     QPushButton *qpbAddNew;
     QPushButton *qpbEdit;
     QPushButton *qpbRemove;
+
+    int _nb;
 };
 
 #endif // CATSLIST_H

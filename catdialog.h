@@ -20,8 +20,12 @@ public:
     QString color();
     int type();
 
+    void setName(const QString& name);
+    void setColor(const QString& color);
+    void setType(int type);
+
 private slots:
-    void setColor();
+    void set_color();
 
 private:
     QVBoxLayout *mainLayout;

@@ -1,4 +1,4 @@
-#include "account.h"
+ #include "account.h"
 #include "ui_account.h"
 
 #include <QFileDialog>
@@ -56,9 +56,10 @@ bool Account::commitOnDatabase()
     if (st)
     {
         qDebug() << "commiting on database";
-        model->database().commit();
-        model->select();
+        qDebug() << model->database().commit();
+        qDebug() << model->select();
 //        updatePie();
+        qDebug() << model->rowCount();
     }
 
     return st;
@@ -198,16 +199,17 @@ void Account::addOperation()
     aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
 
     if (aoDiag.exec()) {
+        qDebug() << "id cat : " << aoDiag.category();
         ++_nbOperations;
         int row = 0;
-        model->insertRows(row, 1);
-        model->setData(model->index(row, 0), _nbOperations);
-        model->setData(model->index(row, 1), aoDiag.date());
-        model->setData(model->index(row, 2), aoDiag.category());
-        model->setData(model->index(row, 3), aoDiag.amount());
-        model->setData(model->index(row, 4), aoDiag.tag());
-        model->setData(model->index(row, 5), aoDiag.description());
-        commitOnDatabase();
+        qDebug() << model->insertRows(row, 1);
+        qDebug() << model->setData(model->index(row, 0), _nbOperations);
+        qDebug() << model->setData(model->index(row, 1), aoDiag.date());
+        qDebug() << model->setData(model->index(row, 2), aoDiag.category());
+        qDebug() << model->setData(model->index(row, 3), aoDiag.amount());
+        qDebug() << model->setData(model->index(row, 4), aoDiag.tag());
+        qDebug() << model->setData(model->index(row, 5), aoDiag.description());
+        qDebug() << commitOnDatabase();
     }
 }
 
