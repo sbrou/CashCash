@@ -52,6 +52,7 @@ bool Account::commitOnDatabase()
 {
     model->database().transaction();
     bool st = model->submitAll();
+    qDebug() << "in commit on database";
     if (st)
     {
         qDebug() << "commiting on database";
@@ -121,6 +122,9 @@ void Account::initAccount()
     goalsView = new GoalsView(this);
     accLayout->addWidget(goalsView, 1, 0, 1, 2);
 //    addWidget(goalsView);
+
+    catsWidget = new CatsList(cats_model, this);
+    connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
     emit accountReady();
 }
@@ -557,8 +561,7 @@ QSqlError Account::readOperations(const QJsonArray &opsArray)
 
 void Account::showCategories()
 {
-    CatsList cats(model, this);
-    cats.exec();
-    commitOnDatabase();
+    catsWidget->show();
+//    commitOnDatabase();
     qDebug() << "here";
 }

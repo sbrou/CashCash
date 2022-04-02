@@ -4,7 +4,7 @@
 #include <QSqlError>
 #include "catdialog.h"
 
-CatsList::CatsList(QSqlRelationalTableModel * mod, QWidget *parent)
+CatsList::CatsList(QSqlTableModel * mod, QWidget *parent)
     : QDialog{parent}
     , model(mod)
 {
@@ -14,16 +14,12 @@ CatsList::CatsList(QSqlRelationalTableModel * mod, QWidget *parent)
     mainLayout = new QGridLayout(this);
 
     catsView = new QListWidget(this);
-    QStringList cats;
 
     QSqlQuery q;
     q.exec("SELECT * from categories");
     while (q.next())
-    {
-        cats << q.value(1).toString();
-    }
+        catsView->addItem(q.value(1).toString());
 
-    catsView->addItems(cats);
     catsView->setSortingEnabled(true);
     catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mainLayout->addWidget(catsView, 0, 0, 5, 3);
@@ -56,15 +52,14 @@ void CatsList::addNewCategory()
     if (diag.exec())
     {
         catsView->addItem(diag.name());
-//        qDebug() << diag.name();
-//        QSqlQuery q("insert into categories(name, color, type) values(?, ?, ?)");
-//        q.addBindValue(diag.name());
-//        q.addBindValue(diag.color());
-//        q.addBindValue(diag.type());
-//        qDebug() << "before exec";
-//        q.exec();
-//        qDebug() << "after exec";
-//        qDebug() << q.lastError().text();
+
+        int row = 0;
+        model->insertRows(row, 1);
+        model->setData(model->index(row, 0), catsView->count());
+        model->setData(model->index(row, 1), diag.name());
+        model->setData(model->index(row, 2), diag.color());
+        model->setData(model->index(row, 3), diag.type());
+        emit commit();
     }
     qDebug() << "end";
 }

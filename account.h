@@ -16,6 +16,7 @@
 #include "drilldownslice.h"
 #include "chartsview.h"
 #include "goalsview.h"
+#include "catslist.h"
 
 class Account : public QWidget
 {
@@ -55,9 +56,10 @@ private slots:
     void activateTagFilter(bool on);
     void applyTagFilter(int);
 
+    bool commitOnDatabase();
+
 private:
     // Methodes
-    bool commitOnDatabase();
     void showError(const QSqlError &err);
     void initAccount();
 
@@ -78,6 +80,8 @@ private:
     OperationsView *opsView;
     ChartsView *chartView;
     GoalsView *goalsView;
+
+    CatsList *catsWidget;
 
     //////////////////////////////////////////////
 

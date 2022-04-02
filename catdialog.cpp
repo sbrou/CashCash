@@ -28,8 +28,8 @@ CatDialog::CatDialog()
     inputLayout->addWidget(qpbColor, 1, 2);
 
     qgbType = new QGroupBox;
-    QRadioButton *expenses = new QRadioButton(tr("&Expenses"));
-    QRadioButton *earnings = new QRadioButton(tr("&Earnings"));
+    expenses = new QRadioButton(tr("&Expenses"));
+    earnings = new QRadioButton(tr("&Earnings"));
     expenses->setChecked(true);
 
     QHBoxLayout *hbox = new QHBoxLayout;
@@ -75,7 +75,12 @@ QString CatDialog::color()
 int CatDialog::type()
 {
     if (expenses->isChecked())
+    {
         return 0;
+    }
+
     else
+    {
         return 1;
+    }
 }

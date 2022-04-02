@@ -12,10 +12,11 @@ class CatsList : public QDialog
 {
     Q_OBJECT
 public:
-    explicit CatsList(QSqlRelationalTableModel * mod, QWidget *parent = nullptr);
+    explicit CatsList(QSqlTableModel * mod, QWidget *parent = nullptr);
     ~CatsList();
 
 signals:
+    void commit();
 
 private slots:
     void addNewCategory();
@@ -23,7 +24,7 @@ private slots:
     void removeCategories();
 
 private:
-    QSqlRelationalTableModel *model;
+    QSqlTableModel *model;
 
     QGridLayout *mainLayout;
 
