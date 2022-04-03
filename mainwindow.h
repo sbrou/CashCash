@@ -17,10 +17,20 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void showWelcomeDialog();
+
+signals:
+    void fileToLoad(const QString& account_file);
+
 private slots:
     void about();
     void enableAccountActions();
     void updateAccountActions(const QItemSelection& selected);
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+    void readSettings();
+    void writeSettings();
 
 private:
     void createActions();

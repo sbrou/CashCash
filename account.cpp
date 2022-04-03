@@ -15,15 +15,16 @@
 #include "initdb.h"
 
 Account::Account(QString title, QWidget *parent)
-    : QWidget{parent}
+    : QSplitter{parent}
     , _locale(QLocale::German)
     , _title(title)
     , _nbOperations(0)
+    , _filepath("")
 {
-//    setOrientation(Qt::Vertical);
-//    splitter = new QSplitter(Qt::Horizontal, this);
+    setOrientation(Qt::Vertical);
+    splitter = new QSplitter(Qt::Horizontal, this);
 
-    accLayout = new QGridLayout(this);
+//    accLayout = new QGridLayout(this);
 
 
     if (!QSqlDatabase::drivers().contains("QSQLITE"))
@@ -72,6 +73,8 @@ void Account::showError(const QSqlError &err)
 
 void Account::initAccount()
 {
+    readSettings();
+
     // Create the data model:
     opsView = new OperationsView;
     model = new QSqlRelationalTableModel(opsView->table());
@@ -110,18 +113,18 @@ void Account::initAccount()
 
     opsView->loadModel(model);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
-    accLayout->addWidget(opsView, 0, 0);
-//    splitter->addWidget(opsView);
+//    accLayout->addWidget(opsView, 0, 0);
+    splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
-    accLayout->addWidget(chartView, 0, 1);
-//    splitter->addWidget(chartView);
+//    accLayout->addWidget(chartView, 0, 1);
+    splitter->addWidget(chartView);
 
-//    addWidget(splitter);
+    addWidget(splitter);
 
     goalsView = new GoalsView(this);
-    accLayout->addWidget(goalsView, 1, 0, 1, 2);
-//    addWidget(goalsView);
+//    accLayout->addWidget(goalsView, 1, 0, 1, 2);
+    addWidget(goalsView);
 
     catsWidget = new CatsList(cats_model, this);
     connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
@@ -411,13 +414,29 @@ void Account::saveFile()
     saveFile.write(QCborValue::fromJsonValue(accObject).toCbor());
 }
 
-QSqlError Account::loadFile()
+void Account::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("subSplitterSizes", splitter->saveState());
+    settings.setValue("mainSplitterSizes", saveState());
+    settings.setValue("lastFile", QVariant(_filepath));
+}
+
+void Account::readSettings()
+{
+    QSettings settings;
+    splitter->restoreState(settings.value("subSplitterSizes").toByteArray());
+    restoreState(settings.value("mainSplitterSizes").toByteArray());
+}
+
+QSqlError Account::loadFile(const QString& filename)
 {
     QSqlError err;
 
-    QString loadFilename = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                        "D:/sopie/Documents",
-                                                        tr("BSX files (*.bsx)"));
+    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                                             "D:/sopie/Documents",
+                                                                             tr("BSX files (*.bsx)")) : filename;
+
     QFile loadFile(loadFilename);
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open save file.");
@@ -456,6 +475,7 @@ QSqlError Account::loadFile()
             return q.lastError();
     }
 
+    _filepath = loadFilename;
     initAccount();
 
     return err;

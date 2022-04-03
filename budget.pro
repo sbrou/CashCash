@@ -20,7 +20,8 @@ SOURCES += \
     goalsview.cpp \
     main.cpp \
     mainwindow.cpp \
-    operationsview.cpp
+    operationsview.cpp \
+    welcomedialog.cpp
 
 HEADERS += \
     account.h \
@@ -34,7 +35,8 @@ HEADERS += \
     goalsview.h \
     initdb.h \
     mainwindow.h \
-    operationsview.h
+    operationsview.h \
+    welcomedialog.h
 
 FORMS += \
     addopdialog.ui \

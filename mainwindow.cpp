@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#include "welcomedialog.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -14,11 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("MoulagApp");
     setWindowIcon(QIcon(":/images/images/euro_money_48px.png"));
 
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect  screenGeometry = screen->availableGeometry();
-    int height = screenGeometry.height();
-    int width = screenGeometry.width();
-    resize(width, height);
+    readSettings();
 
     _account = new Account("CCP");
     setCentralWidget(_account);
@@ -27,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    createStatusBar();
 
     connect(_account, &Account::accountReady, this, &MainWindow::enableAccountActions);
+    connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
 }
 
 MainWindow::~MainWindow()
@@ -50,7 +49,7 @@ void MainWindow::createActions()
     QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, &QAction::triggered, _account, &Account::loadFile);
+    connect(openAct, SIGNAL(triggered()), _account, SLOT(loadFile()));
     fileMenu->addAction(openAct);
     fileToolBar->addAction(openAct);
 
@@ -136,6 +135,35 @@ void MainWindow::about()
                "toolbars, and a status bar."));
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    writeSettings();
+    event->accept();
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+    if (geometry.isEmpty())
+    {
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QRect  screenGeometry = screen->availableGeometry();
+        int height = screenGeometry.height();
+        int width = screenGeometry.width();
+        resize(width, height);
+    }
+    else
+        restoreGeometry(geometry);
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    settings.setValue("geometry", saveGeometry());
+    _account->saveSettings();
+}
+
 void MainWindow::enableAccountActions()
 {
     addOpAct->setEnabled(true);
@@ -158,5 +186,26 @@ void MainWindow::updateAccountActions(const QItemSelection& selected)
     } else {
         removeOpAct->setEnabled(false);
         editOpAct->setEnabled(false);
+    }
+}
+
+void MainWindow::showWelcomeDialog()
+{
+    welcomeDialog welcome(this);
+    int r = welcome.exec();
+    qDebug() << r;
+    QSettings settings;
+
+    switch (r)
+    {
+    case 1:
+        break;
+
+    case 2:
+        emit fileToLoad(settings.value("lastFile", QVariant()).toString());
+        break;
+
+    case 3:
+        break;
     }
 }

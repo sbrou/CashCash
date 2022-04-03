@@ -18,7 +18,7 @@
 #include "goalsview.h"
 #include "catslist.h"
 
-class Account : public QWidget
+class Account : public QSplitter
 {
     Q_OBJECT
 public:
@@ -27,6 +27,8 @@ public:
 
     void setStandardRules();
     void setStandardCategories();
+    void saveSettings();
+    void readSettings();
 
 signals:
     void accountReady();
@@ -37,11 +39,10 @@ public slots:
     void addOperation();
     void editOperation();
     void removeOperation();
-//    void addCategory();
     void selectTest();
 
     void saveFile();
-    QSqlError loadFile();
+    QSqlError loadFile(const QString& account_file = "");
 
     void showCategories();
 
@@ -67,9 +68,10 @@ private:
 
     QLocale _locale;
     QString _title;
+    QString _filepath;
 
-//    QSplitter * splitter;
-    QGridLayout *accLayout;
+    QSplitter * splitter;
+//    QGridLayout *accLayout;
 
     QSqlRelationalTableModel *model;
     QSqlTableModel *cats_model;

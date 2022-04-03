@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "welcomedialog.h"
 
 #include <QApplication>
 #include <QLocale>
@@ -8,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QCoreApplication::setOrganizationName("Sopie Personal Projects");
+    QCoreApplication::setOrganizationName("SopiePersonalProjects");
     QCoreApplication::setApplicationName("MoulagApp");
     QCoreApplication::setApplicationVersion("0.0.0");
 
@@ -24,5 +25,6 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+    w.showWelcomeDialog();
     return a.exec();
 }
