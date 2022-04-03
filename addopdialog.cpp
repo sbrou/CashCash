@@ -16,11 +16,9 @@ void AddOpDialog::init(QSqlTableModel * cats, QSqlTableModel * tags)
 
     ui->qcbCat->setModel(cats);
     ui->qcbCat->setModelColumn(1);
-//    ui->qcbCat->model()->sort(1, Qt::AscendingOrder);
 
     ui->qcbTag->setModel(tags);
     ui->qcbTag->setModelColumn(1);
-//    ui->qcbTag->model()->sort(1, Qt::AscendingOrder);
 }
 
 AddOpDialog::AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent) :

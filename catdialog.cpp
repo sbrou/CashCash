@@ -24,7 +24,7 @@ CatDialog::CatDialog()
     inputLayout->addWidget(qleColor, 1, 1);
 
     qpbColor = new QPushButton(tr("Choose..."));
-    connect(qpbColor, SIGNAL(clicked()), this, SLOT(set_color()));
+    connect(qpbColor, SIGNAL(clicked()), this, SLOT(setColor()));
     inputLayout->addWidget(qpbColor, 1, 2);
 
     qgbType = new QGroupBox;
@@ -52,7 +52,7 @@ CatDialog::CatDialog()
     mainLayout->addWidget(buttonBox);
 }
 
-void CatDialog::set_color()
+void CatDialog::setColor()
 {
     const QColorDialog::ColorDialogOptions options = QFlag(QColorDialog::DontUseNativeDialog);
     const QColor color = QColorDialog::getColor(Qt::green, this, tr("Select Color"), options);
@@ -83,22 +83,4 @@ int CatDialog::type()
     {
         return 1;
     }
-}
-
-void CatDialog::setName(const QString& name)
-{
-    qleName->setText(name);
-}
-
-void CatDialog::setColor(const QString& color)
-{
-    qleColor->setText(color);
-}
-
-void CatDialog::setType(int type)
-{
-    if (type)
-        earnings->setChecked(true);
-    else
-        expenses->setChecked(true);
 }
