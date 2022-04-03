@@ -237,24 +237,6 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-//void Account::addCategory()
-//{
-//    addCatDialog acDiag;
-//    acDiag.setWindowTitle(tr("Ajouter une catégorie"));
-
-//    if (acDiag.exec())
-//    {
-//        model->database().transaction();
-
-//        QSqlQuery q;
-//        if (!q.prepare(INSERT_CATEGORY_SQL))
-//            qDebug() << q.lastError();
-
-//        addCategoryInDB(q, acDiag.title(), QLatin1String("CA6F1E"));
-//        model->database().commit();
-//    }
-//}
-
 void Account::setStandardCategories()
 {
 

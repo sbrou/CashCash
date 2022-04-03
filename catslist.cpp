@@ -21,7 +21,7 @@ CatsList::CatsList(QSqlTableModel * mod, QWidget *parent)
     while (q.next())
         catsView->addItem(q.value(1).toString());
 
-    catsView->setSortingEnabled(true);
+//    catsView->setSortingEnabled(true);
     catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mainLayout->addWidget(catsView, 0, 0, 5, 3);
 
@@ -83,19 +83,32 @@ void CatsList::addNewCategory()
 void CatsList::editCategory()
 {
     qDebug() << "current row is : " << catsView->currentRow();
+    int row = catsView->currentRow();
     // pour l'instant, l'index de la currentRow correspond à l'id de la categorie dans la database
     // mais ça va causer des problemes le jour ou je voudrai sort les combobox ou la qListWidget par ordre
     // alphabetique
 
-    QSqlRecord current_record = model->record(catsView->currentRow());
+    QSqlRecord current_record = model->record(row);
     CatDialog diag;
     diag.setFields(current_record);
     if (diag.exec())
-        emit commit();
+    {
+        catsView->currentItem()->setText(diag.name());
+        current_record.setValue(1, QVariant(diag.name()));
+        current_record.setValue(2, QVariant(diag.color()));
+        current_record.setValue(3, QVariant(diag.type()));
+        if (model->setRecord(row, current_record))
+        {
+            model->submitAll();
+            emit commit();
+
+        }
+    }
 }
 
 void CatsList::removeCategories()
 {
+    // Reflechir a comment gerer les operations a qui sont assignees ces categories
     QItemSelectionModel *selectionModel = catsView->selectionModel();
     QModelIndexList indexes = selectionModel->selectedRows();
     QModelIndex index;
@@ -103,5 +116,7 @@ void CatsList::removeCategories()
     foreach (index, indexes) {
         int row = index.row();
         qDebug() << row;
+        model->removeRow(row);
     }
+    emit commit();
 }
