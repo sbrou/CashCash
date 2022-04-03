@@ -2,6 +2,7 @@
 
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
 #include "catdialog.h"
 
 CatsList::CatsList(QSqlTableModel * mod, QWidget *parent)
@@ -53,13 +54,28 @@ void CatsList::addNewCategory()
     {
         catsView->addItem(diag.name());
 
-        int row = 0;
-        model->insertRows(row, 1);
-        model->setData(model->index(row, 0), catsView->count());
-        model->setData(model->index(row, 1), diag.name());
-        model->setData(model->index(row, 2), diag.color());
-        model->setData(model->index(row, 3), diag.type());
-        emit commit();
+//        qDebug() << model->rowCount();
+
+        QSqlRecord new_record = model->record();
+//        qDebug() << new_record;
+
+        new_record.setGenerated(0, false);
+        new_record.setValue(1, QVariant(diag.name()));
+        new_record.setValue(2, QVariant(diag.color()));
+        new_record.setValue(3, QVariant(diag.type()));
+
+        if (model->insertRecord(-1, new_record))
+        {
+            model->submitAll();
+            emit commit();
+        }
+
+//        for (int i=0; i<6; ++i)
+//        {
+//            qDebug() <<  model->record(i);
+
+//        }
+//        qDebug() << model->rowCount();
     }
     qDebug() << "end";
 }

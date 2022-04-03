@@ -196,18 +196,25 @@ void Account::addOperation()
     AddOpDialog aoDiag(cats_model, tags_model);
     aoDiag.setWindowTitle(tr("Add an operation"));
     aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
-
+    qDebug() << model->rowCount();
     if (aoDiag.exec()) {
-        ++_nbOperations;
-        int row = 0;
-        model->insertRows(row, 1);
-        model->setData(model->index(row, 0), _nbOperations);
-        model->setData(model->index(row, 1), aoDiag.date());
-        model->setData(model->index(row, 2), aoDiag.category());
-        model->setData(model->index(row, 3), aoDiag.amount());
-        model->setData(model->index(row, 4), aoDiag.tag());
-        model->setData(model->index(row, 5), aoDiag.description());
-        commitOnDatabase();
+
+        QSqlRecord new_record = model->record();
+        new_record.setValue(1, QVariant(aoDiag.date()));
+        new_record.setValue(2, QVariant(aoDiag.category()));
+        new_record.setValue(3, QVariant(aoDiag.amount()));
+        new_record.setValue(4, QVariant(aoDiag.tag()));
+        new_record.setValue(5, QVariant(aoDiag.description()));
+        if (aoDiag.amount() < 0)
+            new_record.setValue(6, QVariant(0));
+        else
+            new_record.setValue(6, QVariant(1));
+
+        if (model->insertRecord(-1, new_record))
+        {
+            commitOnDatabase();
+        }
+        qDebug() << model->rowCount();
     }
 }
 
