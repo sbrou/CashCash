@@ -83,6 +83,15 @@ void CatsList::addNewCategory()
 void CatsList::editCategory()
 {
     qDebug() << "current row is : " << catsView->currentRow();
+    // pour l'instant, l'index de la currentRow correspond à l'id de la categorie dans la database
+    // mais ça va causer des problemes le jour ou je voudrai sort les combobox ou la qListWidget par ordre
+    // alphabetique
+
+    QSqlRecord current_record = model->record(catsView->currentRow());
+    CatDialog diag;
+    diag.setFields(current_record);
+    if (diag.exec())
+        emit commit();
 }
 
 void CatsList::removeCategories()

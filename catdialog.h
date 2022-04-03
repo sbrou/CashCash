@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QDialogButtonBox>
+#include <QSqlRecord>
 
 class CatDialog : public QDialog
 {
@@ -20,8 +21,10 @@ public:
     QString color();
     int type();
 
+    void setFields(QSqlRecord record);
+
 private slots:
-    void setColor();
+    void choose_color();
 
 private:
     QVBoxLayout *mainLayout;
