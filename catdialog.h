@@ -34,7 +34,8 @@ private:
     QLineEdit *qleName;
 
     QLabel *qlColor;
-    QLineEdit *qleColor;
+    QColor cat_color;
+    QPixmap *pixmap;
     QPushButton *qpbColor;
 
     QGroupBox *qgbType;

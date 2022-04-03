@@ -18,14 +18,11 @@ CatDialog::CatDialog()
     qlColor = new QLabel(tr("&Color:"));
     inputLayout->addWidget(qlColor, 1, 0);
 
-    qleColor = new QLineEdit;
-    qlColor->setBuddy(qleColor);
-    qleColor->setReadOnly(true);
-    inputLayout->addWidget(qleColor, 1, 1);
-
+    pixmap = new QPixmap(16,16);
     qpbColor = new QPushButton(tr("Choose..."));
+    qlColor->setBuddy(qpbColor);
     connect(qpbColor, SIGNAL(clicked()), this, SLOT(choose_color()));
-    inputLayout->addWidget(qpbColor, 1, 2);
+    inputLayout->addWidget(qpbColor, 1, 1);
 
     qgbType = new QGroupBox;
     expenses = new QRadioButton(tr("&Expenses"));
@@ -55,10 +52,12 @@ CatDialog::CatDialog()
 void CatDialog::choose_color()
 {
     const QColorDialog::ColorDialogOptions options = QFlag(QColorDialog::DontUseNativeDialog);
-    const QColor color = QColorDialog::getColor(Qt::green, this, tr("Select Color"), options);
+    const QColor color = QColorDialog::getColor(cat_color, this, tr("Select Color"), options);
 
     if (color.isValid()) {
-        qleColor->setText(color.name());
+        cat_color = color;
+        pixmap->fill(color);
+        qpbColor->setIcon(QIcon(*pixmap));
     }
 }
 
@@ -69,7 +68,7 @@ QString CatDialog::name()
 
 QString CatDialog::color()
 {
-    return qleColor->text();
+    return cat_color.name();
 }
 
 int CatDialog::type()
@@ -88,7 +87,9 @@ int CatDialog::type()
 void CatDialog::setFields(QSqlRecord rec)
 {
     qleName->setText(rec.value(1).toString());
-    qleColor->setText(rec.value(2).toString());
+    cat_color = QColor(rec.value(2).toString());
+    pixmap->fill(cat_color);
+    qpbColor->setIcon(QIcon(*pixmap));
     if (!rec.value(3).toInt())
         expenses->setChecked(true);
     else
