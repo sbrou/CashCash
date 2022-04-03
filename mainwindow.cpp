@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    createStatusBar();
 
     connect(_account, &Account::accountReady, this, &MainWindow::enableAccountActions);
+    connect(this, SIGNAL(newFileToCreate()), _account, SLOT(createFile()));
     connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
 }
 
@@ -199,6 +200,7 @@ void MainWindow::showWelcomeDialog()
     switch (r)
     {
     case 1:
+        emit newFileToCreate();
         break;
 
     case 2:
@@ -206,6 +208,9 @@ void MainWindow::showWelcomeDialog()
         break;
 
     case 3:
+        emit fileToLoad(QFileDialog::getOpenFileName(this, tr("Open File"),
+                                     "D:/sopie/Documents",
+                                     tr("BSX files (*.bsx)")));
         break;
     }
 }

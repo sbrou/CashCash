@@ -89,8 +89,8 @@ void CatDialog::setFields(QSqlRecord rec)
 {
     qleName->setText(rec.value(1).toString());
     qleColor->setText(rec.value(2).toString());
-    if (rec.value(3).toInt())
-        earnings->setChecked(true);
-    else
+    if (!rec.value(3).toInt())
         expenses->setChecked(true);
+    else
+        earnings->setChecked(true);
 }

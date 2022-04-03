@@ -429,6 +429,24 @@ void Account::readSettings()
     restoreState(settings.value("mainSplitterSizes").toByteArray());
 }
 
+QSqlError Account::createFile()
+{
+    QSqlQuery q;
+    q.exec("TRUNCATE TABLE categories");
+    if (!q.prepare(INSERT_CATEGORY_SQL))
+        return q.lastError();
+
+    addCategoryInDB(q, tr("-NONE-"), "#ffffff" , -1);
+
+    if (!q.prepare(INSERT_TAG_SQL))
+        return q.lastError();
+
+    addTagInDB(q, tr("-NONE-"), "#ffffff" , -1);
+
+    initAccount();
+    return QSqlError();
+}
+
 QSqlError Account::loadFile(const QString& filename)
 {
     QSqlError err;

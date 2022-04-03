@@ -20,6 +20,7 @@ public:
     void showWelcomeDialog();
 
 signals:
+    void newFileToCreate();
     void fileToLoad(const QString& account_file);
 
 private slots:
