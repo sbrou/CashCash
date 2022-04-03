@@ -35,6 +35,7 @@ signals:
     void selectionChanged(const QItemSelection& );
 
 public slots:
+    void initAccount();
     void importFile();
     void addOperation();
     void editOperation();
@@ -43,7 +44,6 @@ public slots:
 
     void saveFile();
     QSqlError loadFile(const QString& account_file = "");
-    QSqlError createFile();
 
     void showCategories();
 
@@ -63,7 +63,6 @@ private slots:
 private:
     // Methodes
     void showError(const QSqlError &err);
-    void initAccount();
 
     // Attributs
 

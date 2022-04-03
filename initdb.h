@@ -84,7 +84,15 @@ QSqlError initDb()
     if (!q.exec(TAGS_SQL))
         return q.lastError();
 
-//    manualInit(q);
+    if (!q.prepare(INSERT_CATEGORY_SQL))
+        return q.lastError();
+
+    addCategoryInDB(q, "-NONE-", "#ffffff" , -1);
+
+    if (!q.prepare(INSERT_TAG_SQL))
+        return q.lastError();
+
+    addTagInDB(q, "-NONE-", "#ffffff" , -1);
 
     return QSqlError();
 }
