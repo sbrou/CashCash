@@ -1,6 +1,6 @@
 QT       += core gui charts sql
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets core
 
 CONFIG += c++11
 
@@ -14,8 +14,7 @@ SOURCES += \
     catdialog.cpp \
     catslist.cpp \
     chartsview.cpp \
-    drilldownchart.cpp \
-    drilldownslice.cpp \
+    customslice.cpp \
     filtersdialog.cpp \
     goalsview.cpp \
     main.cpp \
@@ -29,8 +28,7 @@ HEADERS += \
     catdialog.h \
     catslist.h \
     chartsview.h \
-    drilldownchart.h \
-    drilldownslice.h \
+    customslice.h \
     filtersdialog.h \
     goalsview.h \
     initdb.h \

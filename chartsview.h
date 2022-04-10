@@ -5,9 +5,10 @@
 #include <QHBoxLayout>
 #include <QChartView>
 #include <QSqlRelationalTableModel>
+#include <QPushButton>
+#include <QPieSlice>
 
-#include "drilldownchart.h"
-#include "drilldownslice.h"
+#include "customslice.h"
 
 class ChartsView : public QWidget
 {
@@ -17,13 +18,21 @@ public:
 
 public slots:
     void updatePie();
+    void updateChart(const QSqlRecord &);
 
 private:
     QHBoxLayout *mainLayout;
-    DrilldownChart *pie;
+    QChart *chart;
     QChartView *chartView;
 
     QSqlRelationalTableModel *model;
+
+    QPieSeries *tags_series;
+    QMap<int, QPieSlice*> tags_slices;
+
+    QPieSeries *cats_series;
+    QMap<int, QPieSlice *> cats_slices;
+
 
 signals:
 

@@ -18,12 +18,12 @@ Account::Account(QString title, QWidget *parent)
     : QSplitter{parent}
     , _locale(QLocale::German)
     , _title(title)
-    , _nbOperations(0)
     , _filepath("")
+    , _nbOperations(0)
 {
     setOrientation(Qt::Vertical);
     splitter = new QSplitter(Qt::Horizontal, this);
-
+    qDebug() << splitter->sizes();
 //    accLayout = new QGridLayout(this);
 
 
@@ -117,6 +117,7 @@ void Account::initAccount()
     splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
+    connect(this, SIGNAL(operationsChanged(QSqlRecord)), chartView, SLOT(updateChart(QSqlRecord)));
 //    accLayout->addWidget(chartView, 0, 1);
     splitter->addWidget(chartView);
 
@@ -215,7 +216,9 @@ void Account::addOperation()
 
         if (model->insertRecord(-1, new_record))
         {
-            commitOnDatabase();
+            if (commitOnDatabase())
+                emit operationsChanged(new_record);
+
         }
         qDebug() << model->rowCount();
     }
@@ -416,6 +419,7 @@ void Account::saveFile()
 
 void Account::saveSettings()
 {
+    qDebug() << splitter->sizes();
     QSettings settings;
     settings.setValue("subSplitterSizes", splitter->saveState());
     settings.setValue("mainSplitterSizes", saveState());

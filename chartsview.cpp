@@ -2,6 +2,7 @@
 
 #include <QPieSeries>
 #include <QSqlQuery>
+#include <QSqlRecord>
 
 ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}
@@ -9,15 +10,54 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
 {
     mainLayout = new QHBoxLayout(this);
 
-    pie = new DrilldownChart();
-//    pie->setTheme(QChart::ChartThemeLight);
-    pie->setAnimationOptions(QChart::AllAnimations);
-    pie->legend()->setVisible(true);
-    pie->legend()->setAlignment(Qt::AlignRight);
+    chart = new QChart;
+    chart->setAnimationOptions(QChart::AllAnimations);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignRight);
 
-    updatePie();
+    tags_series = new QPieSeries(this);
+    tags_series->setName("Tags");
 
-    chartView = new QChartView(pie);
+    cats_series = new QPieSeries(this);
+    cats_series->setName("Categories");
+
+    model->select();
+
+    QSqlQuery q;
+    q.exec("SELECT * FROM tags WHERE type=0");
+    while (q.next()) {
+        int id = q.value(0).toInt();
+        QString name = q.value(1).toString();
+        QString color = q.value(2).toString();
+
+        QSqlQuery query;
+        query.exec(QString("SELECT SUM (amount) FROM operations WHERE tag=%1").arg(id));
+        while (query.next()) {
+            CustomSlice *slice = new CustomSlice(query.value(0).toDouble(), name, QColor(color));
+            *tags_series << slice;
+            tags_slices.insert(id, slice);
+        }
+    }
+
+    q.exec("SELECT * FROM categories WHERE type=0");
+    while (q.next()) {
+        int id = q.value(0).toInt();
+        QString name = q.value(1).toString();
+        QString color = q.value(2).toString();
+
+        QSqlQuery query;
+        query.exec(QString("SELECT SUM (amount) FROM operations WHERE category=%1").arg(id));
+        while (query.next()) {
+            qDebug() << query.value(0).toDouble();
+            CustomSlice *slice = new CustomSlice(query.value(0).toDouble(), name, QColor(color));
+            *cats_series << slice;
+            cats_slices.insert(id, slice);
+        }
+    }
+
+    chart->addSeries(cats_series);
+
+    chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
     mainLayout->addWidget(chartView);
@@ -25,67 +65,49 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
 
 void ChartsView::updatePie()
 {
-    QPieSeries *tagsSeries = new QPieSeries(this);
-    tagsSeries->setName("Tags");
+
+}
 
 
-    model->select();
-//    QSqlQuery qu("SELECT * FROM operations WHERE category=1");
-//    while (qu.next()) {
-//        qDebug() << "tag : " << qu.value(0);
-//        qDebug() << "      " << qu.value(1);
-//        qDebug() << "      " << qu.value(2);
-//        qDebug() << "      " << qu.value(3);
-//        qDebug() << "      " << qu.value(4);
-//        qDebug() << "      " << qu.value(5);
-//    }
+void ChartsView::updateChart(const QSqlRecord & record)
+{
+    int cat = record.value(2).toInt();
+    int tag = record.value(4).toInt();
+    double amount = record.value(3).toDouble();
 
-    QMap<int,QString> map_tags;
-    QMap<int,QColor> tags_colors;
-    QSqlQuery q("SELECT * FROM tags WHERE type=0");
-    while (q.next()) {
-//        qDebug() << "tag : " << q.value(0);
-//        qDebug() << "tag : " << q.value(1);
-//        qDebug() << "tag : " << q.value(2);
-//        qDebug() << "tag : " << q.value(3);
-        map_tags.insert(q.value(0).toInt(), q.value(1).toString());
-        QString color = QString("#%1").arg(q.value(2).toString());
-//        qDebug() << color << QColor(color);
-        tags_colors.insert(q.value(0).toInt(), QColor(q.value(2).toString()));
-    }
-
-    QMap<int,QString> map_cats;
-    QMap<int,QColor> cats_colors;
-    q.exec("SELECT * FROM categories WHERE type=0");
-    while (q.next()) {
-        //        qDebug() << "cat : " << q.value(0);
-        //        qDebug() << "cat " << q.value(1);
-        map_cats.insert(q.value(0).toInt(), q.value(1).toString());
-        QString color = QString("#%1").arg(q.value(2).toString());
-        //        qDebug() << color << QColor(color);
-        cats_colors.insert(q.value(0).toInt(), QColor(q.value(2).toString()));
-    }
-
-    for (QMap<int,QString>::const_iterator tag = map_tags.constBegin(); tag != map_tags.constEnd(); ++tag)
+    // tag
+    QMap<int, QPieSlice*>::iterator it_tag = tags_slices.find(tag);
+    if ( it_tag != tags_slices.end())
     {
-        QPieSeries *series = new QPieSeries(this);
-        series->setName("Categories in " + tag.value());
-
-        q.exec(QString("SELECT category, SUM (amount) FROM operations WHERE (tag=%1 AND type=0) GROUP BY category").arg(tag.key()));
-//        qDebug() << "BOUCLE : " << tag.key() << " : " << tag.value();
+        CustomSlice * slice = static_cast<CustomSlice *>(it_tag.value());
+        slice->updateValue(amount);
+    }
+    else
+    {
+        QSqlQuery q;
+        q.exec(QString("SELECT * FROM tags WHERE id=%1").arg(tag));
         while (q.next()) {
-//            qDebug() << q.value(0);
-//            qDebug() << q.value(1);
-            int id = q.value(0).toInt();
-            *series << new DrilldownSlice(q.value(1).toDouble(), map_cats[id], cats_colors[id], tagsSeries);
+            CustomSlice *slice = new CustomSlice(amount, q.value(1).toString(), QColor(q.value(2).toString()));
+            *tags_series << slice;
+            tags_slices.insert(tag, slice);
         }
-
-        QObject::connect(series, &QPieSeries::clicked, pie, &DrilldownChart::handleSliceClicked);
-
-        *tagsSeries << new DrilldownSlice(series->sum(), tag.value(), cats_colors[tag.key()], series);
     }
 
-    QObject::connect(tagsSeries, &QPieSeries::clicked, pie, &DrilldownChart::handleSliceClicked);
-
-    pie->changeSeries(tagsSeries);
+    // category
+    QMap<int, QPieSlice*>::iterator it_cat = cats_slices.find(cat);
+    if ( it_cat != cats_slices.end())
+    {
+        CustomSlice * slice = static_cast<CustomSlice *>(it_cat.value());
+        slice->updateValue(amount);
+    }
+    else
+    {
+        QSqlQuery q;
+        q.exec(QString("SELECT * FROM categories WHERE id=%1").arg(cat));
+        while (q.next()) {
+            CustomSlice *slice = new CustomSlice(amount, q.value(1).toString(), QColor(q.value(2).toString()));
+            *cats_series << slice;
+            cats_slices.insert(cat, slice);
+        }
+    }
 }

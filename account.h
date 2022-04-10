@@ -12,8 +12,7 @@
 #include <QSplitter>
 
 #include "operationsview.h"
-#include "drilldownchart.h"
-#include "drilldownslice.h"
+#include "customslice.h"
 #include "chartsview.h"
 #include "goalsview.h"
 #include "catslist.h"
@@ -33,6 +32,7 @@ public:
 signals:
     void accountReady();
     void selectionChanged(const QItemSelection& );
+    void operationsChanged(const QSqlRecord &);
 
 public slots:
     void initAccount();

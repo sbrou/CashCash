@@ -118,6 +118,11 @@ void MainWindow::createActions()
     goalAct->setEnabled(false);
     fileToolBar->addAction(goalAct);
 
+    statsAct = new QAction(QIcon(":/images/images/graph_48px.png"), tr("&Show stats"), this);
+    statsAct->setStatusTip(tr("Show statistics"));
+    statsAct->setEnabled(false);
+    fileToolBar->addAction(statsAct);
+
 
     connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));
 
@@ -174,6 +179,7 @@ void MainWindow::enableAccountActions()
     catAct->setEnabled(true);
     tagAct->setEnabled(true);
     goalAct->setEnabled(true);
+    statsAct->setEnabled(true);
 }
 
 void MainWindow::updateAccountActions(const QItemSelection& selected)
