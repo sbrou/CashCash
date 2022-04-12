@@ -46,6 +46,7 @@ public slots:
     QSqlError loadFile(const QString& account_file = "");
 
     void showCategories();
+    void showTags();
 
 private slots:
     void activateDateFilter(bool on);
@@ -84,6 +85,7 @@ private:
     GoalsView *goalsView;
 
     CatsList *catsWidget;
+    TagsList *tagsWidget;
 
     //////////////////////////////////////////////
 

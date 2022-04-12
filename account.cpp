@@ -3,13 +3,13 @@
 
 #include <QFileDialog>
 #include <QPushButton>
+#include <QDomDocument>
 #include <QDebug>
 
 #include <QPieSeries>
 
 #include <addopdialog.h>
 
-#include "filtersdialog.h"
 #include "catslist.h"
 
 #include "initdb.h"
@@ -21,8 +21,9 @@ Account::Account(QString title, QWidget *parent)
     , _filepath("")
     , _nbOperations(0)
 {
-    setOrientation(Qt::Vertical);
+    setOrientation(Qt::Vertical);  
     splitter = new QSplitter(Qt::Horizontal, this);
+
     qDebug() << splitter->sizes();
 //    accLayout = new QGridLayout(this);
 
@@ -130,6 +131,9 @@ void Account::initAccount()
     catsWidget = new CatsList(cats_model, this);
     connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
+    tagsWidget = new TagsList(tags_model, this);
+    connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
+
     emit accountReady();
 }
 
@@ -169,16 +173,57 @@ void Account::initTabFilters()
 
 void Account::importFile()
 {
-    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer fichier"), QDir::home().dirName(), tr("csv files (*.csv)"));
+    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(), tr("ofx files (*.ofx)"));
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-//        process_line(line);
+    QDomDocument doc;
+    if (!doc.setContent(&file)) {
+        file.close();
+        return;
     }
+    file.close();
+
+    QDomNodeList ops_node = doc.elementsByTagName("BANKTRANLIST");
+    if (!ops_node.isEmpty())
+    {
+        QDomElement ops_elt = ops_node.at(0).toElement();
+        QDomNodeList ops_list = ops_elt.elementsByTagName("STMTTRN");
+        if (!ops_list.isEmpty())
+        {
+            QSqlQuery q;
+            if (!q.prepare(INSERT_OPERATION_SQL))
+            {
+                qDebug() << q.lastError();
+                return;
+            }
+
+            for (int i = 0; i < ops_list.count(); ++i)
+            {
+                QDomElement op = ops_list.at(i).toElement();
+
+                QDomElement date_elt = op.elementsByTagName("DTPOSTED").at(0).toElement();
+                QDate date = QDate::fromString(date_elt.text(),"yyyMMdd");
+
+                QDomElement amt_elt = op.elementsByTagName("TRNAMT").at(0).toElement();
+                double amount = amt_elt.text().toDouble();
+
+                QDomNodeList des_node = op.elementsByTagName("NAME");
+                QString description;
+                if (!des_node.isEmpty())
+                    description = des_node.at(0).toElement().text();
+                else
+                    description = op.elementsByTagName("PAYEE").at(0).toElement().text();
+
+                qDebug() << date << amount << description;
+                addOperationInDB(q, date, 1, amount, 1, description, (amount>0));
+
+            }
+        }
+    }
+//    model->select();
+    commitOnDatabase();
 }
 
 void Account::editOperation()
@@ -195,8 +240,6 @@ void Account::editOperation()
 
 void Account::addOperation()
 {
-//    filtersDialog filter;
-//    filter.exec();
     AddOpDialog aoDiag(cats_model, tags_model);
     aoDiag.setWindowTitle(tr("Add an operation"));
     aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
@@ -575,6 +618,9 @@ QSqlError Account::readOperations(const QJsonArray &opsArray)
 void Account::showCategories()
 {
     catsWidget->show();
-//    commitOnDatabase();
-    qDebug() << "here";
+}
+
+void Account::showTags()
+{
+    tagsWidget->show();
 }

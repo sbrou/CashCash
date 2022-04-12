@@ -5,7 +5,10 @@
 
 OperationsView::OperationsView()
 {
-    mainLayout = new QHBoxLayout(this);
+    mainLayout = new QVBoxLayout(this);
+
+    filters = new filtersWidget(this);
+    mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
 }

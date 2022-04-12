@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QTableView>
 #include <QSqlRelationalTableModel>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
+
+#include "filterswidget.h"
 
 class OperationsView : public QWidget
 {
@@ -19,10 +21,12 @@ private:
 
 
     // Attributs
-    QHBoxLayout *mainLayout;
+    QVBoxLayout *mainLayout;
     QTableView *opsTable;
 
     QSqlRelationalTableModel * model;
+
+    filtersWidget *filters;
 };
 
 #endif // OPERATIONSVIEW_H

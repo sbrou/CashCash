@@ -5,19 +5,26 @@
 #include <QSqlRecord>
 #include "catdialog.h"
 
-CatsList::CatsList(QSqlTableModel * mod, QWidget *parent)
+GroupList::GroupList(Type type, QSqlTableModel * mod, QWidget *parent)
     : QDialog{parent}
     , model(mod)
 {
-    setWindowIcon(QIcon(":/images/images/category_48px.png"));
-    setWindowTitle(tr("Gérer les catégories"));
-
     mainLayout = new QGridLayout(this);
 
     catsView = new QListWidget(this);
+    qpbAddNew = new QPushButton(this);
+    qpbEdit = new QPushButton(this);
+    qpbRemove = new QPushButton(this);
+
+    qpbAddNew->setIcon(QIcon(":/images/images/add_48px.png"));
+    qpbEdit->setIcon(QIcon(":/images/images/edit_48px.png"));
+    qpbRemove->setIcon(QIcon(":/images/images/Remove_48px.png"));
 
     QSqlQuery q;
-    q.exec("SELECT * from categories");
+    if (type == CAT)
+        q.exec("SELECT * from categories");
+    else
+        q.exec("SELECT * from tags");
     while (q.next())
         catsView->addItem(q.value(1).toString());
 
@@ -25,20 +32,17 @@ CatsList::CatsList(QSqlTableModel * mod, QWidget *parent)
     catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mainLayout->addWidget(catsView, 0, 0, 5, 3);
 
-    qpbAddNew = new QPushButton(QIcon(":/images/images/add_48px.png"),tr("New Category"),this);
-    connect(qpbAddNew, SIGNAL(clicked()), this, SLOT(addNewCategory()));
+    connect(qpbAddNew, SIGNAL(clicked()), this, SLOT(add()));
     mainLayout->addWidget(qpbAddNew, 0, 3);
 
-    qpbEdit = new QPushButton(QIcon(":/images/images/edit_48px.png"),tr("Edit Category"),this);
-    connect(qpbEdit, SIGNAL(clicked()), this, SLOT(editCategory()));
+    connect(qpbEdit, SIGNAL(clicked()), this, SLOT(edit()));
     mainLayout->addWidget(qpbEdit, 1, 3);
 
-    qpbRemove = new QPushButton(QIcon(":/images/images/Remove_48px.png"),tr("Remove Category"),this);
-    connect(qpbRemove, SIGNAL(clicked()), this, SLOT(removeCategories()));
+    connect(qpbRemove, SIGNAL(clicked()), this, SLOT(remove()));
     mainLayout->addWidget(qpbRemove, 2, 3);
 }
 
-CatsList::~CatsList()
+GroupList::~GroupList()
 {
     catsView->deleteLater();
     qpbAddNew->deleteLater();
@@ -46,7 +50,7 @@ CatsList::~CatsList()
     qpbRemove->deleteLater();
 }
 
-void CatsList::addNewCategory()
+void GroupList::add()
 {
     qDebug() << "new category";
     CatDialog diag;
@@ -80,7 +84,7 @@ void CatsList::addNewCategory()
     qDebug() << "end";
 }
 
-void CatsList::editCategory()
+void GroupList::edit()
 {
     qDebug() << "current row is : " << catsView->currentRow();
     int row = catsView->currentRow();
@@ -106,7 +110,7 @@ void CatsList::editCategory()
     }
 }
 
-void CatsList::removeCategories()
+void GroupList::remove()
 {
     // Reflechir a comment gerer les operations a qui sont assignees ces categories
     QItemSelectionModel *selectionModel = catsView->selectionModel();
@@ -120,3 +124,30 @@ void CatsList::removeCategories()
     }
     emit commit();
 }
+
+///// CatsList
+
+CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(Type::CAT, mod, parent)
+{
+    setWindowIcon(QIcon(":/images/images/category_48px.png"));
+    setWindowTitle(tr("Manage categories"));
+
+    qpbAddNew->setText(tr("New Category"));
+    qpbEdit->setText(tr("Edit Category"));
+    qpbRemove->setText(tr("Remove Category"));
+}
+
+///// TagsList
+
+TagsList::TagsList(QSqlTableModel * mod, QWidget *parent) : GroupList(Type::TAG, mod, parent)
+{
+    setWindowIcon(QIcon(":/images/images/tag_window_48px.png"));
+    setWindowTitle(tr("Manage tags"));
+
+    qpbAddNew->setText(tr("New Tag"));
+    qpbEdit->setText(tr("Edit Tag"));
+    qpbRemove->setText(tr("Remove Tag"));
+}
+
+
+

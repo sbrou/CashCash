@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
         }
     }
 
+    a.setStyleSheet("QDateEdit::drop-down {  image: url(:/images/images/calendar_48px.png);  }");
+
     MainWindow w;
     w.show();
     w.showWelcomeDialog();

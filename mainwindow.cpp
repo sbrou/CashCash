@@ -94,11 +94,11 @@ void MainWindow::createActions()
     fileToolBar->addAction(editOpAct);
     connect(editOpAct, SIGNAL(triggered()), _account, SLOT(editOperation()));
 
-    importOpAct = new QAction(QIcon(":/images/images/import_csv_48px.png"), tr("&Import operations"), this);
-    importOpAct->setStatusTip(tr("Import operations from a csv file"));
+    importOpAct = new QAction(QIcon(":/images/images/load_from_file_48px.png"), tr("&Import operations"), this);
+    importOpAct->setStatusTip(tr("Import operations from a ofx file"));
     importOpAct->setEnabled(false);
     fileToolBar->addAction(importOpAct);
-//    connect(importOpAct, SIGNAL(triggered()), this, SLOT(importFile()));
+    connect(importOpAct, SIGNAL(triggered()), _account, SLOT(importFile()));
 
     fileToolBar->addSeparator();
 
@@ -112,6 +112,7 @@ void MainWindow::createActions()
     tagAct->setStatusTip(tr("Create, edit or delete tags"));
     tagAct->setEnabled(false);
     fileToolBar->addAction(tagAct);
+    connect(tagAct, SIGNAL(triggered()), _account, SLOT(showTags()));
 
     goalAct = new QAction(QIcon(":/images/images/goal_48px.png"), tr("&Manage goals"), this);
     goalAct->setStatusTip(tr("Create, edit or delete budget goals"));

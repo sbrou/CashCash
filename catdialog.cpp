@@ -3,9 +3,8 @@
 #include <QColorDialog>
 #include <QRadioButton>
 
-CatDialog::CatDialog()
+GroupDialog::GroupDialog()
 {
-    setWindowIcon(QIcon(":/images/images/category_48px.png"));
     inputLayout = new QGridLayout;
 
     qlName = new QLabel(tr("&Name:"));
@@ -49,7 +48,26 @@ CatDialog::CatDialog()
     mainLayout->addWidget(buttonBox);
 }
 
-void CatDialog::choose_color()
+GroupDialog::~GroupDialog()
+{
+    mainLayout->deleteLater();
+    inputLayout->deleteLater();
+
+    qlName->deleteLater();
+    qleName->deleteLater();
+
+    qlColor->deleteLater();
+
+    qpbColor->deleteLater();
+
+    qgbType->deleteLater();
+    expenses->deleteLater();
+    earnings->deleteLater();
+
+    buttonBox->deleteLater();
+}
+
+void GroupDialog::choose_color()
 {
     const QColorDialog::ColorDialogOptions options = QFlag(QColorDialog::DontUseNativeDialog);
     const QColor color = QColorDialog::getColor(cat_color, this, tr("Select Color"), options);
@@ -61,17 +79,17 @@ void CatDialog::choose_color()
     }
 }
 
-QString CatDialog::name()
+QString GroupDialog::name()
 {
     return qleName->text();
 }
 
-QString CatDialog::color()
+QString GroupDialog::color()
 {
     return cat_color.name();
 }
 
-int CatDialog::type()
+int GroupDialog::type()
 {
     if (expenses->isChecked())
     {
@@ -84,7 +102,7 @@ int CatDialog::type()
     }
 }
 
-void CatDialog::setFields(QSqlRecord rec)
+void GroupDialog::setFields(QSqlRecord rec)
 {
     qleName->setText(rec.value(1).toString());
     cat_color = QColor(rec.value(2).toString());
@@ -94,4 +112,20 @@ void CatDialog::setFields(QSqlRecord rec)
         expenses->setChecked(true);
     else
         earnings->setChecked(true);
+}
+
+///// CatDialog
+
+CatDialog::CatDialog() : GroupDialog()
+{
+    setWindowIcon(QIcon(":/images/images/category_48px.png"));
+    setWindowTitle(tr("Category"));
+}
+
+///// TagDialog
+
+TagDialog::TagDialog() : GroupDialog()
+{
+    setWindowIcon(QIcon(":/images/images/tag_window_48px.png"));
+    setWindowTitle(tr("Tag"));
 }

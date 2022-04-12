@@ -1,4 +1,4 @@
-QT       += core gui charts sql
+QT       += core gui charts sql xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets core
 
@@ -15,7 +15,7 @@ SOURCES += \
     catslist.cpp \
     chartsview.cpp \
     customslice.cpp \
-    filtersdialog.cpp \
+    filterswidget.cpp \
     goalsview.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -29,7 +29,7 @@ HEADERS += \
     catslist.h \
     chartsview.h \
     customslice.h \
-    filtersdialog.h \
+    filterswidget.h \
     goalsview.h \
     initdb.h \
     mainwindow.h \
@@ -38,7 +38,6 @@ HEADERS += \
 
 FORMS += \
     addopdialog.ui \
-    filtersdialog.ui \
     mainwindow.ui
 
 TRANSLATIONS += \

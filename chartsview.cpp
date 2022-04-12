@@ -48,7 +48,7 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
         QSqlQuery query;
         query.exec(QString("SELECT SUM (amount) FROM operations WHERE category=%1").arg(id));
         while (query.next()) {
-            qDebug() << query.value(0).toDouble();
+//            qDebug() << query.value(0).toDouble();
             CustomSlice *slice = new CustomSlice(query.value(0).toDouble(), name, QColor(color));
             *cats_series << slice;
             cats_slices.insert(id, slice);
