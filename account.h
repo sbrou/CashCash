@@ -49,16 +49,6 @@ public slots:
     void showTags();
 
 private slots:
-    void activateDateFilter(bool on);
-    void applyFromDateFilter(QDate);
-    void applyToDateFilter(QDate);
-
-    void activateCatFilter(bool on);
-    void applyCatFilter(int);
-
-    void activateTagFilter(bool on);
-    void applyTagFilter(int);
-
     bool commitOnDatabase();
 
 private:
@@ -91,19 +81,6 @@ private:
 
     QMap<QString,QString> _rules;
 
-    void initTabFilters();
-
-    void setDateFilter();
-
-    QToolBar *toolBar;
-    QAction *importOpAct;
-    QAction *addOpAct;
-    QAction *editOpAct;
-    QAction *removeOpAct;
-    QAction *addCatAct;
-    QAction *manBudgetAct;
-
-    QDataWidgetMapper * filterMapper;
     QDate dateFrom;
     QDate dateTo;
 

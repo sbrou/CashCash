@@ -84,17 +84,17 @@ QSqlError initDb()
     if (!q.exec(TAGS_SQL))
         return q.lastError();
 
-     ////// Pour l'instant, ça casse tout. A revoir !
+     ////// A mettre au moment de crer un nouveau fichier
 
-    if (!q.prepare(INSERT_CATEGORY_SQL))
-        return q.lastError();
+//    if (!q.prepare(INSERT_CATEGORY_SQL))
+//        return q.lastError();
 
-    addCategoryInDB(q, "-NONE-", "#000000" , -1);
+//    addCategoryInDB(q, "-NONE-", "#000000" , -1);
 
-    if (!q.prepare(INSERT_TAG_SQL))
-        return q.lastError();
+//    if (!q.prepare(INSERT_TAG_SQL))
+//        return q.lastError();
 
-    addTagInDB(q, "-NONE-", "#000000" , -1);
+//    addTagInDB(q, "-NONE-", "#000000" , -1);
 
     return QSqlError();
 }

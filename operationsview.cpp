@@ -8,6 +8,7 @@ OperationsView::OperationsView()
     mainLayout = new QVBoxLayout(this);
 
     filters = new filtersWidget(this);
+    connect(filters, SIGNAL(statementBuilt(QString)), this, SLOT(applyFilters(QString)));
     mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
@@ -23,7 +24,7 @@ void OperationsView::loadModel(QSqlRelationalTableModel * mod)
     model = mod;
     opsTable->setModel(model);
     opsTable->setItemDelegate(new QSqlRelationalDelegate(opsTable));
-    //        opsTable->setColumnHidden(model->fieldIndex("id"), true);
+    opsTable->setColumnHidden(model->fieldIndex("id"), true);
     opsTable->setColumnHidden(model->fieldIndex("type"), true);
     opsTable->setCurrentIndex(model->index(0, 0));
     opsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -35,5 +36,12 @@ void OperationsView::loadModel(QSqlRelationalTableModel * mod)
     opsTable->resizeColumnsToContents();
     opsTable->setShowGrid(false);
     mainLayout->addWidget(opsTable);
+
+    filters->populateComboBoxes(model->relationModel(2), model->relationModel(4));
 }
 
+void OperationsView::applyFilters(const QString & statement)
+{
+    qDebug() << statement;
+    model->setFilter(statement);
+}

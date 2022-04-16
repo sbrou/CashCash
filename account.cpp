@@ -137,38 +137,18 @@ void Account::initAccount()
     emit accountReady();
 }
 
-void Account::initTabFilters()
+QDomElement getElement(const QDomElement &parent, const QString& name)
 {
-//    QDate today = QDate::currentDate();
-////    dateFrom = QDate(today.year(), today.month(), 1);
-////    dateTo = QDate(today.year(), today.month(), today.daysInMonth());
-//    dateFrom = QDate(today.year(), 2, 1);
-//    dateTo = QDate(today.year(), 2, 28);
-//    ui->qdeFilterFrom->setDate(dateFrom);
-//    ui->qdeFilterTo->setDate(dateTo);
+    if (!parent.isNull())
+    {
+        QDomNodeList list = parent.elementsByTagName(name);
+        if (list.isEmpty())
+            return QDomElement();
+        else
+            return list.at(0).toElement();
+    }
 
-//    ui->qcbFilterCat->setModel(model->relationModel(categoryIdx));
-//    ui->qcbFilterCat->setModelColumn(1);
-//    ui->qcbFilterTag->setModel(model->relationModel(tagIdx));
-//    ui->qcbFilterTag->setModelColumn(1);
-
-//    filterMapper = new QDataWidgetMapper(this);
-//    filterMapper->setModel(model);
-//    filterMapper->addMapping(ui->qcbFilterCat, 2, "currentIndex");
-//    filterMapper->addMapping(ui->qcbFilterTag, 4, "currentIndex");
-//    filterMapper->toFirst();
-
-//    setDateFilter();
-
-//    connect(ui->qgbFilterDate, SIGNAL(toggled(bool)), this, SLOT(activateDateFilter(bool)));
-//    connect(ui->qdeFilterFrom, SIGNAL(dateChanged(QDate)), this, SLOT(applyFromDateFilter(QDate)));
-//    connect(ui->qdeFilterTo, SIGNAL(dateChanged(QDate)), this, SLOT(applyToDateFilter(QDate)));
-
-//    connect(ui->qgbFilterCat, SIGNAL(toggled(bool)), this, SLOT(activateCatFilter(bool)));
-//    connect(ui->qcbFilterCat, SIGNAL(currentIndexChanged(int)), this, SLOT(applyCatFilter(int)));
-
-//    connect(ui->qgbFilterTag, SIGNAL(toggled(bool)), this, SLOT(activateTagFilter(bool)));
-//    connect(ui->qcbFilterTag, SIGNAL(currentIndexChanged(int)), this, SLOT(applyTagFilter(int)));
+    return QDomElement();
 }
 
 void Account::importFile()
@@ -180,16 +160,22 @@ void Account::importFile()
 
     QDomDocument doc;
     if (!doc.setContent(&file)) {
+        qDebug() << "problem at reading";
         file.close();
         return;
     }
     file.close();
 
-    QDomNodeList ops_node = doc.elementsByTagName("BANKTRANLIST");
-    if (!ops_node.isEmpty())
+    QDomNodeList ofx = doc.elementsByTagName("OFX");
+    if (!ofx.isEmpty())
     {
-        QDomElement ops_elt = ops_node.at(0).toElement();
-        QDomNodeList ops_list = ops_elt.elementsByTagName("STMTTRN");
+        qDebug() << "ofx is not empty";
+        QDomElement ofx_elt = ofx.at(0).toElement();
+        QDomElement BANKMSGSRSV1 = getElement(ofx_elt, "BANKMSGSRSV1");
+        QDomElement STMTTRNRS = getElement(BANKMSGSRSV1, "STMTTRNRS");
+        QDomElement STMTRS = getElement(STMTTRNRS, "STMTRS");
+        QDomElement BANKTRANLIST = getElement(STMTRS, "BANKTRANLIST");
+        QDomNodeList ops_list = BANKTRANLIST.elementsByTagName("STMTTRN");
         if (!ops_list.isEmpty())
         {
             QSqlQuery q;
@@ -319,75 +305,6 @@ void Account::selectTest()
 //        qDebug() << query.value(0);
 //    }
 
-}
-
-void Account::setDateFilter()
-{
-//    qDebug() << "From " << dateFrom.toString(Qt::ISODateWithMs) << " To " << dateTo.toString(Qt::ISODateWithMs);
-    model->setFilter(QString("(op_date>='%1' AND op_date<='%2')").arg(dateFrom.toString(Qt::ISODateWithMs)).arg(dateTo.toString(Qt::ISODateWithMs)));
-}
-
-void Account::activateDateFilter(bool on)
-{
-//    if (on)
-//    {
-//        dateFrom = ui->qdeFilterFrom->date();
-//        dateTo = ui->qdeFilterTo->date();
-//        setDateFilter();
-//    }
-//    else
-//    {
-//        model->setFilter("");
-//    }
-}
-
-void Account::applyFromDateFilter(QDate from)
-{
-    dateFrom = from;
-    setDateFilter();
-}
-
-void Account::applyToDateFilter(QDate to)
-{
-    dateTo = to;
-    setDateFilter();
-}
-
-void Account::activateCatFilter(bool on)
-{
-//    if (on)
-//    {
-//        int cat = ui->qcbFilterCat->currentIndex() + 1;
-//        model->setFilter(QString("category='%1'").arg(cat));
-//    }
-//    else
-//    {
-//        model->setFilter("");
-////        qDebug() << model->filter();
-//    }
-}
-
-void Account::applyCatFilter(int cat)
-{
-    model->setFilter(QString("category='%1'").arg(cat+1));
-}
-
-void Account::activateTagFilter(bool on)
-{
-//    if (on)
-//    {
-//        int tag = ui->qcbFilterTag->currentIndex() + 1;
-//        model->setFilter(QString("tag='%1'").arg(tag));
-//    }
-//    else
-//    {
-//        model->setFilter("");
-//    }
-}
-
-void Account::applyTagFilter(int tag)
-{
-    model->setFilter(QString("tag='%1'").arg(tag+1));
 }
 
 void Account::saveFile()

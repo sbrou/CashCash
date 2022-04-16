@@ -16,5 +16,6 @@
         <file>images/search_48px.png</file>
         <file>images/calendar_48px.png</file>
         <file>images/euro_48px.png</file>
+        <file>images/reset_48px.png</file>
     </qresource>
 </RCC>

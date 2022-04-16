@@ -16,6 +16,10 @@ public:
 
     void loadModel(QSqlRelationalTableModel * mod);
     QTableView* table();
+
+public slots:
+    void applyFilters(const QString &);
+
 private:
     // Methodes
 
