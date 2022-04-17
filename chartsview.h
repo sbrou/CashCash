@@ -2,11 +2,12 @@
 #define CHARTSVIEW_H
 
 #include <QWidget>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QChartView>
 #include <QSqlRelationalTableModel>
 #include <QPushButton>
 #include <QPieSlice>
+#include <QButtonGroup>
 
 #include "customslice.h"
 
@@ -20,20 +21,28 @@ public slots:
     void updatePie();
     void updateChart(const QSqlRecord &);
 
+private slots:
+    void changeChart(int);
+
 private:
-    QHBoxLayout *mainLayout;
+    void changeSeries(QPieSeries *o_series, QPieSeries *n_series);
+
+
+    QVBoxLayout *mainLayout;
     QChart *chart;
     QChartView *chartView;
 
     QSqlRelationalTableModel *model;
 
     QPieSeries *tags_series;
-    QMap<int, QPieSlice*> tags_slices;
+    QMap<int, CustomSlice*> tags_slices;
 
     QPieSeries *cats_series;
-    QMap<int, QPieSlice *> cats_slices;
+    QMap<int, CustomSlice *> cats_slices;
 
-
+    QButtonGroup *buttons;
+    QPushButton *qpbCats;
+    QPushButton *qpbTags;
 signals:
 
 };

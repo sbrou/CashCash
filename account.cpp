@@ -42,12 +42,6 @@ Account::Account(QString title, QWidget *parent)
         showError(err);
         return;
     }
-
-//    initTabFilters();
-
-//    createToolBar();
-
-//    connect(ui->qpbSaveFile, SIGNAL(clicked()), this, SLOT(saveFile()));
 }
 
 bool Account::commitOnDatabase()
@@ -540,4 +534,23 @@ void Account::showCategories()
 void Account::showTags()
 {
     tagsWidget->show();
+}
+
+QSqlError Account::createFile()
+{
+    QSqlQuery q;
+
+    if (!q.prepare(INSERT_CATEGORY_SQL))
+        return q.lastError();
+
+    addCategoryInDB(q, "-NONE-", "#000000" , -1);
+
+    if (!q.prepare(INSERT_TAG_SQL))
+        return q.lastError();
+
+    addTagInDB(q, "-NONE-", "#000000" , -1);
+
+    initAccount();
+
+    return QSqlError();
 }

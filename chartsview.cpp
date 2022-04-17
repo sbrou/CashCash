@@ -3,12 +3,35 @@
 #include <QPieSeries>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QGroupBox>
 
 ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}
     , model(mod)
 {
-    mainLayout = new QHBoxLayout(this);
+    mainLayout = new QVBoxLayout(this);
+
+    qpbCats = new QPushButton(tr("Categories"), this);
+    qpbCats->setToolTip(tr("Show categories chart"));
+    qpbCats->setCheckable(true);
+    qpbCats->setChecked(true);
+
+    qpbTags = new QPushButton(tr("Tags"));
+    qpbTags->setToolTip(tr("Show tags chert"));
+    qpbTags->setCheckable(true);
+
+    buttons = new QButtonGroup(this);
+    buttons->setExclusive(true);
+    buttons->addButton(qpbCats, 1);
+    buttons->addButton(qpbTags, 2);
+    connect(buttons, SIGNAL(idClicked(int)), this, SLOT(changeChart(int)));
+
+    QGroupBox * qgbButtons = new QGroupBox(this);
+    QHBoxLayout * buttonsLayout = new QHBoxLayout(qgbButtons);
+    buttonsLayout->addWidget(qpbCats);
+    buttonsLayout->addWidget(qpbTags);
+
+    mainLayout->addWidget(qgbButtons, 0, Qt::AlignRight);
 
     chart = new QChart;
     chart->setAnimationOptions(QChart::AllAnimations);
@@ -56,6 +79,7 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     }
 
     chart->addSeries(cats_series);
+    chart->setTitle(cats_series->name());
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -76,11 +100,10 @@ void ChartsView::updateChart(const QSqlRecord & record)
     double amount = record.value(3).toDouble();
 
     // tag
-    QMap<int, QPieSlice*>::iterator it_tag = tags_slices.find(tag);
+    QMap<int, CustomSlice*>::iterator it_tag = tags_slices.find(tag);
     if ( it_tag != tags_slices.end())
     {
-        CustomSlice * slice = static_cast<CustomSlice *>(it_tag.value());
-        slice->updateValue(amount);
+        it_tag.value()->updateValue(amount);
     }
     else
     {
@@ -94,11 +117,10 @@ void ChartsView::updateChart(const QSqlRecord & record)
     }
 
     // category
-    QMap<int, QPieSlice*>::iterator it_cat = cats_slices.find(cat);
+    QMap<int, CustomSlice*>::iterator it_cat = cats_slices.find(cat);
     if ( it_cat != cats_slices.end())
     {
-        CustomSlice * slice = static_cast<CustomSlice *>(it_cat.value());
-        slice->updateValue(amount);
+        it_cat.value()->updateValue(amount);
     }
     else
     {
@@ -109,5 +131,25 @@ void ChartsView::updateChart(const QSqlRecord & record)
             *cats_series << slice;
             cats_slices.insert(cat, slice);
         }
+    }
+}
+
+void ChartsView::changeSeries(QPieSeries *o_series, QPieSeries *n_series)
+{
+    chart->removeSeries(o_series);
+    chart->addSeries(n_series);
+    chart->setTitle(n_series->name());
+}
+
+void ChartsView::changeChart(int id)
+{
+    switch (id)
+    {
+    case 1: // show cats
+        changeSeries(tags_series, cats_series);
+        break;
+    case 2: // show tags
+        changeSeries(cats_series, tags_series);
+        break;
     }
 }

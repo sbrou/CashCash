@@ -44,6 +44,7 @@ public slots:
 
     void saveFile();
     QSqlError loadFile(const QString& account_file = "");
+    QSqlError createFile();
 
     void showCategories();
     void showTags();

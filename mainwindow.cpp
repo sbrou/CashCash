@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    createStatusBar();
 
     connect(_account, &Account::accountReady, this, &MainWindow::enableAccountActions);
-    connect(this, SIGNAL(newFileToCreate()), _account, SLOT(initAccount()));
+    connect(this, SIGNAL(newFileToCreate()), _account, SLOT(createFile()));
     connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
 }
 
