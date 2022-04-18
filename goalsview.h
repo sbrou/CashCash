@@ -3,16 +3,19 @@
 
 #include <QWidget>
 #include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QApplication>
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QVBoxLayout>
 
-class GoalsViewDelegate : public QItemDelegate
+#include "coloredprogressbar.h"
+
+class GoalsViewDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    GoalsViewDelegate(QWidget *parent);
+    using QStyledItemDelegate::QStyledItemDelegate;
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 };

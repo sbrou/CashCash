@@ -33,10 +33,12 @@ filtersWidget::filtersWidget(QWidget *parent)
     qpbSearch->setText(tr("Apply"));
     connect(qpbSearch, SIGNAL(clicked()), this, SLOT(buildStatement()));
 
-    QPalette pal = qpbSearch->palette();
-    pal.setColor(QPalette::Button, QColor("#55aaff"));
-    qpbSearch->setAutoFillBackground(true);
-    qpbSearch->setPalette(pal);
+//    QPalette pal = qpbSearch->palette();
+//    pal.setColor(QPalette::Button, QColor("#55aaff"));
+//    qpbSearch->setAutoFillBackground(true);
+//    qpbSearch->setPalette(pal);
+    qpbSearch->setStyleSheet("{ background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
+                             "stop: 0 #f6f7fa, stop: 1 #dadbde); }");
 
     qleMinAmount = new QLineEdit(this);
     QDoubleValidator * minValidator = new QDoubleValidator(qleMinAmount);

@@ -14,6 +14,7 @@ SOURCES += \
     catdialog.cpp \
     catslist.cpp \
     chartsview.cpp \
+    coloredprogressbar.cpp \
     customslice.cpp \
     filterswidget.cpp \
     goalsview.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     catdialog.h \
     catslist.h \
     chartsview.h \
+    coloredprogressbar.h \
     customslice.h \
     filterswidget.h \
     goalsview.h \

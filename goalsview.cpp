@@ -3,47 +3,19 @@
 #include <QHeaderView>
 #include <QPainter>
 
-GoalsViewDelegate::GoalsViewDelegate(QWidget *parent) : QItemDelegate(parent) {}
-
 void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
            const QModelIndex &index ) const
 {
     if (index.column() != 1) {
-        QItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint(painter, option, index);
         return;
     }
 
-    // Set up a QStyleOptionProgressBar to precisely mimic the
-    // environment of a progress bar.
-    QStyleOptionProgressBar progressBarOption;
-    progressBarOption.state = QStyle::StateFlag::State_Horizontal;
-    progressBarOption.direction = Qt::LeftToRight;
-    progressBarOption.rect = option.rect;
-    progressBarOption.fontMetrics = qobject_cast<QWidget *>(parent())->fontMetrics();
-    progressBarOption.minimum = 0;
-    progressBarOption.maximum = 100;
-    progressBarOption.textAlignment = Qt::AlignCenter;
-    progressBarOption.textVisible = true;
-    progressBarOption.bottomToTop = false;
-
-    // Set the progress and text values of the style option.
+    ColoredProgressBar bar;
     int progress = qRound(index.data().toDouble());
-    progressBarOption.progress = progress < 0 ? 0 : progress;
-    progressBarOption.text = QString::asprintf("%d%%", progressBarOption.progress);
-
-//    QPalette progressBarPalette = QApplication::palette();
-////    palette.setColor(QPalette::Foreground, Qt::red);
-//    if (progress < 51)
-//        progressBarPalette.setColor();
-//    else if (progress >= 51 && progress < 80)
-//        progressBarPalette.setColor(QPalette::WindowText, QColorConstants::Svg::coral);
-//    else if (progress >= 81)
-//        progressBarPalette.setColor(QPalette::WindowText, Qt::red);
-
-//    progressBarOption.palette = progressBarPalette;
-
-    // Draw the progress bar onto the view.
-    QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
+    progress = progress < 0 ? 0 : progress;
+    bar.setValue(progress);
+    bar.paint(painter, option.rect);
 }
 
 
