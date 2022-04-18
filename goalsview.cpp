@@ -19,12 +19,28 @@ void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 }
 
 
+MyStandardItemModel::MyStandardItemModel(QObject *parent) : QStandardItemModel(parent)
+{
+
+}
+
+QVariant MyStandardItemModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::TextAlignmentRole )
+        return Qt::AlignCenter;
+    else
+        return QStandardItemModel::data(index, role);
+}
+
+
 GoalsView::GoalsView(QWidget *parent)
     : QWidget{parent}
 {
     mainLayout = new QVBoxLayout(this);
 
-    goals_model = new QStandardItemModel(3, 5, this);
+    goals_model = new MyStandardItemModel(this);
+    goals_model->setRowCount(3);
+    goals_model->setColumnCount(5);
     goals_model->setHeaderData(0, Qt::Horizontal, tr("Category/Tag"));
     goals_model->setHeaderData(1, Qt::Horizontal, tr("Progress"));
     goals_model->setHeaderData(2, Qt::Horizontal, tr("Goal"));

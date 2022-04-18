@@ -20,6 +20,14 @@ public:
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 };
 
+class MyStandardItemModel : public QStandardItemModel
+{
+    Q_OBJECT;
+public:
+    MyStandardItemModel(QObject *parent = nullptr);
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+};
+
 
 class GoalsView : public QWidget
 {
