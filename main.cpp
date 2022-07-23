@@ -24,10 +24,6 @@ int main(int argc, char *argv[])
     }
 
     a.setStyleSheet("QDateEdit::drop-down {  image: url(:/images/images/calendar_48px.png);  }");
-    a.setStyleSheet("QProgressBar {"
-                    "border: 2px solid grey;"
-                    "border-radius: 5px;"
-                "}");
 
     MainWindow w;
     w.show();

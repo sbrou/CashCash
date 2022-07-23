@@ -19,6 +19,7 @@ Account::Account(QWidget *parent)
     : QSplitter{parent}
     , _locale(QLocale::German)
     , _title("")
+    , _init_balance(0)
     , _balance(0)
     , _future_balance(0)
     , _filepath("")
@@ -111,7 +112,9 @@ void Account::initAccount()
     qDebug() << "number of operations : " << _nbOperations;
 
     opsView->loadModel(model);
+    opsView->setBalance(_balance, _future_balance);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
+    connect(this, SIGNAL(balanceChanged(double, double)), opsView, SLOT(setBalance(double, double)));
 //    accLayout->addWidget(opsView, 0, 0);
     splitter->addWidget(opsView);
 
@@ -132,7 +135,7 @@ void Account::initAccount()
     tagsWidget = new TagsList(tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
-    emit accountReady();
+    emit accountReady(_title);
 }
 
 QDomElement getElement(const QDomElement &parent, const QString& name)
@@ -275,13 +278,15 @@ void Account::updateBalance()
     QSqlQuery query;
     query.exec(QString("SELECT SUM (amount) FROM operations WHERE op_date<='%2'").arg(QDate::currentDate().toString(Qt::ISODateWithMs)));
     while (query.next()) {
-        _balance = query.value(0).toDouble();
+        _balance = _init_balance + query.value(0).toDouble();
     }
 
     query.exec("SELECT SUM (amount) FROM operations");
     while (query.next()) {
-        _future_balance = query.value(0).toDouble();
+        _future_balance = _init_balance + query.value(0).toDouble();
     }
+
+    emit balanceChanged(_balance, _future_balance);
 }
 
 void Account::editOperation()
@@ -381,9 +386,9 @@ void Account::selectTest()
 
 void Account::saveFile()
 {
-    QString saveFilename = QFileDialog::getSaveFileName(this, tr("Save File"),
+    QString saveFilename = _filepath.isEmpty() ? QFileDialog::getSaveFileName(this, tr("Save File"),
                                                     "D:/sopie/Documents/untitled.bsx",
-                                                    tr("BSX files (*.bsx)"));
+                                                    tr("BSX files (*.bsx)")) : _filepath;
     QFile saveFile(saveFilename);
 
     commitOnDatabase();
@@ -401,8 +406,7 @@ void Account::saveFile()
     ///// Write Account caracteristics /////
 
     accObject["title"] = _title;
-    accObject["balance"] = _balance;
-    accObject["future_balance"] = _future_balance;
+    accObject["init_balance"] = _init_balance;
 
     ///// Write Cats /////
 
@@ -524,13 +528,11 @@ QSqlError Account::loadFile(const QString& filename)
     if (loadObject.contains("title") && loadObject["title"].isString())
         _title = loadDoc["title"].toString();
 
-    if (loadObject.contains("balance") && loadObject["balance"].isDouble())
-        _balance = loadObject["balance"].toDouble();
-
-    if (loadObject.contains("future_balance") && loadObject["future_balance"].isDouble())
-        _future_balance = loadObject["future_balance"].toDouble();
+    if (loadObject.contains("init_balance") && loadObject["init_balance"].isDouble())
+        _init_balance = loadObject["init_balance"].toDouble();
 
     _filepath = loadFilename;
+    updateBalance();
     initAccount();
 
     return err;
@@ -640,8 +642,9 @@ QSqlError Account::createFile()
     if (newAcc.exec())
     {
         _title = newAcc.title();
-        _balance = newAcc.balance();
-        _future_balance = _balance;
+        _init_balance = newAcc.balance();
+        _balance = _init_balance;
+        _future_balance = _init_balance;
 
         QSqlQuery q;
 

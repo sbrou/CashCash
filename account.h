@@ -30,9 +30,10 @@ public:
     void readSettings();
 
 signals:
-    void accountReady();
-    void selectionChanged(const QItemSelection& );
+    void accountReady(const QString&);
+    void selectionChanged(const QItemSelection&);
     void operationsChanged(const QSqlRecord &);
+    void balanceChanged(double, double);
 
 public slots:
     void initAccount();
@@ -61,6 +62,7 @@ private:
 
     QLocale _locale;
     QString _title;
+    double _init_balance;
     double _balance;
     double _future_balance;
     QString _filepath;

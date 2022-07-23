@@ -17,7 +17,7 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     qpbCats->setChecked(true);
 
     qpbTags = new QPushButton(tr("Tags"));
-    qpbTags->setToolTip(tr("Show tags chert"));
+    qpbTags->setToolTip(tr("Show tags chart"));
     qpbTags->setCheckable(true);
 
     buttons = new QButtonGroup(this);

@@ -6,6 +6,7 @@ NewAccountDialog::NewAccountDialog(QWidget *parent) :
     ui(new Ui::NewAccountDialog)
 {
     ui->setupUi(this);
+    setWindowTitle(tr("Créer un nouveau compte"));
 }
 
 NewAccountDialog::~NewAccountDialog()

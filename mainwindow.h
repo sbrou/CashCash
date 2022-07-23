@@ -25,7 +25,7 @@ signals:
 
 private slots:
     void about();
-    void enableAccountActions();
+    void enableAccountActions(const QString& account_title);
     void updateAccountActions(const QItemSelection& selected);
 
 protected:

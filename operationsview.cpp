@@ -7,11 +7,29 @@ OperationsView::OperationsView()
 {
     mainLayout = new QVBoxLayout(this);
 
+    balanceLayout = new QHBoxLayout;
+    qlTodayBalance = new QLabel;
+    qlFutureBalance = new QLabel;
+    setBalance(0,0);
+    balanceLayout->addWidget(qlTodayBalance);
+    balanceLayout->addWidget(qlFutureBalance);
+    mainLayout->addLayout(balanceLayout);
+
     filters = new filtersWidget(this);
     connect(filters, SIGNAL(statementBuilt(QString)), this, SLOT(applyFilters(QString)));
     mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
+}
+
+OperationsView::~OperationsView()
+{
+    filters->deleteLater();
+    opsTable->deleteLater();
+    qlTodayBalance->deleteLater();
+    qlFutureBalance->deleteLater();
+    balanceLayout->deleteLater();
+    mainLayout->deleteLater();
 }
 
 QTableView* OperationsView::table()
@@ -44,4 +62,10 @@ void OperationsView::applyFilters(const QString & statement)
 {
     qDebug() << statement;
     model->setFilter(statement);
+}
+
+void OperationsView::setBalance(double balance, double future_balance)
+{
+    qlTodayBalance->setText(tr("Solde actuel : ") + QString::number(balance));
+    qlFutureBalance->setText(tr("Solde futur : ") + QString::number(future_balance));
 }

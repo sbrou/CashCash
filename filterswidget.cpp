@@ -69,13 +69,13 @@ filtersWidget::filtersWidget(QWidget *parent)
     QGridLayout *mainLayout = new QGridLayout(this);
     mainLayout->addLayout(fromForm, 0, 0);
     mainLayout->addLayout(toForm, 0, 1);
-    mainLayout->addWidget(qleSearch, 0, 2);
-    mainLayout->addWidget(qpbSearch, 0, 3);
+    mainLayout->addWidget(qleSearch, 0, 2, 1, 2);
+    mainLayout->addWidget(qpbSearch, 0, 4);
     mainLayout->addWidget(qleMinAmount, 1, 0);
     mainLayout->addWidget(qleMaxAmount, 1, 1);
     mainLayout->addWidget(qcbCat, 1, 2);
     mainLayout->addWidget(qcbTag, 1, 3);
-    mainLayout->addWidget(qpbReset, 0, 4, 2, 1);
+    mainLayout->addWidget(qpbReset, 1, 4);
 }
 
 filtersWidget::~filtersWidget()

@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     createActions();
 //    createStatusBar();
 
-    connect(_account, &Account::accountReady, this, &MainWindow::enableAccountActions);
+    connect(_account, SIGNAL(accountReady(const QString&)), this, SLOT(enableAccountActions(const QString&)));
     connect(this, SIGNAL(newFileToCreate()), _account, SLOT(createFile()));
     connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
 }
@@ -171,8 +171,11 @@ void MainWindow::writeSettings()
     _account->saveSettings();
 }
 
-void MainWindow::enableAccountActions()
+void MainWindow::enableAccountActions(const QString& title)
 {
+    if (!title.isEmpty())
+        setWindowTitle(QString("MoulagApp - %1").arg(title));
+
     addOpAct->setEnabled(true);
     removeOpAct->setEnabled(true);
     editOpAct->setEnabled(false);
