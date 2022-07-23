@@ -20,6 +20,7 @@ SOURCES += \
     goalsview.cpp \
     main.cpp \
     mainwindow.cpp \
+    newaccountdialog.cpp \
     operationsview.cpp \
     welcomedialog.cpp
 
@@ -35,12 +36,14 @@ HEADERS += \
     goalsview.h \
     initdb.h \
     mainwindow.h \
+    newaccountdialog.h \
     operationsview.h \
     welcomedialog.h
 
 FORMS += \
     addopdialog.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    newaccountdialog.ui
 
 TRANSLATIONS += \
     budget_en_US.ts

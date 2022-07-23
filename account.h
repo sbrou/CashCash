@@ -22,7 +22,7 @@ class Account : public QSplitter
     Q_OBJECT
 public:
     // Methodes
-    explicit Account(QString title, QWidget *parent = nullptr);
+    explicit Account(QWidget *parent = nullptr);
 
     void setStandardRules();
     void setStandardCategories();
@@ -55,11 +55,14 @@ private slots:
 private:
     // Methodes
     void showError(const QSqlError &err);
+    void updateBalance();
 
     // Attributs
 
     QLocale _locale;
     QString _title;
+    double _balance;
+    double _future_balance;
     QString _filepath;
 
     QSplitter * splitter;

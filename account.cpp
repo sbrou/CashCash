@@ -1,23 +1,26 @@
 #include "account.h"
-#include "ui_account.h"
 
 #include <QFileDialog>
+#include <QTemporaryFile>
+#include <QProcess>
 #include <QPushButton>
 #include <QDomDocument>
 #include <QDebug>
 
 #include <QPieSeries>
 
+#include "newaccountdialog.h"
 #include <addopdialog.h>
-
 #include "catslist.h"
 
 #include "initdb.h"
 
-Account::Account(QString title, QWidget *parent)
+Account::Account(QWidget *parent)
     : QSplitter{parent}
     , _locale(QLocale::German)
-    , _title(title)
+    , _title("")
+    , _balance(0)
+    , _future_balance(0)
     , _filepath("")
     , _nbOperations(0)
 {
@@ -54,6 +57,7 @@ bool Account::commitOnDatabase()
         qDebug() << "commiting on database";
         model->database().commit();
         model->select();
+        updateBalance();
 //        updatePie();
     }
 
@@ -148,17 +152,75 @@ QDomElement getElement(const QDomElement &parent, const QString& name)
 void Account::importFile()
 {
     QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(), tr("ofx files (*.ofx)"));
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
 
-    QDomDocument doc;
-    if (!doc.setContent(&file)) {
-        qDebug() << "problem at reading";
-        file.close();
+    QFile inFile(filename);
+    if(!inFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "can't open input file";
         return;
     }
-    file.close();
+
+    QString newFileData;
+    QTextStream in(&inFile);
+
+    //Read file line by line until it reaches the end
+    while(!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (!line.contains("<OFX>"))
+            continue;
+
+        newFileData.append(line);
+    }
+
+    inFile.close();
+
+    QFile outFile("trimmed_ofx.ofx");
+    if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qDebug() << "can't open trimmed file";
+        return;
+    }
+
+    //Write the data to the output file
+    QTextStream out(&outFile);
+    out << newFileData;
+    outFile.close();
+
+    QString program = "D:\\sopie\\Qt_Projects\\budget\\3rdparty\\OpenSP-1.5.2\\osx.exe";
+    QStringList arguments;
+    arguments << "-ldtd_file" <<  "D:\\sopie\\Qt_Projects\\budget\\3rdparty\\OpenSP-1.5.2\\ofx160.dtd" << outFile.fileName();
+
+    QProcess *myProcess = new QProcess(this);
+    myProcess->start(program, arguments);
+    if (!myProcess->waitForFinished()) {
+        qDebug() << "process not finished";
+        qDebug() << myProcess->readAllStandardError();
+        return;
+    }
+
+    QByteArray result = myProcess->readAllStandardOutput();
+    QFile xmlFile("ops.ofx");
+    if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qDebug() << "can't create xml file";
+        return;
+    }
+
+    //Write the data to the output file
+    QTextStream xml(&xmlFile);
+    xml << result;
+    xmlFile.close();
+
+    QDomDocument doc("ops");
+    if (!xmlFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "can't open xml file";
+        return;
+    }
+    if (!doc.setContent(&xmlFile)) {
+        xmlFile.close();
+        qDebug() << "problem at reading";
+        return;
+    }
+    xmlFile.close();
 
     QDomNodeList ofx = doc.elementsByTagName("OFX");
     if (!ofx.isEmpty())
@@ -184,7 +246,7 @@ void Account::importFile()
                 QDomElement op = ops_list.at(i).toElement();
 
                 QDomElement date_elt = op.elementsByTagName("DTPOSTED").at(0).toElement();
-                QDate date = QDate::fromString(date_elt.text(),"yyyMMdd");
+                QDate date = QDate::fromString(date_elt.text(),"yyyyMMdd");
 
                 QDomElement amt_elt = op.elementsByTagName("TRNAMT").at(0).toElement();
                 double amount = amt_elt.text().toDouble();
@@ -204,6 +266,22 @@ void Account::importFile()
     }
 //    model->select();
     commitOnDatabase();
+    outFile.remove();
+    xmlFile.remove();
+}
+
+void Account::updateBalance()
+{
+    QSqlQuery query;
+    query.exec(QString("SELECT SUM (amount) FROM operations WHERE op_date<='%2'").arg(QDate::currentDate().toString(Qt::ISODateWithMs)));
+    while (query.next()) {
+        _balance = query.value(0).toDouble();
+    }
+
+    query.exec("SELECT SUM (amount) FROM operations");
+    while (query.next()) {
+        _future_balance = query.value(0).toDouble();
+    }
 }
 
 void Account::editOperation()
@@ -320,6 +398,12 @@ void Account::saveFile()
 
 //    write(accObject);
 
+    ///// Write Account caracteristics /////
+
+    accObject["title"] = _title;
+    accObject["balance"] = _balance;
+    accObject["future_balance"] = _future_balance;
+
     ///// Write Cats /////
 
     QJsonArray catsArray;
@@ -433,6 +517,19 @@ QSqlError Account::loadFile(const QString& filename)
             return q.lastError();
     }
 
+    //    write(accObject);
+
+    ///// Write Account caracteristics /////
+
+    if (loadObject.contains("title") && loadObject["title"].isString())
+        _title = loadDoc["title"].toString();
+
+    if (loadObject.contains("balance") && loadObject["balance"].isDouble())
+        _balance = loadObject["balance"].toDouble();
+
+    if (loadObject.contains("future_balance") && loadObject["future_balance"].isDouble())
+        _future_balance = loadObject["future_balance"].toDouble();
+
     _filepath = loadFilename;
     initAccount();
 
@@ -538,19 +635,28 @@ void Account::showTags()
 
 QSqlError Account::createFile()
 {
-    QSqlQuery q;
+    NewAccountDialog newAcc(this);
 
-    if (!q.prepare(INSERT_CATEGORY_SQL))
-        return q.lastError();
+    if (newAcc.exec())
+    {
+        _title = newAcc.title();
+        _balance = newAcc.balance();
+        _future_balance = _balance;
 
-    addCategoryInDB(q, "-NONE-", "#000000" , -1);
+        QSqlQuery q;
 
-    if (!q.prepare(INSERT_TAG_SQL))
-        return q.lastError();
+        if (!q.prepare(INSERT_CATEGORY_SQL))
+            return q.lastError();
 
-    addTagInDB(q, "-NONE-", "#000000" , -1);
+        addCategoryInDB(q, "-NONE-", "#000000" , -1);
 
-    initAccount();
+        if (!q.prepare(INSERT_TAG_SQL))
+            return q.lastError();
+
+        addTagInDB(q, "-NONE-", "#000000" , -1);
+
+        initAccount();
+    }
 
     return QSqlError();
 }

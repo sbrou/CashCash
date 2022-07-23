@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     readSettings();
 
-    _account = new Account("CCP");
+    _account = new Account(this);
     setCentralWidget(_account);
 
     createActions();
@@ -174,8 +174,8 @@ void MainWindow::writeSettings()
 void MainWindow::enableAccountActions()
 {
     addOpAct->setEnabled(true);
-//    removeOpAct->setEnabled(true);
-//    editOpAct->setEnabled(false);
+    removeOpAct->setEnabled(true);
+    editOpAct->setEnabled(false);
     importOpAct->setEnabled(true);
     catAct->setEnabled(true);
     tagAct->setEnabled(true);
