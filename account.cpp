@@ -59,7 +59,7 @@ bool Account::commitOnDatabase()
         model->database().commit();
         model->select();
         updateBalance();
-//        updatePie();
+        chartView->updatePie();
     }
 
     return st;
@@ -119,7 +119,6 @@ void Account::initAccount()
     splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
-    connect(this, SIGNAL(operationsChanged(QSqlRecord)), chartView, SLOT(updateChart(QSqlRecord)));
 //    accLayout->addWidget(chartView, 0, 1);
     splitter->addWidget(chartView);
 
@@ -321,11 +320,8 @@ void Account::addOperation()
             new_record.setValue(6, QVariant(1));
 
         if (model->insertRecord(-1, new_record))
-        {
-            if (commitOnDatabase())
-                emit operationsChanged(new_record);
+            commitOnDatabase();
 
-        }
         qDebug() << model->rowCount();
     }
 }
@@ -389,6 +385,7 @@ void Account::saveFile()
     QString saveFilename = _filepath.isEmpty() ? QFileDialog::getSaveFileName(this, tr("Save File"),
                                                     "D:/sopie/Documents/untitled.bsx",
                                                     tr("BSX files (*.bsx)")) : _filepath;
+    _filepath = saveFilename;
     QFile saveFile(saveFilename);
 
     commitOnDatabase();
@@ -651,12 +648,12 @@ QSqlError Account::createFile()
         if (!q.prepare(INSERT_CATEGORY_SQL))
             return q.lastError();
 
-        addCategoryInDB(q, "-NONE-", "#000000" , -1);
+        addCategoryInDB(q, "-NONE-", "#000000" , 0);
 
         if (!q.prepare(INSERT_TAG_SQL))
             return q.lastError();
 
-        addTagInDB(q, "-NONE-", "#000000" , -1);
+        addTagInDB(q, "-NONE-", "#000000" , 0);
 
         initAccount();
     }

@@ -19,12 +19,12 @@ public:
 
 public slots:
     void updatePie();
-    void updateChart(const QSqlRecord &);
 
 private slots:
     void changeChart(int);
 
 private:
+    void populateSeries(const QString& table, const QString& key, QPieSeries& series);
     void changeSeries(QPieSeries *o_series, QPieSeries *n_series);
 
 
@@ -35,10 +35,8 @@ private:
     QSqlRelationalTableModel *model;
 
     QPieSeries *tags_series;
-    QMap<int, CustomSlice*> tags_slices;
-
     QPieSeries *cats_series;
-    QMap<int, CustomSlice *> cats_slices;
+    QPieSeries *visible_series;
 
     QButtonGroup *buttons;
     QPushButton *qpbCats;

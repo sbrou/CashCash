@@ -32,7 +32,6 @@ public:
 signals:
     void accountReady(const QString&);
     void selectionChanged(const QItemSelection&);
-    void operationsChanged(const QSqlRecord &);
     void balanceChanged(double, double);
 
 public slots:
