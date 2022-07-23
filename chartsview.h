@@ -2,12 +2,14 @@
 #define CHARTSVIEW_H
 
 #include <QWidget>
-#include <QVBoxLayout>
+#include <QGridLayout>
 #include <QChartView>
 #include <QSqlRelationalTableModel>
 #include <QPushButton>
 #include <QPieSlice>
 #include <QButtonGroup>
+#include <QComboBox>
+#include <QDate>
 
 #include "customslice.h"
 
@@ -22,13 +24,14 @@ public slots:
 
 private slots:
     void changeChart(int);
+    void changeTimePeriod(int);
 
 private:
-    void populateSeries(const QString& table, const QString& key, QPieSeries& series);
+    void populateSeries(const QString& table, const QString& key, const QDate &begin, const QDate &end, QPieSeries& series);
     void changeSeries(QPieSeries *o_series, QPieSeries *n_series);
 
 
-    QVBoxLayout *mainLayout;
+    QGridLayout *mainLayout;
     QChart *chart;
     QChartView *chartView;
 
@@ -41,6 +44,9 @@ private:
     QButtonGroup *buttons;
     QPushButton *qpbCats;
     QPushButton *qpbTags;
+    QComboBox *qcbPeriod;
+    QDate beginDate;
+    QDate endDate;
 signals:
 
 };

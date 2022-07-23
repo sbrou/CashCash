@@ -9,7 +9,7 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}
     , model(mod)
 {
-    mainLayout = new QVBoxLayout(this);
+    mainLayout = new QGridLayout(this);
 
     qpbCats = new QPushButton(tr("Categories"), this);
     qpbCats->setToolTip(tr("Show categories chart"));
@@ -31,7 +31,13 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     buttonsLayout->addWidget(qpbCats);
     buttonsLayout->addWidget(qpbTags);
 
-    mainLayout->addWidget(qgbButtons, 0, Qt::AlignRight);
+    mainLayout->addWidget(qgbButtons, 0, 2);
+
+    qcbPeriod = new QComboBox(this);
+    qcbPeriod->addItems({ tr("Ce Mois"), tr("Le mois dernier"), tr("Cette année"), tr("L'année dernière") });
+    qcbPeriod->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    connect(qcbPeriod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTimePeriod(int)));
+    mainLayout->addWidget(qcbPeriod, 0, 3);
 
     chart = new QChart;
     chart->setAnimationOptions(QChart::AllAnimations);
@@ -46,32 +52,40 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
 
     visible_series = cats_series;
 
-    updatePie();
+    changeTimePeriod(0);
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
-    mainLayout->addWidget(chartView);
+    mainLayout->addWidget(chartView, 1, 0, 1, 4);
 }
 
 void ChartsView::updatePie()
 {
+    chart->removeSeries(visible_series);
+
     tags_series->clear();
     cats_series->clear();
 
     model->select();
 
-    populateSeries("categories", "category", *cats_series);
-    populateSeries("tags", "tag", *tags_series);
+    populateSeries("categories", "category", beginDate, endDate, *cats_series);
+    populateSeries("tags", "tag", beginDate, endDate, *tags_series);
 
-    changeSeries(visible_series, visible_series);
+    chart->addSeries(visible_series);
+    chart->setTitle(visible_series->name());
 }
 
 
 
-void ChartsView::populateSeries(const QString& table, const QString& key, QPieSeries& series)
+void ChartsView::populateSeries(const QString& table, const QString& key, const QDate& begin, const QDate& end,
+                                QPieSeries& series)
 {
     QSqlQuery q;
+    QString date = QString("op_date>='%1' AND op_date<='%2' AND ")
+            .arg(beginDate.toString(Qt::ISODateWithMs))
+            .arg(endDate.toString(Qt::ISODateWithMs));
+
     q.exec("SELECT * FROM " + table + " WHERE type=0");
     while (q.next()) {
         int id = q.value(0).toInt();
@@ -79,7 +93,7 @@ void ChartsView::populateSeries(const QString& table, const QString& key, QPieSe
         QString color = q.value(2).toString();
 
         QSqlQuery query;
-        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + key +"=%1").arg(id));
+        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + key +"=%1").arg(id));
         while (query.next()) {
             qreal amount = query.value(0).toDouble();
             if (amount != 0)
@@ -96,6 +110,7 @@ void ChartsView::changeSeries(QPieSeries *o_series, QPieSeries *n_series)
     chart->removeSeries(o_series);
     chart->addSeries(n_series);
     chart->setTitle(n_series->name());
+    visible_series = n_series;
 }
 
 void ChartsView::changeChart(int id)
@@ -109,4 +124,45 @@ void ChartsView::changeChart(int id)
         changeSeries(cats_series, tags_series);
         break;
     }
+}
+
+int daysInPreviousMonth(int month, int year)
+{
+    if (month == 2)
+        return QDate::isLeapYear(year) ? 29 : 28;
+    else if (month <= 7)
+        return month % 2 ? 31 : 30;
+    else
+        return month % 2 ? 30 : 31;
+}
+
+void ChartsView::changeTimePeriod(int index)
+{
+    QDate today = QDate::currentDate();
+    int year = today.year();
+    int month = today.month();
+    int pre_month = month - 1;
+
+    if (pre_month == 0) pre_month = 12;
+
+    switch (index)
+    {
+    case 1: // previous month
+        beginDate = QDate(year, pre_month , 1);
+        endDate = QDate(year, pre_month, daysInPreviousMonth(pre_month, year));
+        break;
+    case 2: // this year
+        beginDate = QDate(year, 1, 1);
+        endDate = QDate(year, 12, 31);
+        break;
+    case 3: // previous year
+        beginDate = QDate(year-1, 1, 1);
+        endDate = QDate(year-1, 12, 31);
+        break;
+    default: // this month (default : 0) or else
+        beginDate = QDate(year, month, 1);
+        endDate = QDate(year, month, today.daysInMonth());
+    }
+
+    updatePie();
 }
