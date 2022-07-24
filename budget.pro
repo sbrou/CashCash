@@ -8,49 +8,51 @@ CONFIG += c++11
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH = includes/ sources/ resources/ resources/uiFiles resources/translation
+
 SOURCES += \
-    account.cpp \
-    addopdialog.cpp \
-    catdialog.cpp \
-    catslist.cpp \
-    chartsview.cpp \
-    coloredprogressbar.cpp \
-    customslice.cpp \
-    filterswidget.cpp \
-    goalsview.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    newaccountdialog.cpp \
-    operationsview.cpp \
-    statswidget.cpp \
-    utilities.cpp \
-    welcomedialog.cpp
+    sources/account.cpp \
+    sources/addopdialog.cpp \
+    sources/catdialog.cpp \
+    sources/catslist.cpp \
+    sources/chartsview.cpp \
+    sources/coloredprogressbar.cpp \
+    sources/customslice.cpp \
+    sources/filterswidget.cpp \
+    sources/goalsview.cpp \
+    sources/main.cpp \
+    sources/mainwindow.cpp \
+    sources/newaccountdialog.cpp \
+    sources/operationsview.cpp \
+    sources/statswidget.cpp \
+    sources/utilities.cpp \
+    sources/welcomedialog.cpp
 
 HEADERS += \
-    account.h \
-    addopdialog.h \
-    catdialog.h \
-    catslist.h \
-    chartsview.h \
-    coloredprogressbar.h \
-    customslice.h \
-    filterswidget.h \
-    goalsview.h \
-    initdb.h \
-    mainwindow.h \
-    newaccountdialog.h \
-    operationsview.h \
-    statswidget.h \
-    utilities.h \
-    welcomedialog.h
+    includes/account.h \
+    includes/addopdialog.h \
+    includes/catdialog.h \
+    includes/catslist.h \
+    includes/chartsview.h \
+    includes/coloredprogressbar.h \
+    includes/customslice.h \
+    includes/filterswidget.h \
+    includes/goalsview.h \
+    includes/initdb.h \
+    includes/mainwindow.h \
+    includes/newaccountdialog.h \
+    includes/operationsview.h \
+    includes/statswidget.h \
+    includes/utilities.h \
+    includes/welcomedialog.h
 
 FORMS += \
-    addopdialog.ui \
-    mainwindow.ui \
-    newaccountdialog.ui
+    resources/uiFiles/addopdialog.ui \
+    resources/uiFiles/mainwindow.ui \
+    resources/uiFiles/newaccountdialog.ui
 
 TRANSLATIONS += \
-    budget_en_US.ts
+    resources/translation/budget_en_US.ts
 CONFIG += lrelease
 CONFIG += embed_translations
 
@@ -60,4 +62,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    budget.qrc
+    resources/budget.qrc
