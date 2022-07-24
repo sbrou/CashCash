@@ -123,6 +123,7 @@ void MainWindow::createActions()
     statsAct->setStatusTip(tr("Show statistics"));
     statsAct->setEnabled(false);
     fileToolBar->addAction(statsAct);
+    connect(statsAct, SIGNAL(triggered()), _account, SLOT(showStats()));
 
 
     connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));

@@ -5,6 +5,8 @@
 #include <QSqlRecord>
 #include <QGroupBox>
 
+#include "utilities.h"
+
 ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}
     , model(mod)
@@ -27,6 +29,7 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
     connect(buttons, SIGNAL(idClicked(int)), this, SLOT(changeChart(int)));
 
     QGroupBox * qgbButtons = new QGroupBox(this);
+    qgbButtons->setFlat(true);
     QHBoxLayout * buttonsLayout = new QHBoxLayout(qgbButtons);
     buttonsLayout->addWidget(qpbCats);
     buttonsLayout->addWidget(qpbTags);
@@ -126,16 +129,6 @@ void ChartsView::changeChart(int id)
     }
 }
 
-int daysInPreviousMonth(int month, int year)
-{
-    if (month == 2)
-        return QDate::isLeapYear(year) ? 29 : 28;
-    else if (month <= 7)
-        return month % 2 ? 31 : 30;
-    else
-        return month % 2 ? 30 : 31;
-}
-
 void ChartsView::changeTimePeriod(int index)
 {
     QDate today = QDate::currentDate();
@@ -149,7 +142,7 @@ void ChartsView::changeTimePeriod(int index)
     {
     case 1: // previous month
         beginDate = QDate(year, pre_month , 1);
-        endDate = QDate(year, pre_month, daysInPreviousMonth(pre_month, year));
+        endDate = QDate(year, pre_month, daysInMonth(pre_month, year));
         break;
     case 2: // this year
         beginDate = QDate(year, 1, 1);

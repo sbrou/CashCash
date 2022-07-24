@@ -12,6 +12,7 @@
 #include "newaccountdialog.h"
 #include <addopdialog.h>
 #include "catslist.h"
+#include "statswidget.h"
 
 #include "initdb.h"
 
@@ -630,6 +631,12 @@ void Account::showCategories()
 void Account::showTags()
 {
     tagsWidget->show();
+}
+
+void Account::showStats()
+{
+    StatsWidget stats(_balance, this);
+    stats.exec();
 }
 
 QSqlError Account::createFile()

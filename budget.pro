@@ -22,6 +22,8 @@ SOURCES += \
     mainwindow.cpp \
     newaccountdialog.cpp \
     operationsview.cpp \
+    statswidget.cpp \
+    utilities.cpp \
     welcomedialog.cpp
 
 HEADERS += \
@@ -38,6 +40,8 @@ HEADERS += \
     mainwindow.h \
     newaccountdialog.h \
     operationsview.h \
+    statswidget.h \
+    utilities.h \
     welcomedialog.h
 
 FORMS += \

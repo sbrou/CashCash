@@ -48,6 +48,7 @@ public slots:
 
     void showCategories();
     void showTags();
+    void showStats();
 
 private slots:
     bool commitOnDatabase();
