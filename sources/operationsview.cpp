@@ -9,7 +9,9 @@ OperationsView::OperationsView()
 
     balanceLayout = new QHBoxLayout;
     qlTodayBalance = new QLabel;
+    qlTodayBalance->setTextFormat(Qt::RichText);
     qlFutureBalance = new QLabel;
+    qlFutureBalance->setTextFormat(Qt::RichText);
     setBalance(0,0);
     balanceLayout->addWidget(qlTodayBalance);
     balanceLayout->addWidget(qlFutureBalance);
@@ -66,6 +68,7 @@ void OperationsView::applyFilters(const QString & statement)
 
 void OperationsView::setBalance(double balance, double future_balance)
 {
-    qlTodayBalance->setText(tr("Solde actuel : ") + QString::number(balance));
+    qlTodayBalance->setText(tr("Solde actuel : ") + QString("<font color=\"green\" size=\"8\"><b>%1</b></font>")
+                                                    .arg(QString::number(balance)));
     qlFutureBalance->setText(tr("Solde futur : ") + QString::number(future_balance));
 }

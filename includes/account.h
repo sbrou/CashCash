@@ -57,6 +57,8 @@ private:
     // Methodes
     void showError(const QSqlError &err);
     void updateBalance();
+    void importCSV();
+    void importOFX();
 
     // Attributs
 

@@ -11,12 +11,15 @@ CONFIG += c++11
 INCLUDEPATH = includes/ sources/ resources/ resources/uiFiles resources/translation
 
 SOURCES += \
+    csvdialog.cpp \
     sources/account.cpp \
     sources/addopdialog.cpp \
     sources/catdialog.cpp \
     sources/catslist.cpp \
     sources/chartsview.cpp \
     sources/coloredprogressbar.cpp \
+    sources/csveditor.cpp \
+    sources/csvimporterwizard.cpp \
     sources/customslice.cpp \
     sources/filterswidget.cpp \
     sources/goalsview.cpp \
@@ -29,12 +32,15 @@ SOURCES += \
     sources/welcomedialog.cpp
 
 HEADERS += \
+    csvdialog.h \
     includes/account.h \
     includes/addopdialog.h \
     includes/catdialog.h \
     includes/catslist.h \
     includes/chartsview.h \
     includes/coloredprogressbar.h \
+    includes/csveditor.h \
+    includes/csvimporterwizard.h \
     includes/customslice.h \
     includes/filterswidget.h \
     includes/goalsview.h \
@@ -47,6 +53,7 @@ HEADERS += \
     includes/welcomedialog.h
 
 FORMS += \
+    csvdialog.ui \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/mainwindow.ui \
     resources/uiFiles/newaccountdialog.ui

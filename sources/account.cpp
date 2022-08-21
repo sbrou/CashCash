@@ -13,6 +13,8 @@
 #include <addopdialog.h>
 #include "catslist.h"
 #include "statswidget.h"
+#include "csvimporterwizard.h"
+#include "csvdialog.h"
 
 #include "initdb.h"
 
@@ -152,9 +154,50 @@ QDomElement getElement(const QDomElement &parent, const QString& name)
     return QDomElement();
 }
 
+void Account::importCSV()
+{
+
+}
+
+void Account::importOFX()
+{
+
+}
+
 void Account::importFile()
 {
-    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(), tr("ofx files (*.ofx)"));
+    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(),
+                                                    tr("ofx files (*.ofx);;csv files (*.csv)"));
+    if (filename.endsWith(".csv"))
+    {
+//        CSVDialog csvdiag(filename, this);
+//        csvdiag.exec();
+
+        CSVImporterWizard csvWizard(filename);
+        if (csvWizard.exec())
+        {
+            QStandardItemModel *ops = csvWizard.getOperations();
+
+            QSqlQuery q;
+            if (!q.prepare(INSERT_OPERATION_SQL))
+            {
+                qDebug() << q.lastError();
+                return;
+            }
+
+            for (int r = 0; r < model->rowCount(); ++r )
+            {
+                QDate date = QDate::fromString(ops->item(r, 0)->data(Qt::DisplayRole).toString(),"yyyyMMdd");
+                int category = 1; // ops->item(r, 1)->data(Qt::DisplayRole).toInt();
+                double amount = ops->item(r, 2)->data(Qt::DisplayRole).toDouble();
+                int tag = 1; // ops->item(r, 3)->data(Qt::DisplayRole).toInt();
+                QString description = ops->item(r, 4)->data(Qt::DisplayRole).toString();
+
+                addOperationInDB(q, date, category, amount, tag, description, (amount>0));
+            }
+        }
+        return;
+    }
 
     QFile inFile(filename);
     if(!inFile.open(QIODevice::ReadOnly)) {
@@ -261,7 +304,7 @@ void Account::importFile()
                 else
                     description = op.elementsByTagName("PAYEE").at(0).toElement().text();
 
-                qDebug() << date << amount << description;
+//                qDebug() << date << amount << description;
                 addOperationInDB(q, date, 1, amount, 1, description, (amount>0));
 
             }
