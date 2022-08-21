@@ -129,7 +129,8 @@ QStandardItemModel* CSVImporterWizard::getOperations()
 /////////////////////////////////////
 
 IntroPage::IntroPage(const QString & filename, QWidget *parent)
-    : QWizardPage(parent)
+    : QWizardPage(parent),
+      _file(filename)
 {
     setTitle(tr("Introduction"));
 //    setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/watermark.png"));
@@ -141,7 +142,6 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
 
     fileLabel = new QLabel(tr("F&ichier:"));
     qleFile = new QLineEdit;
-//    qleFile->setText(filename);
     qleFile->setReadOnly(true);
     fileLabel->setBuddy(qleFile);
 
@@ -154,8 +154,6 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
     hbox->addWidget(qpbChooseFile);
 
     registerField("filename*", qleFile);
-//    if (!filename.isEmpty())
-//        setField("filename", filename);
 
     newConfigRadioButton = new QRadioButton(tr("&Create a new configuration"));
     useConfigRadioButton = new QRadioButton(tr("&Use a configuration"));
@@ -175,6 +173,15 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
     layout->addLayout(hbox);
     layout->addLayout(gbox);
     setLayout(layout);
+}
+
+void IntroPage::initializePage()
+{
+    if (!_file.isEmpty())
+    {
+        qleFile->setText(_file);
+        emit qleFile->textChanged(_file);
+    }
 }
 
 int IntroPage::nextId() const
@@ -283,6 +290,7 @@ FieldsPage::FieldsPage(QWidget *parent)
 
     qleDate = new QLineEdit;
     qleDate->setValidator(new QIntValidator);
+    qleDateFormat = new QLineEdit;
     qleCat = new QLineEdit;
     qleCat->setValidator(new QIntValidator);
     qleAmount = new QLineEdit;
@@ -294,12 +302,14 @@ FieldsPage::FieldsPage(QWidget *parent)
 
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("Date :"), qleDate);
+    form->addRow(tr("Format Date (ex: dd/MM/yyyy) : "), qleDateFormat);
     form->addRow(tr("Catégorie : "), qleCat);
     form->addRow(tr("Montant : "), qleAmount);
     form->addRow(tr("Etiquette : "), qleTag);
     form->addRow(tr("Description : "), qleDes);
 
     registerField("dateColumn*", qleDate);
+    registerField("dateFormat*", qleDateFormat);
     registerField("catColumn", qleCat);
     registerField("amountColumn*", qleAmount);
     registerField("tagColumn", qleTag);
@@ -420,8 +430,7 @@ void ConclusionPage::process_line(const QString& line)
 
     QStringList infos = line.split(QLatin1Char(';'));
 
-    QStringList date = infos.at(dateCol).split(QLatin1Char('/'));
-    QDate op_date(date.at(2).toInt(),date.at(1).toInt(),date.at(0).toInt());
+    QDate op_date = QDate::fromString(infos.at(dateCol),field("dateFormat").toString());
 
     bool ok;
     double amount;

@@ -68,7 +68,13 @@ void OperationsView::applyFilters(const QString & statement)
 
 void OperationsView::setBalance(double balance, double future_balance)
 {
-    qlTodayBalance->setText(tr("Solde actuel : ") + QString("<font color=\"green\" size=\"8\"><b>%1</b></font>")
+    QString bColor = balance >= 0 ? "green" : "red";
+    QString fbColor = future_balance >= 0 ? "green" : "red";
+
+    qlTodayBalance->setText(tr("Solde actuel : ") + QString("<font color=\"%1\" size=\"8\"><b>%2</b></font>")
+                                                    .arg(bColor)
                                                     .arg(QString::number(balance)));
-    qlFutureBalance->setText(tr("Solde futur : ") + QString::number(future_balance));
+    qlFutureBalance->setText(tr("Solde futur : ") + QString("<font color=\"%1\" size=\"8\"><b>%2</b></font>")
+                                                    .arg(fbColor)
+                                                    .arg(QString::number(future_balance)));
 }

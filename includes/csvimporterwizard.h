@@ -99,6 +99,7 @@ class IntroPage : public QWizardPage
 public:
     IntroPage(const QString & filename = "", QWidget *parent = nullptr);
     int nextId() const override;
+    void initializePage() override;
 
 private slots:
     void chooseFile();
@@ -111,6 +112,8 @@ private:
     QRadioButton *newConfigRadioButton;
     QRadioButton *useConfigRadioButton;
     QComboBox *configsList;
+
+    QString _file;
 };
 
 
@@ -120,9 +123,7 @@ class LinePage : public QWizardPage
 
 public:
     LinePage(QWidget *parent = nullptr);
-
     int nextId() const override;
-
     void initializePage() override;
 
 private slots:
@@ -149,6 +150,7 @@ public:
 
 private:
     QLineEdit *qleDate;
+    QLineEdit *qleDateFormat;
     QLineEdit *qleCat;
     QLineEdit *qleAmount;
     QLineEdit *qleTag;

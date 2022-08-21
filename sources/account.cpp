@@ -154,51 +154,39 @@ QDomElement getElement(const QDomElement &parent, const QString& name)
     return QDomElement();
 }
 
-void Account::importCSV()
+void Account::importCSV(const QString & filename)
 {
+    //        CSVDialog csvdiag(filename, this);
+    //        csvdiag.exec();
 
-}
-
-void Account::importOFX()
-{
-
-}
-
-void Account::importFile()
-{
-    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(),
-                                                    tr("ofx files (*.ofx);;csv files (*.csv)"));
-    if (filename.endsWith(".csv"))
+    CSVImporterWizard csvWizard(filename);
+    if (csvWizard.exec())
     {
-//        CSVDialog csvdiag(filename, this);
-//        csvdiag.exec();
+        QStandardItemModel *ops = csvWizard.getOperations();
 
-        CSVImporterWizard csvWizard(filename);
-        if (csvWizard.exec())
+        QSqlQuery q;
+        if (!q.prepare(INSERT_OPERATION_SQL))
         {
-            QStandardItemModel *ops = csvWizard.getOperations();
-
-            QSqlQuery q;
-            if (!q.prepare(INSERT_OPERATION_SQL))
-            {
-                qDebug() << q.lastError();
-                return;
-            }
-
-            for (int r = 0; r < model->rowCount(); ++r )
-            {
-                QDate date = QDate::fromString(ops->item(r, 0)->data(Qt::DisplayRole).toString(),"yyyyMMdd");
-                int category = 1; // ops->item(r, 1)->data(Qt::DisplayRole).toInt();
-                double amount = ops->item(r, 2)->data(Qt::DisplayRole).toDouble();
-                int tag = 1; // ops->item(r, 3)->data(Qt::DisplayRole).toInt();
-                QString description = ops->item(r, 4)->data(Qt::DisplayRole).toString();
-
-                addOperationInDB(q, date, category, amount, tag, description, (amount>0));
-            }
+            qDebug() << q.lastError();
+            return;
         }
-        return;
-    }
 
+        for (int r = 0; r < ops->rowCount(); ++r )
+        {
+            QDate date = QDate::fromString(ops->item(r, 0)->data(Qt::DisplayRole).toString(),"yyyy-MM-dd");
+            int category = 1; // ops->item(r, 1)->data(Qt::DisplayRole).toInt();
+            double amount = ops->item(r, 2)->data(Qt::DisplayRole).toDouble();
+            int tag = 1; // ops->item(r, 3)->data(Qt::DisplayRole).toInt();
+            QString description = ops->item(r, 4)->data(Qt::DisplayRole).toString();
+
+            addOperationInDB(q, date, category, amount, tag, description, (amount>0));
+        }
+    }
+    commitOnDatabase();
+}
+
+void Account::importOFX(const QString & filename)
+{
     QFile inFile(filename);
     if(!inFile.open(QIODevice::ReadOnly)) {
         qDebug() << "can't open input file";
@@ -310,10 +298,19 @@ void Account::importFile()
             }
         }
     }
-//    model->select();
     commitOnDatabase();
     outFile.remove();
     xmlFile.remove();
+}
+
+void Account::importFile()
+{
+    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(),
+                                                    tr("ofx files (*.ofx);;csv files (*.csv)"));
+    if (filename.endsWith(".csv"))
+        importCSV(filename);
+    else if (filename.endsWith(".ofx"))
+        importOFX(filename);
 }
 
 void Account::updateBalance()
