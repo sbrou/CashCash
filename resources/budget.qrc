@@ -17,5 +17,7 @@
         <file>images/save_48px.png</file>
         <file>images/search_48px.png</file>
         <file>images/tag_window_48px.png</file>
+        <file>images/arrow_down.png</file>
+        <file>images/arrow_up.png</file>
     </qresource>
 </RCC>

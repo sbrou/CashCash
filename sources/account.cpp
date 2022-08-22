@@ -159,7 +159,7 @@ void Account::importCSV(const QString & filename)
     //        CSVDialog csvdiag(filename, this);
     //        csvdiag.exec();
 
-    CSVImporterWizard csvWizard(filename);
+    CSVImporterWizard csvWizard(model, filename);
     if (csvWizard.exec())
     {
         QStandardItemModel *ops = csvWizard.getOperations();
@@ -504,6 +504,7 @@ void Account::saveSettings()
     settings.setValue("subSplitterSizes", splitter->saveState());
     settings.setValue("mainSplitterSizes", saveState());
     settings.setValue("lastFile", QVariant(_filepath));
+    opsView->saveSettings();
 }
 
 void Account::readSettings()

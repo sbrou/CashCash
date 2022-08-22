@@ -65,6 +65,10 @@ class QGroupBox;
 class QComboBox;
 class QTableView;
 class QStandardItemModel;
+class QFormLayout;
+class QSqlRelationalTableModel;
+class QSqlTableModel;
+
 QT_END_NAMESPACE
 
 class CSVImporterWizard : public QWizard
@@ -79,16 +83,18 @@ public:
            Page_Tags,
            Page_Conclusion };
 
-    CSVImporterWizard(const QString & filename = "", QWidget *parent = nullptr);
+    CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename = "", QWidget *parent = nullptr);
     void accept() override;
     QStandardItemModel* getOperations();
+    void matchCategories(QMap<QString,int>* catsList);
 
 private slots:
     void showHelp();
 
 private:
     QStandardItemModel *ops;
-
+    QSqlTableModel * catsModel;
+    QSqlTableModel * tagsModel;
 };
 
 
@@ -160,21 +166,20 @@ private:
 };
 
 
-//class CategoriesPage : public QWizardPage
-//{
-//    Q_OBJECT
+class CategoriesPage : public QWizardPage
+{
+    Q_OBJECT
 
-//public:
-//    CategoriesPage(QWidget *parent = nullptr);
+public:
+    CategoriesPage(QSqlTableModel *mod, QWidget *parent = nullptr);
+    void initializePage() override;
+    int nextId() const override;
 
-//    int nextId() const override;
-
-//private:
-//    QLabel *nameLabel;
-//    QLabel *upgradeKeyLabel;
-//    QLineEdit *nameLineEdit;
-//    QLineEdit *upgradeKeyLineEdit;
-//};
+private:
+    QFormLayout *form;
+    QSqlTableModel *cats;
+    QMap<QString,int> catsList;
+};
 
 
 //class TagsPage : public QWizardPage

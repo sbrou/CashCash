@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 #include "filterswidget.h"
 
@@ -19,14 +20,18 @@ public:
 
     void loadModel(QSqlRelationalTableModel * mod);
     QTableView* table();
+    void saveSettings();
+    void readSettings();
 
 public slots:
     void applyFilters(const QString &);
     void setBalance(double, double);
 
+private slots:
+    void slotShowFilters(bool isVisible);
+
 private:
     // Methodes
-
 
     // Attributs
     QVBoxLayout *mainLayout;
@@ -35,6 +40,7 @@ private:
 
     QSqlRelationalTableModel * model;
 
+    QPushButton *qpbHideOrShowFilters;
     filtersWidget *filters;
 
     QLabel *qlTodayBalance;

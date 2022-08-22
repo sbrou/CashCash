@@ -52,14 +52,21 @@
 
 #include "csvimporterwizard.h"
 
-CSVImporterWizard::CSVImporterWizard(const QString & filename, QWidget *parent)
-    : QWizard(parent)
+#include <QSqlRelationalTableModel>
+#include <QScrollArea>
+
+CSVImporterWizard::CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename, QWidget *parent)
+    : QWizard(parent),
+      catsModel(mod->relationModel(2)),
+      tagsModel(mod->relationModel(4))
 {
     setPage(Page_Intro, new IntroPage(filename));
     setPage(Page_Line, new LinePage);
     setPage(Page_Fields, new FieldsPage);
-//    setPage(Page_Categories, new CategoriesPage);
+
+    setPage(Page_Categories, new CategoriesPage(catsModel));
 //    setPage(Page_Tags, new TagsPage);
+
     ops = new QStandardItemModel;
     setPage(Page_Conclusion, new ConclusionPage(ops));
 
@@ -68,6 +75,8 @@ CSVImporterWizard::CSVImporterWizard(const QString & filename, QWidget *parent)
 //    setWizardStyle(ModernStyle);
 
     setOption(HaveHelpButton, true);
+    setOption(NoDefaultButton, true);
+
 //    setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 
     connect(this, &QWizard::helpRequested, this, &CSVImporterWizard::showHelp);
@@ -125,6 +134,10 @@ QStandardItemModel* CSVImporterWizard::getOperations()
     return ops;
 }
 
+void CSVImporterWizard::matchCategories(QMap<QString,int>* catsList)
+{
+
+}
 
 /////////////////////////////////////
 
@@ -280,7 +293,6 @@ void LinePage::initializePage()
 
 /////////////////////////////////////
 
-
 FieldsPage::FieldsPage(QWidget *parent)
     : QWizardPage(parent)
 {
@@ -328,9 +340,13 @@ FieldsPage::FieldsPage(QWidget *parent)
 }
 
 int FieldsPage::nextId() const
-{
-//    return CSVImporterWizard::Page_Categories;
-    return CSVImporterWizard::Page_Conclusion;
+{ 
+    if (field("catColumn").toInt() > 0)
+        return CSVImporterWizard::Page_Categories;
+//    else if (field("tagColumn").toInt() > 0)
+//        return CSVImporterWizard::Page_Tags;
+    else
+        return CSVImporterWizard::Page_Conclusion;
 }
 
 void FieldsPage::initializePage()
@@ -359,6 +375,82 @@ void FieldsPage::initializePage()
         file.close();
         qlHeaders->setText(text);
     }
+}
+
+/////////////////////////////////////
+
+CategoriesPage::CategoriesPage(QSqlTableModel *mod, QWidget *parent)
+    : QWizardPage(parent),
+      cats(mod)
+{
+    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
+    setSubTitle(tr("Please fill both fields. Make sure to provide a valid "
+                   "email address (e.g., john.smith@example.com)."));
+
+    QScrollArea * scrollArea = new QScrollArea;
+    QWidget * scrollWidget = new QWidget;
+    form = new QFormLayout(scrollWidget);
+
+    scrollArea->setWidget(scrollWidget);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scrollArea->setWidgetResizable(true);
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(scrollArea);
+    setLayout(vbox);
+}
+
+void CategoriesPage::initializePage()
+{
+    QFile file(field("filename").toString());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    int op_line = field("firstOpLine").toInt() < 0 ?
+                field("OpHeaderLine").toInt() + 1 : field("firstOpLine").toInt();
+    int iline = 1;
+    int catCol = field("catColumn").toInt() - 1;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+
+        if (iline++ < op_line)
+            continue;
+
+        QStringList infos = line.split(QLatin1Char(';'));
+
+        if (!infos.at(catCol).isEmpty())
+        {
+            catsList.insert(infos.at(catCol), 1);
+        }
+    }
+
+    file.close();
+
+    QStringList keys = catsList.keys();
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        QComboBox * cb = new QComboBox;
+        cb->setEditable(true);
+        cb->setModel(cats);
+        cb->setModelColumn(1);
+        cb->setCurrentIndex(0);
+
+        form->addRow(keys.at(i), cb);
+    }
+}
+
+int CategoriesPage::nextId() const
+{
+    for (int i = 0; i < form->rowCount(); ++i)
+    {
+        QLayoutItem *field = form->itemAt(i, QFormLayout::FieldRole);
+        QComboBox *cb = qobject_cast<QComboBox *>(field->widget());
+    }
+//    wizard()->matchCategories(&catsList);
+
+    return CSVImporterWizard::Page_Conclusion;
 }
 
 /////////////////////////////////////
@@ -417,6 +509,8 @@ void ConclusionPage::initializePage()
 
         process_line(line);
     }
+
+    file.close();
 }
 
 void ConclusionPage::process_line(const QString& line)

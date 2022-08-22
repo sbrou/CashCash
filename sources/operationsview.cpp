@@ -2,12 +2,13 @@
 
 #include <QSqlRelationalDelegate>
 #include <QHeaderView>
+#include <QSettings>
 
 OperationsView::OperationsView()
 {
     mainLayout = new QVBoxLayout(this);
-
     balanceLayout = new QHBoxLayout;
+
     qlTodayBalance = new QLabel;
     qlTodayBalance->setTextFormat(Qt::RichText);
     qlFutureBalance = new QLabel;
@@ -17,11 +18,18 @@ OperationsView::OperationsView()
     balanceLayout->addWidget(qlFutureBalance);
     mainLayout->addLayout(balanceLayout);
 
+    qpbHideOrShowFilters = new QPushButton(this);
+    qpbHideOrShowFilters->setCheckable(true);
+    connect(qpbHideOrShowFilters, SIGNAL(toggled(bool)), this, SLOT(slotShowFilters(bool)));
+    mainLayout->addWidget(qpbHideOrShowFilters);
+
     filters = new filtersWidget(this);
     connect(filters, SIGNAL(statementBuilt(QString)), this, SLOT(applyFilters(QString)));
     mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
+
+    readSettings();
 }
 
 OperationsView::~OperationsView()
@@ -32,6 +40,33 @@ OperationsView::~OperationsView()
     qlFutureBalance->deleteLater();
     balanceLayout->deleteLater();
     mainLayout->deleteLater();
+}
+
+void OperationsView::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("operations/filtersVisible", filters->isVisible());
+}
+
+void OperationsView::readSettings()
+{
+    QSettings settings;
+    bool isVisible = settings.value("operations/filtersVisible", false).toBool();
+    slotShowFilters(isVisible);
+}
+
+void OperationsView::slotShowFilters(bool isVisible)
+{
+    if (isVisible) {
+        filters->show();
+        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/arrow_up.png"));
+        qpbHideOrShowFilters->setText(tr("Cacher les filtres"));
+    }
+    else {
+        filters->hide();
+        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/arrow_down.png"));
+        qpbHideOrShowFilters->setText(tr("Montrer les filtres"));
+    }
 }
 
 QTableView* OperationsView::table()
