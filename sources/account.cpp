@@ -116,6 +116,7 @@ void Account::initAccount()
     opsView->loadModel(model);
     opsView->setBalance(_balance, _future_balance);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
+    connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
     connect(this, SIGNAL(balanceChanged(double, double)), opsView, SLOT(setBalance(double, double)));
 //    accLayout->addWidget(opsView, 0, 0);
     splitter->addWidget(opsView);
