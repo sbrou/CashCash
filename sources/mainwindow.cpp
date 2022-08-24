@@ -205,7 +205,6 @@ void MainWindow::showWelcomeDialog()
 {
     welcomeDialog welcome(this);
     int r = welcome.exec();
-    qDebug() << r;
     QSettings settings;
 
     switch (r)

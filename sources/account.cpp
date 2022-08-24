@@ -14,7 +14,6 @@
 #include "catslist.h"
 #include "statswidget.h"
 #include "csvimporterwizard.h"
-#include "csvdialog.h"
 
 #include "initdb.h"
 
@@ -156,9 +155,6 @@ QDomElement getElement(const QDomElement &parent, const QString& name)
 
 void Account::importCSV(const QString & filename)
 {
-    //        CSVDialog csvdiag(filename, this);
-    //        csvdiag.exec();
-
     CSVImporterWizard csvWizard(model, filename);
     if (csvWizard.exec())
     {
@@ -187,9 +183,14 @@ void Account::importCSV(const QString & filename)
 
 void Account::importOFX(const QString & filename)
 {
+    QMessageBox qmbErr(QMessageBox::Critical, tr("Erreur"), QString(tr("Problème à l'importation du fichier") + " %1")
+                       .arg(filename), QMessageBox::Ok, this);
+
+
     QFile inFile(filename);
     if(!inFile.open(QIODevice::ReadOnly)) {
-        qDebug() << "can't open input file";
+        qmbErr.setDetailedText("can't open input file");
+        qmbErr.exec();
         return;
     }
 
@@ -210,7 +211,8 @@ void Account::importOFX(const QString & filename)
 
     QFile outFile("trimmed_ofx.ofx");
     if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        qDebug() << "can't open trimmed file";
+        qmbErr.setDetailedText("can't open trimmed file");
+        qmbErr.exec();
         return;
     }
 
@@ -219,22 +221,36 @@ void Account::importOFX(const QString & filename)
     out << newFileData;
     outFile.close();
 
-    QString program = "D:\\sopie\\Qt_Projects\\budget\\3rdparty\\OpenSP-1.5.2\\osx.exe";
+    qDebug() << QCoreApplication::applicationDirPath();
+
+    QFile osx_exe(QString("%1/extern/osx.exe").arg(QCoreApplication::applicationDirPath()));
+    QFile dtd_file(QString("%1/extern/ofx160.dtd").arg(QCoreApplication::applicationDirPath()));
+    if (!osx_exe.exists() || !dtd_file.exists()) {
+        QString details;
+        if (!osx_exe.exists()) details += QString("can't find the file %1 \n").arg(osx_exe.fileName());
+        if (!dtd_file.exists()) details += QString("can't find the file %1 \n").arg(dtd_file.fileName());
+        qmbErr.setDetailedText(details);
+        qmbErr.exec();
+        return;
+    }
+
+    QString program = osx_exe.fileName();
     QStringList arguments;
-    arguments << "-ldtd_file" <<  "D:\\sopie\\Qt_Projects\\budget\\3rdparty\\OpenSP-1.5.2\\ofx160.dtd" << outFile.fileName();
+    arguments << "-ldtd_file" <<  dtd_file.fileName() << outFile.fileName();
 
     QProcess *myProcess = new QProcess(this);
     myProcess->start(program, arguments);
     if (!myProcess->waitForFinished()) {
-        qDebug() << "process not finished";
-        qDebug() << myProcess->readAllStandardError();
+        qmbErr.setDetailedText("process not finished : \n" + myProcess->readAllStandardError());
+        qmbErr.exec();
         return;
     }
 
     QByteArray result = myProcess->readAllStandardOutput();
     QFile xmlFile("ops.ofx");
     if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        qDebug() << "can't create xml file";
+        qmbErr.setDetailedText("can't create xml file");
+        qmbErr.exec();
         return;
     }
 
@@ -246,12 +262,14 @@ void Account::importOFX(const QString & filename)
     QDomDocument doc("ops");
     if (!xmlFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << "can't open xml file";
+        qmbErr.setDetailedText("can't open xml file");
+        qmbErr.exec();
         return;
     }
     if (!doc.setContent(&xmlFile)) {
         xmlFile.close();
-        qDebug() << "problem at reading";
+        qmbErr.setDetailedText("problem at reading");
+        qmbErr.exec();
         return;
     }
     xmlFile.close();
@@ -272,6 +290,8 @@ void Account::importOFX(const QString & filename)
             if (!q.prepare(INSERT_OPERATION_SQL))
             {
                 qDebug() << q.lastError();
+                qmbErr.setDetailedText(q.lastError().text());
+                qmbErr.exec();
                 return;
             }
 
@@ -306,7 +326,7 @@ void Account::importOFX(const QString & filename)
 void Account::importFile()
 {
     QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(),
-                                                    tr("ofx files (*.ofx);;csv files (*.csv)"));
+                                                    tr("Fichiers (*.ofx *.csv)"));
     if (filename.endsWith(".csv"))
         importCSV(filename);
     else if (filename.endsWith(".ofx"))

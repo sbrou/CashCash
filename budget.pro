@@ -11,7 +11,6 @@ CONFIG += c++11
 INCLUDEPATH = includes/ sources/ resources/ resources/uiFiles resources/translation
 
 SOURCES += \
-    csvdialog.cpp \
     sources/account.cpp \
     sources/addopdialog.cpp \
     sources/catdialog.cpp \
@@ -32,7 +31,6 @@ SOURCES += \
     sources/welcomedialog.cpp
 
 HEADERS += \
-    csvdialog.h \
     includes/account.h \
     includes/addopdialog.h \
     includes/catdialog.h \
@@ -53,7 +51,6 @@ HEADERS += \
     includes/welcomedialog.h
 
 FORMS += \
-    csvdialog.ui \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/mainwindow.ui \
     resources/uiFiles/newaccountdialog.ui
