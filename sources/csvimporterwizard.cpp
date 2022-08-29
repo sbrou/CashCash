@@ -54,24 +54,23 @@
 
 #include <QSqlRelationalTableModel>
 #include <QScrollArea>
+#include <set>
 
 CSVImporterWizard::CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename, QWidget *parent)
     : QWizard(parent),
       catsModel(mod->relationModel(2)),
       tagsModel(mod->relationModel(4))
 {
+    ops = new OperationsVector;
+
     setPage(Page_Intro, new IntroPage(filename));
     setPage(Page_Line, new LinePage);
     setPage(Page_Fields, new FieldsPage);
-
     setPage(Page_Categories, new CategoriesPage(catsModel));
 //    setPage(Page_Tags, new TagsPage);
-
-    ops = new QStandardItemModel;
-    setPage(Page_Conclusion, new ConclusionPage(ops));
+    setPage(Page_Conclusion, new ConclusionPage);
 
     setStartId(Page_Intro);
-
 //    setWizardStyle(ModernStyle);
 
     setOption(HaveHelpButton, true);
@@ -126,17 +125,44 @@ void CSVImporterWizard::showHelp()
 
 void CSVImporterWizard::accept()
 {
+    QTableWidget *tab = qobject_cast<ConclusionPage*>(page(Page_Conclusion))->table();
+    ops->reserve(tab->rowCount());
+
+    for (int r = 0; r < tab->rowCount(); ++r )
+    {
+        Operation op;
+        op.date = QDate::fromString(tab->item(r, 0)->text(),"yyyy-MM-dd");
+        op.cat = tab->item(r, 2)->text().toInt();
+        op.amount = tab->item(r, 3)->text().toDouble();
+        op.tag = 1; // model->item(r, 5)->data(Qt::DisplayRole).toInt();
+        op.description = tab->item(r, 6)->text();
+
+        ops->push_back(op);
+    }
+
+    qDebug() << "le nombre d'operations dans ops est : " << ops->size();
     QDialog::accept();
 }
 
-QStandardItemModel* CSVImporterWizard::getOperations()
+void CSVImporterWizard::setNbOperations(int nb)
+{
+    nbOps = nb;
+    qDebug() << "le nombre d'operations à importer est : " << nbOps;
+}
+
+int CSVImporterWizard::getNbOperations() const
+{
+    return nbOps;
+}
+
+OperationsVector* CSVImporterWizard::getOperations()
 {
     return ops;
 }
 
-void CSVImporterWizard::matchCategories(QMap<QString,int>* catsList)
+GroupsMap* CSVImporterWizard::matchedCategories()
 {
-
+    return &catsMap;
 }
 
 /////////////////////////////////////
@@ -245,6 +271,7 @@ LinePage::LinePage(QWidget *parent)
     qleOpLine = new QLineEdit;
     qleOpLine->setValidator(new QIntValidator);
     connect(enterOpLine, SIGNAL(stateChanged(int)), this, SLOT(handleOpLine(int)));
+    connect(qleLineSelected, SIGNAL(textChanged(QString)), this, SLOT(updateOpLine(QString)));
 
     registerField("firstOpLine", qleOpLine);
 
@@ -271,8 +298,14 @@ void LinePage::handleOpLine(int state)
     else
     {
         qleOpLine->setEnabled(false);
-        setField("firstOpLine",-1);
+        setField("firstOpLine","");
     }
+}
+
+void LinePage::updateOpLine(const QString & line)
+{
+    int id_line = line.toInt() + 1;
+    setField("firstOpLine",id_line);
 }
 
 int LinePage::nextId() const
@@ -351,23 +384,28 @@ int FieldsPage::nextId() const
 
 void FieldsPage::initializePage()
 {
+    int nbLines = 0;
     QFile file(field("filename").toString());
     if (file.open(QFile::ReadOnly | QFile::Text))
     {
         QString text;
-
         QTextStream in(&file);
         int id_line = field("OpHeaderLine").toInt();
+        int id_opLine = field("firstOpLine").toInt();
         int id = 1;
         while (!in.atEnd()) {
             QString line = in.readLine();
-            if (id++ == id_line) {
+            if (id == id_line) {
                 QStringList headers = line.split(QLatin1Char(';'));
                 for (int i = 1; i <= headers.size(); ++i) {
                     text += QString::number(i) + " " + headers.at(i-1) + "\n";
                 }
-                break;
             }
+
+            if (id >= id_opLine && !line.isEmpty())
+                ++nbLines;
+
+            ++id;
         }
         file.close();
         file.open(QFile::ReadOnly | QFile::Text);
@@ -375,6 +413,8 @@ void FieldsPage::initializePage()
         file.close();
         qlHeaders->setText(text);
     }
+
+    qobject_cast<CSVImporterWizard*>(wizard())->setNbOperations(nbLines);
 }
 
 /////////////////////////////////////
@@ -407,10 +447,10 @@ void CategoriesPage::initializePage()
         return;
 
     QTextStream in(&file);
-    int op_line = field("firstOpLine").toInt() < 0 ?
-                field("OpHeaderLine").toInt() + 1 : field("firstOpLine").toInt();
+    int op_line = field("firstOpLine").toInt();
     int iline = 1;
     int catCol = field("catColumn").toInt() - 1;
+    std::set<QString> catsKeys;
 
     while (!in.atEnd()) {
         QString line = in.readLine();
@@ -422,42 +462,48 @@ void CategoriesPage::initializePage()
 
         if (!infos.at(catCol).isEmpty())
         {
-            catsList.insert(infos.at(catCol), 1);
+            QString cat = infos.at(catCol);
+            cat.remove(QChar('"'));
+            catsKeys.insert(cat);
         }
     }
 
     file.close();
 
-    QStringList keys = catsList.keys();
-    for (int i = 0; i < keys.size(); ++i)
+    foreach (const QString &key, catsKeys)
     {
         QComboBox * cb = new QComboBox;
-        cb->setEditable(true);
         cb->setModel(cats);
         cb->setModelColumn(1);
         cb->setCurrentIndex(0);
 
-        form->addRow(keys.at(i), cb);
+        form->addRow(key, cb);
     }
 }
 
 int CategoriesPage::nextId() const
 {
+    GroupsMap* catsMap = qobject_cast<CSVImporterWizard*>(wizard())->matchedCategories();
     for (int i = 0; i < form->rowCount(); ++i)
     {
+        QLayoutItem *label = form->itemAt(i, QFormLayout::LabelRole);
+        QString oldCat = qobject_cast<QLabel *>(label->widget())->text();
+
         QLayoutItem *field = form->itemAt(i, QFormLayout::FieldRole);
-        QComboBox *cb = qobject_cast<QComboBox *>(field->widget());
+        QComboBox * cb = qobject_cast<QComboBox *>(field->widget());
+        QString newCat = cb->currentText();
+        int newCatId = cb->currentIndex()+1;
+
+        catsMap->insert(oldCat, QPair<int,QString>(newCatId,newCat));
     }
-//    wizard()->matchCategories(&catsList);
 
     return CSVImporterWizard::Page_Conclusion;
 }
 
 /////////////////////////////////////
 
-ConclusionPage::ConclusionPage(QStandardItemModel *ops, QWidget *parent)
-    : QWizardPage(parent),
-      model(ops)
+ConclusionPage::ConclusionPage(QWidget *parent)
+    : QWizardPage(parent)
 {
     setTitle(tr("Complete Your Registration"));
 //    setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/watermark.png"));
@@ -468,20 +514,21 @@ ConclusionPage::ConclusionPage(QStandardItemModel *ops, QWidget *parent)
                          "This software is licensed under the terms of your "
                          "current license.");
 
-    model->setColumnCount(5);
-    model->setHeaderData(0, Qt::Horizontal, tr("Date"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Category"));
-    model->setHeaderData(2, Qt::Horizontal, tr("Amount"));
-    model->setHeaderData(3, Qt::Horizontal, tr("Tag"));
-    model->setHeaderData(4, Qt::Horizontal, tr("Description"));
-    table = new QTableView;
-    table->setModel(model);
-    table->horizontalHeader()->setStretchLastSection(true);
-    table->verticalHeader()->hide();
+    tableWidget = new QTableWidget;
+    tableWidget->setColumnCount(7);
+    tableWidget->horizontalHeader()->setStretchLastSection(true);
+    tableWidget->verticalHeader()->hide();
+    tableWidget->setHorizontalHeaderLabels(QStringList({"Date", "Category", "CatId",
+                                                        "Amount", "Tag", "TagId", "Description"}));
+   tableWidget->hideColumn(2);
+   tableWidget->hideColumn(5);
+    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tableWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(bottomLabel);
-    layout->addWidget(table);
+    layout->addWidget(tableWidget);
     setLayout(layout);
 }
 
@@ -492,6 +539,10 @@ int ConclusionPage::nextId() const
 
 void ConclusionPage::initializePage()
 {
+    CSVImporterWizard* wiz = qobject_cast<CSVImporterWizard*>(wizard());
+    tableWidget->setRowCount(wiz->getNbOperations());
+    GroupsMap * catsMap = wiz->matchedCategories();
+
     QFile file(field("filename").toString());
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
@@ -500,6 +551,7 @@ void ConclusionPage::initializePage()
     int op_line = field("firstOpLine").toInt() < 0 ?
                 field("OpHeaderLine").toInt() + 1 : field("firstOpLine").toInt();
     int iline = 1;
+    int row = 0;
 
     while (!in.atEnd()) {
         QString line = in.readLine();
@@ -507,46 +559,77 @@ void ConclusionPage::initializePage()
         if (iline++ < op_line)
             continue;
 
-        process_line(line);
+        process_line(row, catsMap, line);
+        ++row;
     }
 
     file.close();
 }
 
-void ConclusionPage::process_line(const QString& line)
+void ConclusionPage::process_line(int row, GroupsMap* catsMap, const QString& line)
 {
     int dateCol = field("dateColumn").toInt() - 1;
     int amountCol = field("amountColumn").toInt() - 1;
     int desCol = field("desColumn").toInt() - 1;
-
     int catCol = field("catColumn").toInt() - 1;
     int tagCol = field("tagColumn").toInt() - 1;
 
     QStringList infos = line.split(QLatin1Char(';'));
 
-    QDate op_date = QDate::fromString(infos.at(dateCol),field("dateFormat").toString());
+    if (infos.size() > 0)
+    {
+        //// date
+        QDate op_date = QDate::fromString(infos.at(dateCol),field("dateFormat").toString());
+        QTableWidgetItem *dateItem = new QTableWidgetItem(op_date.toString("yyyy-MM-dd"));
+        tableWidget->setItem(row, 0, dateItem);
 
-    bool ok;
-    double amount;
+        //// category
+        QString cat;
+        int catId = 1;
+        if (catCol >= 0) {
+            GroupsMap::ConstIterator it_cat = catsMap->constFind(infos.at(catCol));
+            if (it_cat != catsMap->constEnd()) {
+                catId = it_cat.value().first;
+                cat = it_cat.value().second;
+            }
+        }
+        QTableWidgetItem *catItem = new QTableWidgetItem(cat);
+        tableWidget->setItem(row, 1, catItem);
 
-    QLocale german(QLocale::German);
-    amount = german.toDouble(infos.at(amountCol), &ok);
-    if (!ok) { // try with locale c
-        QLocale c(QLocale::C);
-        amount = c.toDouble(infos.at(amountCol), &ok);
+        //// Category id
+        QTableWidgetItem *catIdItem = new QTableWidgetItem(QString::number(catId));
+        tableWidget->setItem(row, 2, catIdItem);
+
+        //// amount
+        bool ok;
+        double amount;
+        QLocale german(QLocale::German);
+        amount = german.toDouble(infos.at(amountCol), &ok);
+        if (!ok) { // try with locale c
+            QLocale c(QLocale::C);
+            amount = c.toDouble(infos.at(amountCol), &ok);
+        }
+        QTableWidgetItem *amountItem = new QTableWidgetItem(QString::number(amount));
+        tableWidget->setItem(row, 3, amountItem);
+
+        //// tag
+        QString tag = tagCol < 0 ? "" : infos.at(tagCol);
+        QTableWidgetItem *tagItem = new QTableWidgetItem(tag);
+        tableWidget->setItem(row, 4, tagItem);
+
+        //// Tag id
+        QTableWidgetItem *tagIdItem = new QTableWidgetItem("1");
+        tableWidget->setItem(row, 5, tagIdItem);
+
+        //// description
+        QString des = infos.at(desCol);
+        des.remove(QChar('"'));
+        QTableWidgetItem *desItem = new QTableWidgetItem(des);
+        tableWidget->setItem(row, 6, desItem);
     }
+}
 
-    QString des = infos.at(desCol);
-    des.remove(QChar('"'));
-
-    QString cat = catCol < 0 ? "" : infos.at(catCol);
-    QString tag = tagCol < 0 ? "" : infos.at(tagCol);
-
-    QList<QStandardItem *> items;
-    items.append(new QStandardItem(op_date.toString("yyyy-MM-dd")));
-    items.append(new QStandardItem(cat));
-    items.append(new QStandardItem(QString::number(amount)));
-    items.append(new QStandardItem(tag));
-    items.append(new QStandardItem(des));
-    model->appendRow(items);
+QTableWidget * ConclusionPage::table()
+{
+    return tableWidget;
 }

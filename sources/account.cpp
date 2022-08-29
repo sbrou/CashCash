@@ -159,7 +159,7 @@ void Account::importCSV(const QString & filename)
     CSVImporterWizard csvWizard(model, filename);
     if (csvWizard.exec())
     {
-        QStandardItemModel *ops = csvWizard.getOperations();
+        OperationsVector *ops = csvWizard.getOperations();
 
         QSqlQuery q;
         if (!q.prepare(INSERT_OPERATION_SQL))
@@ -168,15 +168,10 @@ void Account::importCSV(const QString & filename)
             return;
         }
 
-        for (int r = 0; r < ops->rowCount(); ++r )
+        for (int r = 0; r < ops->size(); ++r )
         {
-            QDate date = QDate::fromString(ops->item(r, 0)->data(Qt::DisplayRole).toString(),"yyyy-MM-dd");
-            int category = 1; // ops->item(r, 1)->data(Qt::DisplayRole).toInt();
-            double amount = ops->item(r, 2)->data(Qt::DisplayRole).toDouble();
-            int tag = 1; // ops->item(r, 3)->data(Qt::DisplayRole).toInt();
-            QString description = ops->item(r, 4)->data(Qt::DisplayRole).toString();
-
-            addOperationInDB(q, date, category, amount, tag, description, (amount>0));
+            Operation op = ops->at(r);
+            addOperationInDB(q, op.date, op.cat, op.amount, op.tag, op.description, (op.amount>0));
         }
     }
     commitOnDatabase();

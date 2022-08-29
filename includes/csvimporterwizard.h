@@ -63,13 +63,25 @@ class QLineEdit;
 class QRadioButton;
 class QGroupBox;
 class QComboBox;
-class QTableView;
-class QStandardItemModel;
+class QTableWidget;
+class QAbstractItemModel;
 class QFormLayout;
 class QSqlRelationalTableModel;
 class QSqlTableModel;
 
 QT_END_NAMESPACE
+
+struct Operation
+{
+    QDate date;
+    int cat;
+    double amount;
+    int tag;
+    QString description;
+};
+
+typedef QMap<QString,QPair<int,QString> > GroupsMap;
+typedef QVector<Operation> OperationsVector;
 
 class CSVImporterWizard : public QWizard
 {
@@ -85,16 +97,21 @@ public:
 
     CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename = "", QWidget *parent = nullptr);
     void accept() override;
-    QStandardItemModel* getOperations();
-    void matchCategories(QMap<QString,int>* catsList);
+
+    void setNbOperations(int nb);
+    int getNbOperations() const;
+    OperationsVector* getOperations();
+    GroupsMap* matchedCategories();
 
 private slots:
     void showHelp();
 
 private:
-    QStandardItemModel *ops;
+    int nbOps;
+    OperationsVector *ops;
     QSqlTableModel * catsModel;
     QSqlTableModel * tagsModel;
+    GroupsMap catsMap;
 };
 
 
@@ -134,6 +151,7 @@ public:
 
 private slots:
     void handleOpLine(int);
+    void updateOpLine(const QString &);
 
 private:
     QLabel *topLabel;
@@ -178,7 +196,6 @@ public:
 private:
     QFormLayout *form;
     QSqlTableModel *cats;
-    QMap<QString,int> catsList;
 };
 
 
@@ -206,27 +223,17 @@ class ConclusionPage : public QWizardPage
     Q_OBJECT
 
 public:
-    ConclusionPage(QStandardItemModel *ops, QWidget *parent = nullptr);
+    ConclusionPage(QWidget *parent = nullptr);
     int nextId() const override;
     void initializePage() override;
 
-    struct Operation
-    {
-        QDate date;
-        int cat;
-        double amount;
-        int tag;
-        QString description;
-    };
+    QTableWidget * table();
 
 private:
     QLabel *bottomLabel;
+    QTableWidget *tableWidget;
 
-    QVector<Operation> operations;
-    QStandardItemModel *model;
-    QTableView *table;
-
-    void process_line(const QString&);
+    void process_line(int row, GroupsMap*, const QString&);
 };
 
 #endif // CSVIMPORTERWIZARD_H
