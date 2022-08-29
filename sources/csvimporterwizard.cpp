@@ -67,7 +67,7 @@ CSVImporterWizard::CSVImporterWizard(QSqlRelationalTableModel * mod, const QStri
     setPage(Page_Line, new LinePage);
     setPage(Page_Fields, new FieldsPage);
     setPage(Page_Categories, new CategoriesPage(catsModel));
-//    setPage(Page_Tags, new TagsPage);
+    setPage(Page_Tags, new TagsPage(tagsModel));
     setPage(Page_Conclusion, new ConclusionPage);
 
     setStartId(Page_Intro);
@@ -134,7 +134,7 @@ void CSVImporterWizard::accept()
         op.date = QDate::fromString(tab->item(r, 0)->text(),"yyyy-MM-dd");
         op.cat = tab->item(r, 2)->text().toInt();
         op.amount = tab->item(r, 3)->text().toDouble();
-        op.tag = 1; // model->item(r, 5)->data(Qt::DisplayRole).toInt();
+        op.tag = tab->item(r, 5)->text().toInt();
         op.description = tab->item(r, 6)->text();
 
         ops->push_back(op);
@@ -163,6 +163,11 @@ OperationsVector* CSVImporterWizard::getOperations()
 GroupsMap* CSVImporterWizard::matchedCategories()
 {
     return &catsMap;
+}
+
+GroupsMap* CSVImporterWizard::matchedTags()
+{
+    return &tagsMap;
 }
 
 /////////////////////////////////////
@@ -376,8 +381,8 @@ int FieldsPage::nextId() const
 { 
     if (field("catColumn").toInt() > 0)
         return CSVImporterWizard::Page_Categories;
-//    else if (field("tagColumn").toInt() > 0)
-//        return CSVImporterWizard::Page_Tags;
+    else if (field("tagColumn").toInt() > 0)
+        return CSVImporterWizard::Page_Tags;
     else
         return CSVImporterWizard::Page_Conclusion;
 }
@@ -497,6 +502,92 @@ int CategoriesPage::nextId() const
         catsMap->insert(oldCat, QPair<int,QString>(newCatId,newCat));
     }
 
+    if (field("tagColumn").toInt() > 0)
+        return CSVImporterWizard::Page_Tags;
+    else
+        return CSVImporterWizard::Page_Conclusion;
+}
+
+/////////////////////////////////////
+
+TagsPage::TagsPage(QSqlTableModel *mod, QWidget *parent)
+    : QWizardPage(parent),
+      tags(mod)
+{
+    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
+    setSubTitle(tr("Please fill both fields. Make sure to provide a valid "
+                   "email address (e.g., john.smith@example.com)."));
+
+    QScrollArea * scrollArea = new QScrollArea;
+    QWidget * scrollWidget = new QWidget;
+    form = new QFormLayout(scrollWidget);
+
+    scrollArea->setWidget(scrollWidget);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scrollArea->setWidgetResizable(true);
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(scrollArea);
+    setLayout(vbox);
+}
+
+void TagsPage::initializePage()
+{
+    QFile file(field("filename").toString());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    int op_line = field("firstOpLine").toInt();
+    int iline = 1;
+    int tagCol = field("tagColumn").toInt() - 1;
+    std::set<QString> tagsKeys;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+
+        if (iline++ < op_line)
+            continue;
+
+        QStringList infos = line.split(QLatin1Char(';'));
+
+        if (!infos.at(tagCol).isEmpty())
+        {
+            QString tag = infos.at(tagCol);
+            tag.remove(QChar('"'));
+            tagsKeys.insert(tag);
+        }
+    }
+
+    file.close();
+
+    foreach (const QString &key, tagsKeys)
+    {
+        QComboBox * cb = new QComboBox;
+        cb->setModel(tags);
+        cb->setModelColumn(1);
+        cb->setCurrentIndex(0);
+
+        form->addRow(key, cb);
+    }
+}
+
+int TagsPage::nextId() const
+{
+    GroupsMap* tagsMap = qobject_cast<CSVImporterWizard*>(wizard())->matchedTags();
+    for (int i = 0; i < form->rowCount(); ++i)
+    {
+        QLayoutItem *label = form->itemAt(i, QFormLayout::LabelRole);
+        QString oldTag = qobject_cast<QLabel *>(label->widget())->text();
+
+        QLayoutItem *field = form->itemAt(i, QFormLayout::FieldRole);
+        QComboBox * cb = qobject_cast<QComboBox *>(field->widget());
+        QString newTag = cb->currentText();
+        int newTagId = cb->currentIndex()+1;
+
+        tagsMap->insert(oldTag, QPair<int,QString>(newTagId,newTag));
+    }
+
     return CSVImporterWizard::Page_Conclusion;
 }
 
@@ -520,8 +611,8 @@ ConclusionPage::ConclusionPage(QWidget *parent)
     tableWidget->verticalHeader()->hide();
     tableWidget->setHorizontalHeaderLabels(QStringList({"Date", "Category", "CatId",
                                                         "Amount", "Tag", "TagId", "Description"}));
-   tableWidget->hideColumn(2);
-   tableWidget->hideColumn(5);
+    tableWidget->hideColumn(2);
+    tableWidget->hideColumn(5);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -542,14 +633,14 @@ void ConclusionPage::initializePage()
     CSVImporterWizard* wiz = qobject_cast<CSVImporterWizard*>(wizard());
     tableWidget->setRowCount(wiz->getNbOperations());
     GroupsMap * catsMap = wiz->matchedCategories();
+    GroupsMap * tagsMap = wiz->matchedTags();
 
     QFile file(field("filename").toString());
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
     QTextStream in(&file);
-    int op_line = field("firstOpLine").toInt() < 0 ?
-                field("OpHeaderLine").toInt() + 1 : field("firstOpLine").toInt();
+    int op_line = field("firstOpLine").toInt();
     int iline = 1;
     int row = 0;
 
@@ -559,14 +650,14 @@ void ConclusionPage::initializePage()
         if (iline++ < op_line)
             continue;
 
-        process_line(row, catsMap, line);
+        process_line(row, catsMap, tagsMap, line);
         ++row;
     }
 
     file.close();
 }
 
-void ConclusionPage::process_line(int row, GroupsMap* catsMap, const QString& line)
+void ConclusionPage::process_line(int row, GroupsMap* catsMap, GroupsMap* tagsMap, const QString& line)
 {
     int dateCol = field("dateColumn").toInt() - 1;
     int amountCol = field("amountColumn").toInt() - 1;
@@ -613,12 +704,20 @@ void ConclusionPage::process_line(int row, GroupsMap* catsMap, const QString& li
         tableWidget->setItem(row, 3, amountItem);
 
         //// tag
-        QString tag = tagCol < 0 ? "" : infos.at(tagCol);
+        QString tag;
+        int tagId = 1;
+        if (tagCol >= 0) {
+            GroupsMap::ConstIterator it_tag = tagsMap->constFind(infos.at(tagCol));
+            if (it_tag != tagsMap->constEnd()) {
+                tagId = it_tag.value().first;
+                tag = it_tag.value().second;
+            }
+        }
         QTableWidgetItem *tagItem = new QTableWidgetItem(tag);
         tableWidget->setItem(row, 4, tagItem);
 
         //// Tag id
-        QTableWidgetItem *tagIdItem = new QTableWidgetItem("1");
+        QTableWidgetItem *tagIdItem = new QTableWidgetItem(QString::number(tagId));
         tableWidget->setItem(row, 5, tagIdItem);
 
         //// description

@@ -102,6 +102,7 @@ public:
     int getNbOperations() const;
     OperationsVector* getOperations();
     GroupsMap* matchedCategories();
+    GroupsMap* matchedTags();
 
 private slots:
     void showHelp();
@@ -112,6 +113,7 @@ private:
     QSqlTableModel * catsModel;
     QSqlTableModel * tagsModel;
     GroupsMap catsMap;
+    GroupsMap tagsMap;
 };
 
 
@@ -199,23 +201,19 @@ private:
 };
 
 
-//class TagsPage : public QWizardPage
-//{
-//    Q_OBJECT
+class TagsPage : public QWizardPage
+{
+    Q_OBJECT
 
-//public:
-//    TagsPage(QWidget *parent = nullptr);
+public:
+    TagsPage(QSqlTableModel *mod, QWidget *parent = nullptr);
+    void initializePage() override;
+    int nextId() const override;
 
-//    int nextId() const override;
-
-//private:
-//    QLabel *companyLabel;
-//    QLabel *emailLabel;
-//    QLabel *postalLabel;
-//    QLineEdit *companyLineEdit;
-//    QLineEdit *emailLineEdit;
-//    QLineEdit *postalLineEdit;
-//};
+private:
+    QFormLayout *form;
+    QSqlTableModel *tags;
+};
 
 
 class ConclusionPage : public QWizardPage
@@ -233,7 +231,7 @@ private:
     QLabel *bottomLabel;
     QTableWidget *tableWidget;
 
-    void process_line(int row, GroupsMap*, const QString&);
+    void process_line(int row, GroupsMap*, GroupsMap*, const QString&);
 };
 
 #endif // CSVIMPORTERWIZARD_H
