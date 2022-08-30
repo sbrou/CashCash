@@ -402,41 +402,6 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-void Account::setStandardCategories()
-{
-
-}
-
-void Account::setStandardRules()
-{
-    _rules.insert("CARREFOUR","FOOD");
-    _rules.insert("HOMESERVE","HOUSE");
-    _rules.insert("PHARMACIE","HEALTH");
-    _rules.insert("FNAC","HOBBIES");
-    _rules.insert("Maxi Zoo","MAIKO");
-    _rules.insert("CHANTURGUE","HOUSE");
-    _rules.insert("TotalEnergies","HOUSE");
-    _rules.insert("PROXISERV","HOUSE");
-    _rules.insert("AVANSSUR","HOUSE");
-    _rules.insert("JOINT","JOINT");
-    _rules.insert("T2C","TRANSPORT");
-    _rules.insert("FR5110011000207555808944J","SAVING");
-    _rules.insert("BOUYGUES","SUBS");
-    _rules.insert("Deezer","SUBS");
-    _rules.insert("ASTEK","SALARY");
-}
-
-void Account::selectTest()
-{
-//    qDebug() << model->filter();
-//    model->setFilter(QString("category='1'"));
-//    QSqlQuery query = model->query();
-//    while (query.next()) {
-//        qDebug() << query.value(0);
-//    }
-
-}
-
 void Account::saveFile()
 {
     QString saveFilename = _filepath.isEmpty() ? QFileDialog::getSaveFileName(this, tr("Save File"),
@@ -707,13 +672,11 @@ QSqlError Account::createFile()
         _balance = _init_balance;
         _future_balance = _init_balance;
 
+        QSqlError err = setStandardCategories();
+        if (err.isValid())
+            return err;
+
         QSqlQuery q;
-
-        if (!q.prepare(INSERT_CATEGORY_SQL))
-            return q.lastError();
-
-        addCategoryInDB(q, "-NONE-", "#000000" , 0);
-
         if (!q.prepare(INSERT_TAG_SQL))
             return q.lastError();
 
@@ -723,4 +686,67 @@ QSqlError Account::createFile()
     }
 
     return QSqlError();
+}
+
+QSqlError Account::setStandardCategories()
+{
+    QSqlQuery q;
+
+    if (!q.prepare(INSERT_CATEGORY_SQL))
+        return q.lastError();
+
+    QStringList colors = QColor::colorNames();
+    qDebug() << "Nombre de couleurs " << colors.size();
+
+    // Depenses
+
+    addCategoryInDB(q, tr("-AUCUN-"), "#000000" , 0);
+
+    int i = 0;
+    addCategoryInDB(q, tr("Abonnements"), colors[i++], 0);
+    addCategoryInDB(q, tr("Alimentation"), colors[i++], 0);
+    addCategoryInDB(q, tr("Animaux"), colors[i++], 0);
+    addCategoryInDB(q, tr("Auto/Moto"), colors[i++], 0);
+    addCategoryInDB(q, tr("Bien-Etre/Soins"), colors[i++], 0);
+    addCategoryInDB(q, tr("Divers"), colors[i++], 0);
+    addCategoryInDB(q, tr("Dons/Cadeaux"), colors[i++], 0);
+    addCategoryInDB(q, tr("Electronique/Informatique"), colors[i++], 0);
+    addCategoryInDB(q, tr("Epargne"), colors[i++], 0);
+    addCategoryInDB(q, tr("Frais"), colors[i++], 0);
+    addCategoryInDB(q, tr("Habillement"), colors[i++], 0);
+    addCategoryInDB(q, tr("Impôts/Taxes"), colors[i++], 0);
+    addCategoryInDB(q, tr("Logement"), colors[i++], 0);
+    addCategoryInDB(q, tr("Loisirs/Culture/Sport"), colors[i++], 0);
+    addCategoryInDB(q, tr("Santé"), colors[i++], 0);
+    addCategoryInDB(q, tr("Transport"), colors[i++], 0);
+    addCategoryInDB(q, tr("Vacances"), colors[i++], 0);
+
+    // Revenus
+
+    addCategoryInDB(q, tr("Autres Revenus"), colors[i++], 1);
+    addCategoryInDB(q, tr("Indemnités"), colors[i++], 1);
+    addCategoryInDB(q, tr("Placements"), colors[i++], 1);
+    addCategoryInDB(q, tr("Traitements/Salaires"), colors[i++], 1);
+    addCategoryInDB(q, tr("Remboursements"), colors[i++], 1);
+
+    return QSqlError();
+}
+
+void Account::setStandardRules()
+{
+    _rules.insert("CARREFOUR","FOOD");
+    _rules.insert("HOMESERVE","HOUSE");
+    _rules.insert("PHARMACIE","HEALTH");
+    _rules.insert("FNAC","HOBBIES");
+    _rules.insert("Maxi Zoo","MAIKO");
+    _rules.insert("CHANTURGUE","HOUSE");
+    _rules.insert("TotalEnergies","HOUSE");
+    _rules.insert("PROXISERV","HOUSE");
+    _rules.insert("AVANSSUR","HOUSE");
+    _rules.insert("JOINT","JOINT");
+    _rules.insert("T2C","TRANSPORT");
+    _rules.insert("FR5110011000207555808944J","SAVING");
+    _rules.insert("BOUYGUES","SUBS");
+    _rules.insert("Deezer","SUBS");
+    _rules.insert("ASTEK","SALARY");
 }

@@ -25,7 +25,7 @@ public:
     explicit Account(QWidget *parent = nullptr);
 
     void setStandardRules();
-    void setStandardCategories();
+    QSqlError setStandardCategories();
     void saveSettings();
     void readSettings();
 
@@ -40,7 +40,6 @@ public slots:
     void addOperation();
     void editOperation();
     void removeOperation();
-    void selectTest();
 
     void saveFile();
     QSqlError loadFile(const QString& account_file = "");

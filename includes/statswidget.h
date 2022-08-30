@@ -16,11 +16,14 @@ public:
     explicit StatsWidget(double balance, QWidget *parent = nullptr);
     ~StatsWidget();
 
+    double getBalanceByDate(QDate date);
+
 signals:
 
 private:
     // Méthodes
     void populateTable();
+    void addItemInTable(double amount, int row, int column);
 
     // Attributs
 

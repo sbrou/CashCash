@@ -46,9 +46,8 @@ void StatsWidget::populateTable()
 
     int nb_tags = tags.size();
 
-    table->setRowCount(nb_tags + 3); // + tous les earnings + resultat du mois + solde
+    table->setRowCount(nb_tags + 2); // + resultat du mois + solde
     QStringList vertical_labels;
-    vertical_labels << tr("Revenus");
     TagsMap::iterator tag = tags.begin();
     while (tag != tags.end()) {
         vertical_labels << tag.value().first;
@@ -63,14 +62,13 @@ void StatsWidget::populateTable()
                                        tr("Septembre"), tr("Octobre"), tr("Novembre"), tr("Décembre"),
                                        tr("Moyenne"), tr("Total")});
 
-    double earnings_sum = 0;
     double results_sum = 0;
+    QDate today = QDate::currentDate();
 
     for (int month = 0; month < 12; ++month) // 12 mois
     {
         double result = 0;
 
-        QDate today = QDate::currentDate();
         QDate start = QDate(today.year(), month+1, 1);
         QDate end = QDate(today.year(), month+1, daysInMonth(month+1, today.year()));
 
@@ -79,45 +77,54 @@ void StatsWidget::populateTable()
                 .arg(end.toString(Qt::ISODateWithMs));
 
         int row = 0;
-        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + "type=1")); // Revenus
-        while (query.next()) {
-            result += query.value(0).toDouble();
-            earnings_sum += query.value(0).toDouble();
-            QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(query.value(0).toDouble()));
-            table->setItem(row++, month, newItem);
-        }
-
         TagsMap::iterator tag = tags.begin();
         while (tag != tags.end()) {
             query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + "tag=%1").arg(tag.key())); // Tag
             while (query.next()) {
                 result += query.value(0).toDouble();
                 tag.value().second += query.value(0).toDouble();
-                QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(query.value(0).toDouble()));
-                table->setItem(row++, month, newItem);
+                addItemInTable(query.value(0).toDouble(), row++, month);
             }
             ++tag;
         }
 
-        results_sum += result;
-        table->setItem(row++, month, new QTableWidgetItem(QString::number(result))); // Resultat
-        table->setItem(row++, month, new QTableWidgetItem(QString::number(0))); // Solde (pas bon à revoir)
+        results_sum += result; 
+        addItemInTable(result, row++, month); // Resultat
+        addItemInTable(getBalanceByDate(end), row++, month); // Solde
     }
 
     int row = 0;
-    table->setItem(row, 12, new QTableWidgetItem(QString::number(earnings_sum/12.0))); // Moyenne revenus
-    table->setItem(row++, 13, new QTableWidgetItem(QString::number(earnings_sum))); // total revenus
-
     TagsMap::const_iterator ctag = tags.constBegin();
     while (ctag != tags.constEnd()) {
-        table->setItem(row, 12, new QTableWidgetItem(QString::number(ctag.value().second/12.0))); // Moyenne tag
-        table->setItem(row++, 13, new QTableWidgetItem(QString::number(ctag.value().second))); // total tag
+        addItemInTable(ctag.value().second/12.0, row, 12); // Moyenne tag
+        addItemInTable(ctag.value().second, row++, 13); // total tag
         ++ctag;
     }
 
-    table->setItem(1+nb_tags, 12, new QTableWidgetItem(QString::number(results_sum/12.0))); // Moyenne resultats
-    table->setItem(1+nb_tags, 13, new QTableWidgetItem(QString::number(results_sum))); // total resultats
+    addItemInTable(results_sum/12.0, 1+nb_tags, 12); // Moyenne resultats
+    addItemInTable(results_sum, 1+nb_tags, 13); // total resultats
 
     table->setItem(2+nb_tags, 12, new QTableWidgetItem("-")); // Moyenne solde : sens ?
-    table->setItem(2+nb_tags, 13, new QTableWidgetItem(QString::number(0))); // solde actuel
+    addItemInTable(getBalanceByDate(today), 2+nb_tags, 13); // Solde actuel
+}
+
+double StatsWidget::getBalanceByDate(QDate date)
+{
+    double balance = 0;
+    QSqlQuery query;
+    QString date_query = QString("op_date<='%1'").arg(date.toString(Qt::ISODateWithMs));
+    query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date_query));
+    while (query.next()) {
+        balance = _balance + query.value(0).toDouble();
+    }
+    return balance;
+}
+
+void StatsWidget::addItemInTable(double amount, int row, int column)
+{
+    QColor aColor = amount >= 0 ? Qt::darkGreen : Qt::darkRed;
+    QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(qAbs(amount)));
+    newItem->setForeground(QBrush(aColor));
+    newItem->setTextAlignment(Qt::AlignCenter);
+    table->setItem(row, column, newItem);
 }

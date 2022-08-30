@@ -28,6 +28,7 @@ OperationsView::OperationsView()
     mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
+    connect(opsTable, SIGNAL(rowCountChanged(int,int)), opsTable, SLOT(resizeColumnsToContents()));
 
     readSettings();
 }
