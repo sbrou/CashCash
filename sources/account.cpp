@@ -657,7 +657,7 @@ void Account::showTags()
 
 void Account::showStats()
 {
-    StatsWidget stats(_balance, this);
+    StatsWidget stats(_init_balance, this);
     stats.exec();
 }
 

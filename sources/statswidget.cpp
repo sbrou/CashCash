@@ -8,7 +8,7 @@
 
 StatsWidget::StatsWidget(double balance, QWidget *parent)
     : QDialog{parent}
-    , _balance(balance)
+    , _init_balance(balance)
 {
     mainLayout = new QGridLayout(this);
 
@@ -115,7 +115,7 @@ double StatsWidget::getBalanceByDate(QDate date)
     QString date_query = QString("op_date<='%1'").arg(date.toString(Qt::ISODateWithMs));
     query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date_query));
     while (query.next()) {
-        balance = _balance + query.value(0).toDouble();
+        balance = _init_balance + query.value(0).toDouble();
     }
     return balance;
 }

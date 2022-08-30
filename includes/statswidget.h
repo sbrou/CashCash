@@ -33,7 +33,7 @@ private:
     QGroupBox *dateFilter;
     QTableWidget *table;
 
-    double _balance;
+    double _init_balance;
 
 
 };

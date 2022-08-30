@@ -94,6 +94,7 @@ void OperationsView::loadModel(QSqlRelationalTableModel * mod)
     mainLayout->addWidget(opsTable);
 
     filters->populateComboBoxes(model->relationModel(2), model->relationModel(4));
+    filters->buildStatement();
 }
 
 void OperationsView::applyFilters(const QString & statement)

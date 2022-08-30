@@ -16,12 +16,14 @@ public:
 
     void populateComboBoxes(QSqlTableModel * cats, QSqlTableModel * tags);
 
+public slots:
+    void buildStatement();
+
 signals:
     void statementBuilt(const QString &);
 
 private slots:
     void reset();
-    void buildStatement();
 
 private:
     QDateEdit *qdeDateFrom;
