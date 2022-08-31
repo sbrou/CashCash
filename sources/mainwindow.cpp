@@ -27,11 +27,26 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_account, SIGNAL(accountReady(const QString&)), this, SLOT(enableAccountActions(const QString&)));
     connect(this, SIGNAL(newFileToCreate()), _account, SLOT(createFile()));
     connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
+    connect(_account, SIGNAL(stateChanged(bool)), this, SLOT(updateWindowTitle(bool)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::updateWindowTitle(bool modified)
+{
+    QString title = windowTitle();
+    if (modified) {
+        if (!title.endsWith('*'))
+            title += "*";
+    }
+    else {
+        title.remove('*');
+    }
+
+    setWindowTitle(title);
 }
 
 void MainWindow::createActions()
@@ -148,6 +163,17 @@ void MainWindow::about()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     writeSettings();
+    if (_account->getState() == Account::State::Modified) {
+        QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Fermer MoulagApp"),
+                                                                   tr("Voulez-vous enregistrer vos modifications avant de fermer l'application ?"),
+                                                                   QMessageBox::Save | QMessageBox::Cancel | QMessageBox::Discard, QMessageBox::Save);
+        if (choice == QMessageBox::Save)
+            _account->saveFile();
+        else if (choice == QMessageBox::Cancel) {
+            event->ignore();
+            return;
+        }
+    }
     event->accept();
 }
 

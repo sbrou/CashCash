@@ -27,6 +27,7 @@ private slots:
     void about();
     void enableAccountActions(const QString& account_title);
     void updateAccountActions(const QItemSelection& selected);
+    void updateWindowTitle(bool modified);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

@@ -25,6 +25,7 @@ Account::Account(QWidget *parent)
     , _balance(0)
     , _future_balance(0)
     , _filepath("")
+    , _state(Modified)
     , _nbOperations(0)
 {
     setOrientation(Qt::Vertical);  
@@ -62,6 +63,7 @@ bool Account::commitOnDatabase()
         model->select();
         updateBalance();
         chartView->updatePie();
+        changeState(Modified);
     }
 
     return st;
@@ -402,6 +404,17 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
+Account::State Account::getState()
+{
+    return _state;
+}
+
+void Account::changeState(State newState)
+{
+    _state = newState;
+    emit stateChanged( _state == Modified);
+}
+
 void Account::saveFile(bool isNewFile)
 {
     QString saveFilename = _filepath;
@@ -486,6 +499,7 @@ void Account::saveFile(bool isNewFile)
     accObject["operations"] = opsArray;
 
     saveFile.write(QCborValue::fromJsonValue(accObject).toCbor());
+    changeState(UpToDate);
 }
 
 void Account::saveAsFile()
@@ -569,6 +583,7 @@ QSqlError Account::loadFile(const QString& filename)
     _filepath = loadFilename;
     updateBalance();
     initAccount();
+    changeState(UpToDate);
 
     return err;
 }

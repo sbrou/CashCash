@@ -29,10 +29,18 @@ public:
     void saveSettings();
     void readSettings();
 
+    enum State {
+        UpToDate,
+        Modified
+    };
+
+    State getState();
+
 signals:
     void accountReady(const QString&);
     void selectionChanged(const QItemSelection&);
     void balanceChanged(double, double);
+    void stateChanged(bool isModified);
 
 public slots:
     void initAccount();
@@ -59,6 +67,7 @@ private:
     void updateBalance();
     void importCSV(const QString & filename);
     void importOFX(const QString & filename);
+    void changeState(State newState);
 
     // Attributs
 
@@ -68,6 +77,7 @@ private:
     double _balance;
     double _future_balance;
     QString _filepath;
+    State _state;
 
     QSplitter * splitter;
 //    QGridLayout *accLayout;
