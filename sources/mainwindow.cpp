@@ -62,10 +62,12 @@ void MainWindow::createActions()
     fileMenu->addAction(saveAct);
     fileToolBar->addAction(saveAct);
 
-//    const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
-//    QAction *saveAsAct = fileMenu->addAction(saveAsIcon, tr("Save &As..."), this, &MainWindow::saveAs);
-//    saveAsAct->setShortcuts(QKeySequence::SaveAs);
-//    saveAsAct->setStatusTip(tr("Save the document under a new name"));
+    const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
+    QAction *saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
+    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setStatusTip(tr("Save the document under a new name"));
+    connect(saveAsAct, SIGNAL(triggered()), _account, SLOT(saveAsFile()));
+    fileMenu->addAction(saveAsAct);
 
     fileMenu->addSeparator();
 

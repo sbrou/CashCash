@@ -41,7 +41,8 @@ public slots:
     void editOperation();
     void removeOperation();
 
-    void saveFile();
+    void saveFile(bool isNewFile = false);
+    void saveAsFile();
     QSqlError loadFile(const QString& account_file = "");
     QSqlError createFile();
 

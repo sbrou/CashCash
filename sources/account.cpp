@@ -54,10 +54,10 @@ bool Account::commitOnDatabase()
 {
     model->database().transaction();
     bool st = model->submitAll();
-    qDebug() << "in commit on database";
+//    qDebug() << "in commit on database";
     if (st)
     {
-        qDebug() << "commiting on database";
+//        qDebug() << "commiting on database";
         model->database().commit();
         model->select();
         updateBalance();
@@ -402,12 +402,22 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-void Account::saveFile()
+void Account::saveFile(bool isNewFile)
 {
-    QString saveFilename = _filepath.isEmpty() ? QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                    "D:/sopie/Documents/untitled.bsx",
-                                                    tr("BSX files (*.bsx)")) : _filepath;
-    _filepath = saveFilename;
+    QString saveFilename = _filepath;
+
+    if (_filepath.isEmpty() || isNewFile)
+    {
+        QString title = isNewFile ? tr("Save file as") : tr("Save file");
+        saveFilename = QFileDialog::getSaveFileName(this, title, "D:/sopie/Documents/untitled.bsx",
+                                                    tr("BSX files (*.bsx)"));
+
+        if (saveFilename.isEmpty())
+            return;
+        else
+            _filepath = saveFilename;
+    }
+
     QFile saveFile(saveFilename);
 
     commitOnDatabase();
@@ -476,6 +486,11 @@ void Account::saveFile()
     accObject["operations"] = opsArray;
 
     saveFile.write(QCborValue::fromJsonValue(accObject).toCbor());
+}
+
+void Account::saveAsFile()
+{
+    saveFile(true);
 }
 
 void Account::saveSettings()
@@ -680,7 +695,7 @@ QSqlError Account::createFile()
         if (!q.prepare(INSERT_TAG_SQL))
             return q.lastError();
 
-        addTagInDB(q, "-NONE-", "#000000" , 0);
+        addTagInDB(q, tr("-AUCUN-"), "#000000" , 0);
 
         initAccount();
     }
