@@ -57,6 +57,7 @@ bool Account::commitOnDatabase()
         model->select();
         updateBalance();
         chartView->updatePie();
+        opsView->resizeView();
         changeState(Modified);
     }
 

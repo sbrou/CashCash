@@ -28,7 +28,6 @@ OperationsView::OperationsView()
     mainLayout->addWidget(filters);
 
     opsTable = new QTableView;
-    connect(opsTable, SIGNAL(rowCountChanged(int,int)), opsTable, SLOT(resizeColumnsToContents()));
 
     readSettings();
 }
@@ -114,4 +113,10 @@ void OperationsView::setBalance(double balance, double future_balance)
     qlFutureBalance->setText(tr("Solde futur : ") + QString("<font color=\"%1\" size=\"8\"><b>%2</b></font>")
                                                     .arg(fbColor)
                                                     .arg(QString::number(future_balance)));
+}
+
+void OperationsView::resizeView()
+{
+    opsTable->resizeRowsToContents();
+    opsTable->resizeColumnsToContents();
 }

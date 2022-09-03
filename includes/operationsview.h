@@ -26,6 +26,7 @@ public:
 public slots:
     void applyFilters(const QString &);
     void setBalance(double, double);
+    void resizeView();
 
 private slots:
     void slotShowFilters(bool isVisible);

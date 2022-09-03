@@ -110,7 +110,8 @@ void ChartsView::populateSeries(const QString& table, const QString& key, const 
 
 void ChartsView::changeSeries(QPieSeries *o_series, QPieSeries *n_series)
 {
-    chart->removeSeries(o_series);
+    if (chart->series().contains(o_series))
+        chart->removeSeries(o_series);
     chart->addSeries(n_series);
     chart->setTitle(n_series->name());
     visible_series = n_series;
