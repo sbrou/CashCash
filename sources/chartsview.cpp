@@ -65,7 +65,8 @@ ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
 
 void ChartsView::updatePie()
 {
-    chart->removeSeries(visible_series);
+    if (chart->series().contains(visible_series))
+        chart->removeSeries(visible_series);
 
     tags_series->clear();
     cats_series->clear();
@@ -89,6 +90,8 @@ void ChartsView::populateSeries(const QString& table, const QString& key, const 
             .arg(beginDate.toString(Qt::ISODateWithMs))
             .arg(endDate.toString(Qt::ISODateWithMs));
 
+    QMap<double,CustomSlice*> sortedSlices;
+
     q.exec("SELECT * FROM " + table + " WHERE type=0");
     while (q.next()) {
         int id = q.value(0).toInt();
@@ -102,10 +105,13 @@ void ChartsView::populateSeries(const QString& table, const QString& key, const 
             if (amount != 0)
             {
                 CustomSlice *slice = new CustomSlice(amount, name, QColor(color));
-                series << slice;
+                sortedSlices.insert(amount, slice);
             }
         }
     }
+
+    foreach (CustomSlice* slice, sortedSlices)
+        series << slice;
 }
 
 void ChartsView::changeSeries(QPieSeries *o_series, QPieSeries *n_series)

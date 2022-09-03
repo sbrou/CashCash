@@ -108,7 +108,7 @@ void Account::initAccount()
     }
 
     _nbOperations = model->rowCount();
-    qDebug() << "number of operations : " << _nbOperations;
+    // qDebug() << "number of operations : " << _nbOperations;
 
     opsView->loadModel(model);
     opsView->setBalance(_balance, _future_balance);
