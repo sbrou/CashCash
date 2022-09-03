@@ -84,7 +84,7 @@ void ChartsView::updatePie()
 void ChartsView::populateSeries(const QString& table, const QString& key, const QDate& begin, const QDate& end,
                                 QPieSeries& series)
 {
-    QSqlQuery q;
+    QSqlQuery q(model->database());
     QString date = QString("op_date>='%1' AND op_date<='%2' AND ")
             .arg(beginDate.toString(Qt::ISODateWithMs))
             .arg(endDate.toString(Qt::ISODateWithMs));
@@ -95,7 +95,7 @@ void ChartsView::populateSeries(const QString& table, const QString& key, const 
         QString name = q.value(1).toString();
         QString color = q.value(2).toString();
 
-        QSqlQuery query;
+        QSqlQuery query(model->database());
         query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + key +"=%1").arg(id));
         while (query.next()) {
             qreal amount = query.value(0).toDouble();

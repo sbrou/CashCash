@@ -24,8 +24,8 @@ CustomSlice::~CustomSlice()
 
 void CustomSlice::updateLabel()
 {
-    QString label = m_label;
-    label += QString(" %1").arg(QString::number(m_value));
+    QString label = QString("%1").arg(m_label, 28);
+    label += QString(" %1").arg(QString::number(m_value), 4);
     label += "€";
     label += ", ";
     label += QString::number(this->percentage() * 100, 'f', 1);

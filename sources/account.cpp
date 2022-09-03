@@ -9,7 +9,6 @@
 
 #include <QPieSeries>
 
-#include "newaccountdialog.h"
 #include <addopdialog.h>
 #include "catslist.h"
 #include "statswidget.h"
@@ -25,30 +24,25 @@ Account::Account(QWidget *parent)
     , _balance(0)
     , _future_balance(0)
     , _filepath("")
-    , _state(Modified)
+    , _state(Empty)
     , _nbOperations(0)
 {
     setOrientation(Qt::Vertical);  
     splitter = new QSplitter(Qt::Horizontal, this);
-
+    readSettings();
     qDebug() << splitter->sizes();
 //    accLayout = new QGridLayout(this);
+}
 
-
-    if (!QSqlDatabase::drivers().contains("QSQLITE"))
-        QMessageBox::critical(
-                    this,
-                    "Unable to load database",
-                    "This demo needs the SQLITE driver"
-                    );
-
-    // Initialize the database:
-    QSqlError err = initDb();
+QSqlError Account::initDatabase()
+{
+    QSqlError err = initDb(_title);
 
     if (err.type() != QSqlError::NoError) {
         showError(err);
-        return;
     }
+
+    return err;
 }
 
 bool Account::commitOnDatabase()
@@ -77,11 +71,11 @@ void Account::showError(const QSqlError &err)
 
 void Account::initAccount()
 {
-    readSettings();
+    // readSettings();
 
     // Create the data model:
     opsView = new OperationsView;
-    model = new QSqlRelationalTableModel(opsView->table());
+    model = new QSqlRelationalTableModel(opsView->table(), QSqlDatabase::database(_title));
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->setTable("operations");
     model->setSort(1, Qt::DescendingOrder);
@@ -139,6 +133,7 @@ void Account::initAccount()
     tagsWidget = new TagsList(tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
+    changeState(Modified);
     emit accountReady(_title);
 }
 
@@ -163,7 +158,7 @@ void Account::importCSV(const QString & filename)
     {
         OperationsVector *ops = csvWizard.getOperations();
 
-        QSqlQuery q;
+        QSqlQuery q(QSqlDatabase::database(_title));
         if (!q.prepare(INSERT_OPERATION_SQL))
         {
             qDebug() << q.lastError();
@@ -284,7 +279,7 @@ void Account::importOFX(const QString & filename)
         QDomNodeList ops_list = BANKTRANLIST.elementsByTagName("STMTTRN");
         if (!ops_list.isEmpty())
         {
-            QSqlQuery q;
+            QSqlQuery q(QSqlDatabase::database(_title));
             if (!q.prepare(INSERT_OPERATION_SQL))
             {
                 qDebug() << q.lastError();
@@ -333,7 +328,7 @@ void Account::importFile()
 
 void Account::updateBalance()
 {
-    QSqlQuery query;
+    QSqlQuery query(QSqlDatabase::database(_title));
     query.exec(QString("SELECT SUM (amount) FROM operations WHERE op_date<='%2'").arg(QDate::currentDate().toString(Qt::ISODateWithMs)));
     while (query.next()) {
         _balance = _init_balance + query.value(0).toDouble();
@@ -404,9 +399,14 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-Account::State Account::getState()
+Account::State Account::state()
 {
     return _state;
+}
+
+QString Account::title()
+{
+    return _title;
 }
 
 void Account::changeState(State newState)
@@ -441,7 +441,7 @@ void Account::saveFile(bool isNewFile)
         }
 
     QJsonObject accObject;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database(_title));
 
 //    write(accObject);
 
@@ -528,21 +528,28 @@ QSqlError Account::loadFile(const QString& filename)
 {
     QSqlError err;
 
-    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                                             "D:/sopie/Documents",
-                                                                             tr("BSX files (*.bsx)")) : filename;
-
-    QFile loadFile(loadFilename);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open save file.");
         return QSqlError("Couldn't open save file.","",QSqlError::UnknownError);
     }
 
-    QByteArray saveData = loadFile.readAll();
+    QByteArray saveData = file.readAll();
 
     QJsonDocument loadDoc(QJsonDocument(QCborValue::fromCbor(saveData).toMap().toJsonObject()));
     QJsonObject loadObject = loadDoc.object();
-    QSqlQuery q;
+
+    ///// Read Account caracteristics /////
+
+    if (loadObject.contains("title") && loadObject["title"].isString())
+        _title = loadDoc["title"].toString();
+
+    if (loadObject.contains("init_balance") && loadObject["init_balance"].isDouble())
+        _init_balance = loadObject["init_balance"].toDouble();
+
+    initDatabase();
+
+    QSqlQuery q(QSqlDatabase::database(_title));
 
     ///// Read Cats /////
 
@@ -570,17 +577,8 @@ QSqlError Account::loadFile(const QString& filename)
             return q.lastError();
     }
 
-    //    write(accObject);
-
-    ///// Write Account caracteristics /////
-
-    if (loadObject.contains("title") && loadObject["title"].isString())
-        _title = loadDoc["title"].toString();
-
-    if (loadObject.contains("init_balance") && loadObject["init_balance"].isDouble())
-        _init_balance = loadObject["init_balance"].toDouble();
-
-    _filepath = loadFilename;
+    file.close();
+    _filepath = filename;
     updateBalance();
     initAccount();
     changeState(UpToDate);
@@ -590,7 +588,7 @@ QSqlError Account::loadFile(const QString& filename)
 
 QSqlError Account::readCategories(const QString& query, const QJsonArray &catsArray)
 {
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database(_title));
     if (!q.prepare(query))
         return q.lastError();
 
@@ -624,7 +622,7 @@ QSqlError Account::readCategories(const QString& query, const QJsonArray &catsAr
 
 QSqlError Account::readOperations(const QJsonArray &opsArray)
 {
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database(_title));
     if (!q.prepare(INSERT_OPERATION_SQL))
         return q.lastError();
 
@@ -687,40 +685,43 @@ void Account::showTags()
 
 void Account::showStats()
 {
-    StatsWidget stats(_init_balance, this);
+    StatsWidget stats(_init_balance, _title, this);
     stats.exec();
 }
 
-QSqlError Account::createFile()
+QSqlError Account::createFile(const QString & title, double balance)
 {
-    NewAccountDialog newAcc(this);
+    _title = title;
+    _init_balance = balance;
+    _balance = _init_balance;
+    _future_balance = _init_balance;
 
-    if (newAcc.exec())
-    {
-        _title = newAcc.title();
-        _init_balance = newAcc.balance();
-        _balance = _init_balance;
-        _future_balance = _init_balance;
+    QSqlError err = initDatabase();
+    if (err.isValid())
+        return err;
 
-        QSqlError err = setStandardCategories();
-        if (err.isValid())
-            return err;
+    // initialize categories
+    err = setStandardCategories();
+    if (err.isValid())
+        return err;
 
-        QSqlQuery q;
-        if (!q.prepare(INSERT_TAG_SQL))
-            return q.lastError();
+    // initialize tags
+    QSqlQuery q(QSqlDatabase::database(_title));
+    if (!q.prepare(INSERT_TAG_SQL))
+        return q.lastError();
 
-        addTagInDB(q, tr("-AUCUN-"), "#000000" , 0);
+    addTagInDB(q, tr("-AUCUN-"), "#000000" , 0);
 
-        initAccount();
-    }
+    // initialize account
+    initAccount();
+
 
     return QSqlError();
 }
 
 QSqlError Account::setStandardCategories()
 {
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database(_title));
 
     if (!q.prepare(INSERT_CATEGORY_SQL))
         return q.lastError();

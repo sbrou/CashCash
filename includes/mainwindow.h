@@ -22,12 +22,16 @@ public:
 signals:
     void newFileToCreate();
     void fileToLoad(const QString& account_file);
+    void quitApp();
 
 private slots:
     void about();
     void enableAccountActions(const QString& account_title);
     void updateAccountActions(const QItemSelection& selected);
     void updateWindowTitle(bool modified);
+    void initFile(bool newFile = true, const QString & filename = "");
+    void createFile();
+    void openFile(const QString & filename = "");
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -37,12 +41,15 @@ protected:
 private:
     void createActions();
 //    void createStatusBar();
+    bool maybeSave();
 
 
     Ui::MainWindow *ui;
 
     Account* _account;
 
+    QAction *saveAct;
+    QAction *saveAsAct;
     QAction *addOpAct;
     QAction *removeOpAct;
     QAction *editOpAct;

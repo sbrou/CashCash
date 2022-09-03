@@ -4,12 +4,15 @@
 #include <QScreen>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QApplication>
 
 #include "welcomedialog.h"
+#include "newaccountdialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , _account(nullptr)
 {
     ui->setupUi(this);
 
@@ -17,21 +20,18 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(QIcon(":/images/images/euro_money_48px.png"));
 
     readSettings();
-
-    _account = new Account(this);
-    setCentralWidget(_account);
-
     createActions();
 //    createStatusBar();
+//    createFile();
 
-    connect(_account, SIGNAL(accountReady(const QString&)), this, SLOT(enableAccountActions(const QString&)));
-    connect(this, SIGNAL(newFileToCreate()), _account, SLOT(createFile()));
-    connect(this, SIGNAL(fileToLoad(const QString&)), _account, SLOT(loadFile(const QString&)));
-    connect(_account, SIGNAL(stateChanged(bool)), this, SLOT(updateWindowTitle(bool)));
+    QObject::connect(this, &MainWindow::quitApp, QCoreApplication::instance(), &QCoreApplication::quit, Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow()
 {
+    if (_account != nullptr)
+        delete _account;
+
     delete ui;
 }
 
@@ -49,6 +49,75 @@ void MainWindow::updateWindowTitle(bool modified)
     setWindowTitle(title);
 }
 
+void MainWindow::createFile()
+{
+    if (!maybeSave())
+        return;
+
+    initFile(true);
+}
+
+void MainWindow::openFile(const QString & filename)
+{
+    if (!maybeSave())
+        return;
+
+    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                                             "D:/sopie/Documents",
+                                                                             tr("BSX files (*.bsx)")) : filename;
+
+    if (loadFilename.isEmpty())
+        return;
+
+    initFile(false, loadFilename);
+}
+
+void MainWindow::initFile(bool newFile, const QString & filename)
+{
+    NewAccountDialog newAcc(this);
+    if (newFile && !newAcc.exec())
+        return;
+
+    if (_account != nullptr)
+    {
+        QString connectionName = _account->title();
+        delete _account;
+
+        QSqlDatabase::database(connectionName).close();
+        QSqlDatabase::removeDatabase(connectionName);
+    }
+
+    _account = new Account(this);
+    setCentralWidget(_account);
+
+    connect(saveAct, &QAction::triggered, _account, &Account::saveFile);
+    connect(saveAsAct, SIGNAL(triggered()), _account, SLOT(saveAsFile()));
+    connect(addOpAct, SIGNAL(triggered()), _account, SLOT(addOperation()));
+    connect(removeOpAct, SIGNAL(triggered()), _account, SLOT(removeOperation()));
+    connect(editOpAct, SIGNAL(triggered()), _account, SLOT(editOperation()));
+    connect(importOpAct, SIGNAL(triggered()), _account, SLOT(importFile()));
+    connect(catAct, SIGNAL(triggered()), _account, SLOT(showCategories()));
+    connect(tagAct, SIGNAL(triggered()), _account, SLOT(showTags()));
+    connect(statsAct, SIGNAL(triggered()), _account, SLOT(showStats()));
+    connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));
+
+    connect(_account, SIGNAL(accountReady(const QString&)), this, SLOT(enableAccountActions(const QString&)));
+    connect(_account, SIGNAL(stateChanged(bool)), this, SLOT(updateWindowTitle(bool)));
+
+    if (newFile)
+        _account->createFile(newAcc.title(), newAcc.balance());
+    else
+        _account->loadFile(filename);
+//    _account->show();
+}
+
+//void MainWindow::loadFile(const QString & filename)
+//{
+
+
+//    _account->loadFile(filename);
+//}
+
 void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
@@ -57,7 +126,7 @@ void MainWindow::createActions()
     QAction *newAct = new QAction(newIcon, tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
-//    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+    connect(newAct, &QAction::triggered, this, &MainWindow::createFile);
     fileMenu->addAction(newAct);
     fileToolBar->addAction(newAct);
 
@@ -65,23 +134,21 @@ void MainWindow::createActions()
     QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, SIGNAL(triggered()), _account, SLOT(loadFile()));
+    connect(openAct, SIGNAL(triggered()), this, SLOT(openFile()));
     fileMenu->addAction(openAct);
     fileToolBar->addAction(openAct);
 
     const QIcon saveIcon = QIcon(":/images/images/save_48px.png");
-    QAction *saveAct = new QAction(saveIcon, tr("&Save"), this);
+    saveAct = new QAction(saveIcon, tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the document to disk"));
-    connect(saveAct, &QAction::triggered, _account, &Account::saveFile);
     fileMenu->addAction(saveAct);
     fileToolBar->addAction(saveAct);
 
     const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
-    QAction *saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
+    saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
-    connect(saveAsAct, SIGNAL(triggered()), _account, SLOT(saveAsFile()));
     fileMenu->addAction(saveAsAct);
 
     fileMenu->addSeparator();
@@ -97,25 +164,21 @@ void MainWindow::createActions()
     addOpAct->setStatusTip(tr("Add an operation"));
     addOpAct->setEnabled(false);
     fileToolBar->addAction(addOpAct);
-    connect(addOpAct, SIGNAL(triggered()), _account, SLOT(addOperation()));
 
     removeOpAct = new QAction(QIcon(":/images/images/Remove_48px.png"), tr("&Delete operations"), this);
     removeOpAct->setEnabled(false);
     removeOpAct->setStatusTip(tr("Delete the selected operations"));
     fileToolBar->addAction(removeOpAct);
-    connect(removeOpAct, SIGNAL(triggered()), _account, SLOT(removeOperation()));
 
     editOpAct = new QAction(QIcon(":/images/images/edit_48px.png"), tr("&Edit operation"), this);
     editOpAct->setEnabled(false);
     editOpAct->setStatusTip(tr("Edit the selected operation"));
     fileToolBar->addAction(editOpAct);
-    connect(editOpAct, SIGNAL(triggered()), _account, SLOT(editOperation()));
 
     importOpAct = new QAction(QIcon(":/images/images/load_from_file_48px.png"), tr("&Import operations"), this);
     importOpAct->setStatusTip(tr("Import operations from a ofx file"));
     importOpAct->setEnabled(false);
     fileToolBar->addAction(importOpAct);
-    connect(importOpAct, SIGNAL(triggered()), _account, SLOT(importFile()));
 
     fileToolBar->addSeparator();
 
@@ -123,13 +186,11 @@ void MainWindow::createActions()
     catAct->setStatusTip(tr("Create, edit or delete categories"));
     catAct->setEnabled(false);
     fileToolBar->addAction(catAct);
-    connect(catAct, SIGNAL(triggered()), _account, SLOT(showCategories()));
 
     tagAct = new QAction(QIcon(":/images/images/tag_window_48px.png"), tr("&Manage tags"), this);
     tagAct->setStatusTip(tr("Create, edit or delete tags"));
     tagAct->setEnabled(false);
     fileToolBar->addAction(tagAct);
-    connect(tagAct, SIGNAL(triggered()), _account, SLOT(showTags()));
 
     goalAct = new QAction(QIcon(":/images/images/goal_48px.png"), tr("&Manage goals"), this);
     goalAct->setStatusTip(tr("Create, edit or delete budget goals"));
@@ -140,16 +201,10 @@ void MainWindow::createActions()
     statsAct->setStatusTip(tr("Show statistics"));
     statsAct->setEnabled(false);
     fileToolBar->addAction(statsAct);
-    connect(statsAct, SIGNAL(triggered()), _account, SLOT(showStats()));
-
-
-    connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));
-
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
     aboutAct->setStatusTip(tr("Show the application's About box"));
-
 }
 
 void MainWindow::about()
@@ -160,21 +215,32 @@ void MainWindow::about()
                "toolbars, and a status bar."));
 }
 
+bool MainWindow::maybeSave()
+{
+    if (_account != nullptr && _account->state() != Account::Empty)
+    {
+        if (_account->state() == Account::Modified) {
+            QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Sauvegarder"),
+                                                                       tr("Voulez-vous enregistrer vos modifications ?"),
+                                                                       QMessageBox::Save | QMessageBox::Cancel | QMessageBox::Discard, QMessageBox::Save);
+            if (choice == QMessageBox::Save)
+                _account->saveFile();
+            else if (choice == QMessageBox::Cancel) {
+                return false;
+            }
+        }
+        writeSettings();
+    }
+
+    return true;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    writeSettings();
-    if (_account->getState() == Account::State::Modified) {
-        QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Fermer MoulagApp"),
-                                                                   tr("Voulez-vous enregistrer vos modifications avant de fermer l'application ?"),
-                                                                   QMessageBox::Save | QMessageBox::Cancel | QMessageBox::Discard, QMessageBox::Save);
-        if (choice == QMessageBox::Save)
-            _account->saveFile();
-        else if (choice == QMessageBox::Cancel) {
-            event->ignore();
-            return;
-        }
-    }
-    event->accept();
+    if (maybeSave())
+        event->accept();
+    else
+        event->ignore();
 }
 
 void MainWindow::readSettings()
@@ -238,17 +304,18 @@ void MainWindow::showWelcomeDialog()
     switch (r)
     {
     case 1:
-        emit newFileToCreate();
+        createFile();
         break;
 
     case 2:
-        emit fileToLoad(settings.value("lastFile", QVariant()).toString());
+        openFile(settings.value("lastFile", QVariant()).toString());
         break;
 
     case 3:
-        emit fileToLoad(QFileDialog::getOpenFileName(this, tr("Open File"),
-                                     "D:/sopie/Documents",
-                                     tr("BSX files (*.bsx)")));
+        openFile();
+        break;
+    case 4:
+        emit quitApp();
         break;
     }
 }

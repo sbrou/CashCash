@@ -9,6 +9,15 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    if (!QSqlDatabase::drivers().contains("QSQLITE"))
+    {
+        QMessageBox::critical(NULL,
+                    "Unable to load database",
+                    "This demo needs the SQLITE driver"
+                    );
+        a.quit();
+    }
+
     QCoreApplication::setOrganizationName("SopiePersonalProjects");
     QCoreApplication::setApplicationName("MoulagApp");
     QCoreApplication::setApplicationVersion("0.0.0");

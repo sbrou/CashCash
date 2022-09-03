@@ -30,11 +30,13 @@ public:
     void readSettings();
 
     enum State {
+        Empty,
         UpToDate,
         Modified
     };
 
-    State getState();
+    State state();
+    QString title();
 
 signals:
     void accountReady(const QString&);
@@ -43,6 +45,7 @@ signals:
     void stateChanged(bool isModified);
 
 public slots:
+    QSqlError initDatabase();
     void initAccount();
     void importFile();
     void addOperation();
@@ -51,8 +54,8 @@ public slots:
 
     void saveFile(bool isNewFile = false);
     void saveAsFile();
-    QSqlError loadFile(const QString& account_file = "");
-    QSqlError createFile();
+    QSqlError loadFile(const QString& account_file);
+    QSqlError createFile(const QString & title, double balance);
 
     void showCategories();
     void showTags();

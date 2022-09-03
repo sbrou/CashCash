@@ -6,9 +6,10 @@
 
 #include "utilities.h"
 
-StatsWidget::StatsWidget(double balance, QWidget *parent)
+StatsWidget::StatsWidget(double balance, const QString & account_title, QWidget *parent)
     : QDialog{parent}
     , _init_balance(balance)
+    , _account_name(account_title)
 {
     mainLayout = new QGridLayout(this);
 
@@ -36,7 +37,7 @@ void StatsWidget::populateTable()
     table->clear();
 
     TagsMap tags; // QMap<id_tag, QPair<name_tag,sum_tag> >
-    QSqlQuery query;
+    QSqlQuery query(QSqlDatabase::database(_account_name));
     query.exec("SELECT * FROM tags WHERE type=0");
     while (query.next()) {
         int id = query.value(0).toInt();
@@ -111,7 +112,7 @@ void StatsWidget::populateTable()
 double StatsWidget::getBalanceByDate(QDate date)
 {
     double balance = 0;
-    QSqlQuery query;
+    QSqlQuery query(QSqlDatabase::database(_account_name));
     QString date_query = QString("op_date<='%1'").arg(date.toString(Qt::ISODateWithMs));
     query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date_query));
     while (query.next()) {

@@ -62,9 +62,9 @@ const auto INSERT_TAG_SQL = QLatin1String(R"(
 
 QSqlError manualInit(QSqlQuery &q);
 
-QSqlError initDb()
+QSqlError initDb(const QString & title)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", title);
     db.setDatabaseName(":memory:");
 
     if (!db.open())
@@ -76,7 +76,7 @@ QSqlError initDb()
         && tables.contains("tags", Qt::CaseInsensitive))
         return QSqlError();
 
-    QSqlQuery q;
+    QSqlQuery q(db);
     if (!q.exec(OPERATIONS_SQL))
         return q.lastError();
     if (!q.exec(CATEGORIES_SQL))

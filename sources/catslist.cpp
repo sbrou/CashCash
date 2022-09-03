@@ -20,7 +20,7 @@ GroupList::GroupList(Type type, QSqlTableModel * mod, QWidget *parent)
     qpbEdit->setIcon(QIcon(":/images/images/edit_48px.png"));
     qpbRemove->setIcon(QIcon(":/images/images/Remove_48px.png"));
 
-    QSqlQuery q;
+    QSqlQuery q(model->database());
     if (type == CAT)
         q.exec("SELECT * from categories");
     else
