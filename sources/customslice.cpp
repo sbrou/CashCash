@@ -35,7 +35,6 @@ void CustomSlice::updateLabel()
 
 void CustomSlice::updateValue(qreal amount)
 {
-    qDebug() << "in update value" << amount;
     m_value += amount;
     setValue(m_value);
 }

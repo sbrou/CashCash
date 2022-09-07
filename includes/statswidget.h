@@ -6,8 +6,11 @@
 #include <QGroupBox>
 #include <QTableWidget>
 #include <QDialog>
+#include <QComboBox>
 
-typedef QMap<int, QPair<QString, double> > TagsMap; // QMap<id_tag, QPair<name_tag,sum_tag> >
+typedef QMap<int, QPair<QString, double> > GroupsIdMap; // QMap<id_tag, QPair<name_tag,sum_tag> >
+
+
 
 class StatsWidget : public QDialog
 {
@@ -18,11 +21,11 @@ public:
 
     double getBalanceByDate(QDate date);
 
-signals:
+private slots:
+    void populateTable();
 
 private:
     // Méthodes
-    void populateTable();
     void addItemInTable(double amount, int row, int column);
 
     // Attributs
@@ -30,6 +33,9 @@ private:
     QGridLayout *mainLayout;
 
     QGroupBox *settings;
+    QComboBox *qcbOpType;
+    QComboBox *qcbGroupType;
+
     QGroupBox *dateFilter;
     QTableWidget *table;
 
