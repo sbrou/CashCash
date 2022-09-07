@@ -7,6 +7,7 @@
 #include <QDate>
 #include <QFormLayout>
 
+#include "defines.h"
 #include "utilities.h"
 
 StatsWidget::StatsWidget(double balance, const QString & account_title, QWidget *parent)
@@ -56,10 +57,9 @@ void StatsWidget::populateTable()
 
     QString table_name;
     QString group_name;
-    int type;
+    int type = -1;
 
-    GroupsIdMap groups; // QMap<id_tag, QPair<name_tag,sum_tag> >
-    QSqlQuery query(QSqlDatabase::database(_account_name));
+    SumsByGroup groups;
 
     int groupTypeIndex = qcbGroupType->currentIndex();
     if (groupTypeIndex == 0) {
@@ -76,31 +76,22 @@ void StatsWidget::populateTable()
     int opTypeIndex = qcbOpType->currentIndex();
     if (opTypeIndex != 2)
     {
-        if (opTypeIndex == 0) // expenses
-            type = 0;
-        else if (opTypeIndex == 1) // earnings
-            type = 1;
+        type = opTypeIndex;
         statement += QString(" WHERE type=%2").arg(type);
     }
 
+    
+    QSqlQuery query(QSqlDatabase::database(_account_name));
     query.exec(statement);
     while (query.next()) {
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
-        groups.insert(id, qMakePair(name,0));
+        QList<double> sums(13, 0); // 12 mois + la somme des 12
+        groups.insert(qMakePair(id,name), sums);
     }
 
-    int nb_groups = groups.size();
-
-    table->setRowCount(nb_groups + 2); // + resultat du mois + solde
-    QStringList vertical_labels;
-    GroupsIdMap::iterator it_group = groups.begin();
-    while (it_group != groups.end()) {
-        vertical_labels << it_group.value().first;
-        ++it_group;
-    }
-    vertical_labels << tr("Resultats") << tr("Solde");
-    table->setVerticalHeaderLabels(vertical_labels);
+    table->setRowCount(2); // Resultat et solde
+    table->setVerticalHeaderLabels({ tr("Resultats"), tr("Solde") });
 
     table->setColumnCount(12 + 2); // 12 mois + moyenne de l'annee + total
     table->setHorizontalHeaderLabels({ tr("Janvier"), tr("Février"), tr("Mars"), tr("Avril"),
@@ -111,9 +102,9 @@ void StatsWidget::populateTable()
     double results_sum = 0;
     QDate today = QDate::currentDate();
 
-    for (int month = 0; month < 12; ++month) // 12 mois
+    for (int month = 0; month < 12; ++month)
     {
-        double result = 0;
+        double month_result = 0;
 
         QDate start = QDate(today.year(), month+1, 1);
         QDate end = QDate(today.year(), month+1, daysInMonth(month+1, today.year()));
@@ -122,38 +113,56 @@ void StatsWidget::populateTable()
                 .arg(start.toString(Qt::ISODateWithMs))
                 .arg(end.toString(Qt::ISODateWithMs));
 
-        int row = 0;
-        GroupsIdMap::iterator it_group = groups.begin();
+        SumsByGroup::iterator it_group = groups.begin();
         while (it_group != groups.end()) {
-            query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + "%1=%2")
-                       .arg(group_name)
-                       .arg(it_group.key()));
+            statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + "%1=%2")
+                    .arg(group_name)
+                    .arg(it_group.key().first);
+            query.exec(statement);
             while (query.next()) {
-                result += query.value(0).toDouble();
-                it_group.value().second += query.value(0).toDouble();
-                addItemInTable(query.value(0).toDouble(), row++, month);
+                double sum = query.value(0).toDouble();
+                month_result += sum;
+                it_group.value()[month] = sum;
+                it_group.value()[12] += sum;
             }
             ++it_group;
         }
 
-        results_sum += result; 
-        addItemInTable(result, row++, month); // Resultat
-        addItemInTable(getBalanceByDate(end), row++, month); // Solde
+        results_sum += month_result;
+        addItemInTable(month_result, 0, month); // Resultat
+        addItemInTable(getBalanceByDate(end), 1, month); // Solde
     }
 
     int row = 0;
-    GroupsIdMap::const_iterator cgroup = groups.constBegin();
+    SumsByGroup::const_iterator cgroup = groups.constBegin();
     while (cgroup != groups.constEnd()) {
-        addItemInTable(cgroup.value().second/12.0, row, 12); // Moyenne tag
-        addItemInTable(cgroup.value().second, row++, 13); // total tag
+        QList<double> sums = cgroup.value();
+        if (sums.at(12) != 0)
+        {
+            table->insertRow(row);
+            table->setVerticalHeaderItem(row, new QTableWidgetItem(cgroup.key().second));
+
+            for (qsizetype i = 0; i < table->columnCount(); ++i) {
+                double amount;
+                if (i == 12)
+                    amount = sums.at(12) / 12.0;
+                else if (i == 13)
+                    amount = sums.at(12);
+                else
+                    amount = sums.at(i);
+                addItemInTable(amount, row, i);
+            }
+
+            ++row;
+        }
         ++cgroup;
     }
 
-    addItemInTable(results_sum/12.0, 1+nb_groups, 12); // Moyenne resultats
-    addItemInTable(results_sum, 1+nb_groups, 13); // total resultats
+    addItemInTable(results_sum/12.0, table->rowCount() - 2, 12); // Moyenne resultats
+    addItemInTable(results_sum, table->rowCount() - 2, 13); // total resultats
 
-    table->setItem(2+nb_groups, 12, new QTableWidgetItem("-")); // Moyenne solde : sens ?
-    addItemInTable(getBalanceByDate(today), 2+nb_groups, 13); // Solde actuel
+    table->setItem(table->rowCount() - 1, 12, new QTableWidgetItem("-")); // Moyenne solde : sens ?
+    addItemInTable(getBalanceByDate(today), table->rowCount() - 1, 13); // Solde actuel
 }
 
 double StatsWidget::getBalanceByDate(QDate date)
