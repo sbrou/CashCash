@@ -21,6 +21,7 @@ SOURCES += \
     sources/csvimporterwizard.cpp \
     sources/customslice.cpp \
     sources/filterswidget.cpp \
+    sources/goaldialog.cpp \
     sources/goalsview.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     includes/customslice.h \
     includes/defines.h \
     includes/filterswidget.h \
+    includes/goaldialog.h \
     includes/goalsview.h \
     includes/initdb.h \
     includes/mainwindow.h \
@@ -53,6 +55,7 @@ HEADERS += \
 
 FORMS += \
     resources/uiFiles/addopdialog.ui \
+    resources/uiFiles/goaldialog.ui \
     resources/uiFiles/mainwindow.ui \
     resources/uiFiles/newaccountdialog.ui
 

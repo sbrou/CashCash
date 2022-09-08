@@ -9,8 +9,9 @@
 
 #include <QPieSeries>
 
-#include <addopdialog.h>
+#include "addopdialog.h"
 #include "catslist.h"
+#include "goaldialog.h"
 #include "statswidget.h"
 #include "csvimporterwizard.h"
 
@@ -668,7 +669,10 @@ void Account::showStats()
 
 void Account::manageGoals()
 {
-    qDebug() << "manageGoals";
+    GoalDialog diag(cats_model, tags_model, this);
+    if (diag.exec()) {
+        goals << diag.goal();
+    }
 }
 
 QSqlError Account::createFile(const QString & title, double balance)
