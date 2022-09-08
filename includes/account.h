@@ -11,6 +11,7 @@
 #include <QChartView>
 #include <QSplitter>
 
+#include "defines.h"
 #include "operationsview.h"
 #include "customslice.h"
 #include "chartsview.h"
@@ -59,6 +60,7 @@ public slots:
 
     void showCategories();
     void showTags();
+    void manageGoals();
     void showStats();
 
 private slots:
@@ -97,6 +99,8 @@ private:
 
     CatsList *catsWidget;
     TagsList *tagsWidget;
+
+    QList<Goal> goals;
 
     //////////////////////////////////////////////
 

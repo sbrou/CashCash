@@ -29,8 +29,8 @@ Account::Account(QWidget *parent)
 {
     setOrientation(Qt::Vertical);  
     splitter = new QSplitter(Qt::Horizontal, this);
-    readSettings();
-    qDebug() << splitter->sizes();
+//    readSettings();
+//    qDebug() << splitter->sizes();
 //    accLayout = new QGridLayout(this);
 }
 
@@ -72,7 +72,7 @@ void Account::showError(const QSqlError &err)
 
 void Account::initAccount()
 {
-    // readSettings();
+     readSettings();
 
     // Create the data model:
     opsView = new OperationsView;
@@ -688,6 +688,11 @@ void Account::showStats()
 {
     StatsWidget stats(_init_balance, _title, this);
     stats.exec();
+}
+
+void Account::manageGoals()
+{
+    qDebug() << "manageGoals";
 }
 
 QSqlError Account::createFile(const QString & title, double balance)

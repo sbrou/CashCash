@@ -98,6 +98,7 @@ void MainWindow::initFile(bool newFile, const QString & filename)
     connect(importOpAct, SIGNAL(triggered()), _account, SLOT(importFile()));
     connect(catAct, SIGNAL(triggered()), _account, SLOT(showCategories()));
     connect(tagAct, SIGNAL(triggered()), _account, SLOT(showTags()));
+    connect(goalAct, SIGNAL(triggered()), _account, SLOT(manageGoals()));
     connect(statsAct, SIGNAL(triggered()), _account, SLOT(showStats()));
     connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));
 

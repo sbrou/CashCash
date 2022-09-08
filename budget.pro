@@ -40,6 +40,7 @@ HEADERS += \
     includes/csveditor.h \
     includes/csvimporterwizard.h \
     includes/customslice.h \
+    includes/defines.h \
     includes/filterswidget.h \
     includes/goalsview.h \
     includes/initdb.h \
