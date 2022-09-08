@@ -1,7 +1,6 @@
 #include "customslice.h"
 
 #include <QBrush>
-#include <QDebug>
 
 QT_USE_NAMESPACE
 

@@ -202,8 +202,6 @@ void Account::importOFX(const QString & filename)
     out << newFileData;
     outFile.close();
 
-    qDebug() << QCoreApplication::applicationDirPath();
-
     QFile osx_exe(QString("%1/extern/osx.exe").arg(QCoreApplication::applicationDirPath()));
     QFile dtd_file(QString("%1/extern/ofx160.dtd").arg(QCoreApplication::applicationDirPath()));
     if (!osx_exe.exists() || !dtd_file.exists()) {
@@ -258,7 +256,6 @@ void Account::importOFX(const QString & filename)
     QDomNodeList ofx = doc.elementsByTagName("OFX");
     if (!ofx.isEmpty())
     {
-        qDebug() << "ofx is not empty";
         QDomElement ofx_elt = ofx.at(0).toElement();
         QDomElement BANKMSGSRSV1 = getElement(ofx_elt, "BANKMSGSRSV1");
         QDomElement STMTTRNRS = getElement(BANKMSGSRSV1, "STMTTRNRS");
@@ -270,7 +267,6 @@ void Account::importOFX(const QString & filename)
             QSqlQuery q(QSqlDatabase::database(_title));
             if (!q.prepare(INSERT_OPERATION_SQL))
             {
-                qDebug() << q.lastError();
                 qmbErr.setDetailedText(q.lastError().text());
                 qmbErr.exec();
                 return;
@@ -346,7 +342,6 @@ void Account::addOperation()
     AddOpDialog aoDiag(cats_model, tags_model);
     aoDiag.setWindowTitle(tr("Add an operation"));
     aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
-    qDebug() << model->rowCount();
     if (aoDiag.exec()) {
 
         QSqlRecord new_record = model->record();
@@ -362,8 +357,6 @@ void Account::addOperation()
 
         if (model->insertRecord(-1, new_record))
             commitOnDatabase();
-
-        qDebug() << model->rowCount();
     }
 }
 
@@ -494,7 +487,6 @@ void Account::saveAsFile()
 
 void Account::saveSettings()
 {
-    qDebug() << splitter->sizes();
     QSettings settings;
     settings.setValue("subSplitterSizes", splitter->saveState());
     settings.setValue("mainSplitterSizes", saveState());
@@ -717,7 +709,6 @@ QSqlError Account::setStandardCategories()
         return q.lastError();
 
     QStringList colors = QColor::colorNames();
-    qDebug() << "Nombre de couleurs " << colors.size();
 
     // Depenses
 

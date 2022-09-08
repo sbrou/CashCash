@@ -124,15 +124,12 @@ void CSVImporterWizard::accept()
 
         ops->push_back(op);
     }
-
-    qDebug() << "le nombre d'operations dans ops est : " << ops->size();
     QDialog::accept();
 }
 
 void CSVImporterWizard::setNbOperations(int nb)
 {
     nbOps = nb;
-    qDebug() << "le nombre d'operations à importer est : " << nbOps;
 }
 
 int CSVImporterWizard::getNbOperations() const
@@ -230,7 +227,6 @@ void IntroPage::chooseFile()
 
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "can't open input file";
         QMessageBox::critical(this, tr("Problème de fichier"),
                               tr("Impossible de lire le fichier sélectionné. Veuillez en choisir un autre."));
         return;

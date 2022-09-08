@@ -51,7 +51,6 @@ GroupList::~GroupList()
 
 void GroupList::add()
 {
-    qDebug() << "new category";
     CatDialog diag;
     if (diag.exec())
     {
@@ -70,12 +69,10 @@ void GroupList::add()
             emit commit();
         }
     }
-    qDebug() << "end";
 }
 
 void GroupList::edit()
 {
-    qDebug() << "current row is : " << catsView->currentRow();
     int row = catsView->currentRow();
     // pour l'instant, l'index de la currentRow correspond à l'id de la categorie dans la database
     // mais ça va causer des problemes le jour ou je voudrai sort les combobox ou la qListWidget par ordre
@@ -108,7 +105,6 @@ void GroupList::remove()
 
     foreach (index, indexes) {
         int row = index.row();
-        qDebug() << row;
         model->removeRow(row);
     }
     emit commit();
