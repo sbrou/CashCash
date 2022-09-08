@@ -8,7 +8,7 @@
 #include <QDialog>
 #include <QComboBox>
 
-typedef QMap<QPair<int, QString>, QList<double> > SumsByGroup; // QMap<id_tag, QPair<name_tag,sum_tag> >
+typedef QMap<QPair<int, QString>, QList<double> > SumsByGroup;
 
 
 

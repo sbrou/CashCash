@@ -40,7 +40,6 @@ protected:
 
 private:
     void createActions();
-//    void createStatusBar();
     bool maybeSave();
 
 

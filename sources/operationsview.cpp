@@ -98,7 +98,6 @@ void OperationsView::loadModel(QSqlRelationalTableModel * mod)
 
 void OperationsView::applyFilters(const QString & statement)
 {
-//    qDebug() << statement;
     model->setFilter(statement);
 }
 

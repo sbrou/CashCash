@@ -28,7 +28,6 @@ GroupList::GroupList(Type type, QSqlTableModel * mod, QWidget *parent)
     while (q.next())
         catsView->addItem(q.value(1).toString());
 
-//    catsView->setSortingEnabled(true);
     catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mainLayout->addWidget(catsView, 0, 0, 5, 3);
 
@@ -58,10 +57,7 @@ void GroupList::add()
     {
         catsView->addItem(diag.name());
 
-//        qDebug() << model->rowCount();
-
         QSqlRecord new_record = model->record();
-//        qDebug() << new_record;
 
         new_record.setGenerated(0, false);
         new_record.setValue(1, QVariant(diag.name()));
@@ -73,13 +69,6 @@ void GroupList::add()
             model->submitAll();
             emit commit();
         }
-
-//        for (int i=0; i<6; ++i)
-//        {
-//            qDebug() <<  model->record(i);
-
-//        }
-//        qDebug() << model->rowCount();
     }
     qDebug() << "end";
 }

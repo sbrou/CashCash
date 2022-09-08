@@ -31,7 +31,6 @@ GroupDialog::GroupDialog()
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->addWidget(expenses);
     hbox->addWidget(earnings);
-//    hbox->addStretch(2);
     qgbType->setLayout(hbox);
 
     inputLayout->addWidget(qgbType, 2, 0, 1, 3);

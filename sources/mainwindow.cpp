@@ -21,8 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     readSettings();
     createActions();
-//    createStatusBar();
-//    createFile();
 
     QObject::connect(this, &MainWindow::quitApp, QCoreApplication::instance(), &QCoreApplication::quit, Qt::QueuedConnection);
 }
@@ -109,15 +107,7 @@ void MainWindow::initFile(bool newFile, const QString & filename)
         _account->createFile(newAcc.title(), newAcc.balance());
     else
         _account->loadFile(filename);
-//    _account->show();
 }
-
-//void MainWindow::loadFile(const QString & filename)
-//{
-
-
-//    _account->loadFile(filename);
-//}
 
 void MainWindow::createActions()
 {

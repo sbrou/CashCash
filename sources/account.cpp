@@ -29,9 +29,6 @@ Account::Account(QWidget *parent)
 {
     setOrientation(Qt::Vertical);  
     splitter = new QSplitter(Qt::Horizontal, this);
-//    readSettings();
-//    qDebug() << splitter->sizes();
-//    accLayout = new QGridLayout(this);
 }
 
 QSqlError Account::initDatabase()
@@ -49,10 +46,8 @@ bool Account::commitOnDatabase()
 {
     model->database().transaction();
     bool st = model->submitAll();
-//    qDebug() << "in commit on database";
     if (st)
     {
-//        qDebug() << "commiting on database";
         model->database().commit();
         model->select();
         updateBalance();
@@ -108,24 +103,20 @@ void Account::initAccount()
     }
 
     _nbOperations = model->rowCount();
-    // qDebug() << "number of operations : " << _nbOperations;
 
     opsView->loadModel(model);
     opsView->setBalance(_balance, _future_balance);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
     connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
     connect(this, SIGNAL(balanceChanged(double, double)), opsView, SLOT(setBalance(double, double)));
-//    accLayout->addWidget(opsView, 0, 0);
     splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
-//    accLayout->addWidget(chartView, 0, 1);
     splitter->addWidget(chartView);
 
     addWidget(splitter);
 
     goalsView = new GoalsView(this);
-//    accLayout->addWidget(goalsView, 1, 0, 1, 2);
     addWidget(goalsView);
 
     catsWidget = new CatsList(cats_model, this);
@@ -306,7 +297,6 @@ void Account::importOFX(const QString & filename)
                 else
                     description = op.elementsByTagName("PAYEE").at(0).toElement().text();
 
-//                qDebug() << date << amount << description;
                 addOperationInDB(q, date, 1, amount, 1, description, (amount>0));
 
             }
@@ -443,8 +433,6 @@ void Account::saveFile(bool isNewFile)
 
     QJsonObject accObject;
     QSqlQuery q(QSqlDatabase::database(_title));
-
-//    write(accObject);
 
     ///// Write Account caracteristics /////
 

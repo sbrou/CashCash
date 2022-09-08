@@ -85,7 +85,6 @@ private:
     State _state;
 
     QSplitter * splitter;
-//    QGridLayout *accLayout;
 
     QSqlRelationalTableModel *model;
     QSqlTableModel *cats_model;

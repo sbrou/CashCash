@@ -71,12 +71,9 @@ CSVImporterWizard::CSVImporterWizard(QSqlRelationalTableModel * mod, const QStri
     setPage(Page_Conclusion, new ConclusionPage);
 
     setStartId(Page_Intro);
-//    setWizardStyle(ModernStyle);
 
     setOption(HaveHelpButton, true);
     setOption(NoDefaultButton, true);
-
-//    setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 
     connect(this, &QWizard::helpRequested, this, &CSVImporterWizard::showHelp);
 
@@ -94,18 +91,6 @@ void CSVImporterWizard::showHelp()
         message = tr("The decision you make here will affect which page you "
                      "get to see next.");
         break;
-//    case Page_Evaluate:
-//        message = tr("Make sure to provide a valid email address, such as "
-//                     "toni.buddenbrook@example.de.");
-//        break;
-//    case Page_Register:
-//        message = tr("If you don't provide an upgrade key, you will be "
-//                     "asked to fill in your details.");
-//        break;
-//    case Page_Details:
-//        message = tr("Make sure to provide a valid email address, such as "
-//                     "thomas.gradgrind@example.co.uk.");
-//        break;
     case Page_Conclusion:
         message = tr("You must accept the terms and conditions of the "
                      "license to proceed.");
@@ -177,7 +162,6 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
       _file(filename)
 {
     setTitle(tr("Introduction"));
-//    setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/watermark.png"));
 
     topLabel = new QLabel(tr("This wizard will help you register your copy of "
                              "<i>Super Product One</i>&trade; or start "
@@ -597,7 +581,6 @@ ConclusionPage::ConclusionPage(QWidget *parent)
     : QWizardPage(parent)
 {
     setTitle(tr("Complete Your Registration"));
-//    setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/watermark.png"));
 
     bottomLabel = new QLabel;
     bottomLabel->setWordWrap(true);
