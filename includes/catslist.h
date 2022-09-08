@@ -5,22 +5,16 @@
 #include <QGridLayout>
 #include <QListWidget>
 #include <QPushButton>
-
 #include <QSqlRelationalTableModel>
+
+#include <defines.h>
 
 class GroupList : public QDialog
 {
     Q_OBJECT
 
-protected:
-    enum Type
-    {
-        CAT,
-        TAG
-    };
-
 public:
-    explicit GroupList(Type type, QSqlTableModel * mod, QWidget *parent = nullptr);
+    explicit GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent = nullptr);
     ~GroupList();
 
 signals:

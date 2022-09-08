@@ -1,14 +1,27 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#define EXPENSES_TYPE 0
-#define EARNINGS_TYPE 1
+#define DEFAULT_GROUP 1
 
 #include <QString>
+
+enum OpType {
+    Expense = 0,
+    Earning
+};
 
 enum GroupType {
     CatType,
     TagType
+};
+
+enum IndexInTable {
+    DateIndex = 1,
+    CatIndex,
+    AmountIndex,
+    TagIndex,
+    DesIndex,
+    OpTypeIndex
 };
 
 struct Goal {

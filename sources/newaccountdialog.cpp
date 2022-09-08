@@ -1,4 +1,4 @@
-#include "newaccountdialog.h"
+ #include "newaccountdialog.h"
 #include "ui_newaccountdialog.h"
 
 NewAccountDialog::NewAccountDialog(QWidget *parent) :

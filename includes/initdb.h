@@ -1,11 +1,12 @@
 #ifndef INITDB_H
 #define INITDB_H
 
+#include <defines.h>
 #include <QtSql>
 
 // les revenus ont comme type 1
 void addOperationInDB(QSqlQuery &q, QDate date, const QVariant &categoryId,
-             double amount, const QVariant &tagId, const QString &description, int type=0)
+             double amount, const QVariant &tagId, const QString &description, int type=Expense)
 {
     q.addBindValue(date);
     q.addBindValue(categoryId);
@@ -16,7 +17,7 @@ void addOperationInDB(QSqlQuery &q, QDate date, const QVariant &categoryId,
     q.exec();
 }
 
-QVariant addCategoryInDB(QSqlQuery &q, const QString &name, const QString& color, int type=0)
+QVariant addCategoryInDB(QSqlQuery &q, const QString &name, const QString& color, int type=Expense)
 {
     q.addBindValue(name);
     q.addBindValue(color);
@@ -25,7 +26,7 @@ QVariant addCategoryInDB(QSqlQuery &q, const QString &name, const QString& color
     return q.lastInsertId();
 }
 
-QVariant addTagInDB(QSqlQuery &q, const QString &name, const QString& color, int type=0)
+QVariant addTagInDB(QSqlQuery &q, const QString &name, const QString& color, int type=Expense)
 {
     q.addBindValue(name);
     q.addBindValue(color);

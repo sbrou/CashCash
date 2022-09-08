@@ -4,6 +4,8 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 
+#include <defines.h>
+
 void AddOpDialog::init(QSqlTableModel * cats, QSqlTableModel * tags)
 {
     ui->setupUi(this);
@@ -35,7 +37,7 @@ AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *paren
     ui(new Ui::AddOpDialog),
     opId(id)
 {
-    init(model->relationModel(2), model->relationModel(4));
+    init(model->relationModel(CatIndex), model->relationModel(TagIndex));
 
     QPushButton *ok = ui->buttonBox->button(ui->buttonBox->Ok);
     QPushButton *cancel = ui->buttonBox->button(ui->buttonBox->Cancel);
@@ -47,11 +49,11 @@ AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *paren
     mapper->setModel(model);
     mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
     mapper->setItemDelegate(new QSqlRelationalDelegate(this));
-    mapper->addMapping(ui->qdeDate, 1);
-    mapper->addMapping(ui->qleAmount, 3);
-    mapper->addMapping(ui->qcbCat, model->fieldIndex("categories_name_2"));
-    mapper->addMapping(ui->qcbTag, 4);
-    mapper->addMapping(ui->qleDes, 5, "text");
+    mapper->addMapping(ui->qdeDate, DateIndex);
+    mapper->addMapping(ui->qleAmount, AmountIndex);
+    mapper->addMapping(ui->qcbCat, CatIndex);
+    mapper->addMapping(ui->qcbTag, TagIndex);
+    mapper->addMapping(ui->qleDes, DesIndex, "text");
     mapper->setCurrentIndex(id);
 }
 

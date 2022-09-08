@@ -5,7 +5,7 @@
 #include <QSqlRecord>
 #include "catdialog.h"
 
-GroupList::GroupList(Type type, QSqlTableModel * mod, QWidget *parent)
+GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     : QDialog{parent}
     , model(mod)
 {
@@ -21,7 +21,7 @@ GroupList::GroupList(Type type, QSqlTableModel * mod, QWidget *parent)
     qpbRemove->setIcon(QIcon(":/images/images/Remove_48px.png"));
 
     QSqlQuery q(model->database());
-    if (type == CAT)
+    if (type == CatType)
         q.exec("SELECT * from categories");
     else
         q.exec("SELECT * from tags");
@@ -116,7 +116,7 @@ void GroupList::remove()
 
 ///// CatsList
 
-CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(Type::CAT, mod, parent)
+CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(CatType, mod, parent)
 {
     setWindowIcon(QIcon(":/images/images/category_48px.png"));
     setWindowTitle(tr("Manage categories"));
@@ -128,7 +128,7 @@ CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(Type::CAT,
 
 ///// TagsList
 
-TagsList::TagsList(QSqlTableModel * mod, QWidget *parent) : GroupList(Type::TAG, mod, parent)
+TagsList::TagsList(QSqlTableModel * mod, QWidget *parent) : GroupList(TagType, mod, parent)
 {
     setWindowIcon(QIcon(":/images/images/tag_window_48px.png"));
     setWindowTitle(tr("Manage tags"));

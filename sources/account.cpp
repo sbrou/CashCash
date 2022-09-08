@@ -76,20 +76,16 @@ void Account::initAccount()
     model->setTable("operations");
     model->setSort(1, Qt::DescendingOrder);
 
-    // Remember the indexes of the columns:
-    categoryIdx = model->fieldIndex("category");
-    tagIdx = model->fieldIndex("tag");
-
     // Set the relations to the other database tables:
-    model->setRelation(categoryIdx, QSqlRelation("categories", "id", "name"));
-    model->setRelation(tagIdx, QSqlRelation("tags", "id", "name"));
+    model->setRelation(CatIndex, QSqlRelation("categories", "id", "name"));
+    model->setRelation(TagIndex, QSqlRelation("tags", "id", "name"));
 
-    cats_model = model->relationModel(categoryIdx);
-    tags_model = model->relationModel(tagIdx);
+    cats_model = model->relationModel(CatIndex);
+    tags_model = model->relationModel(TagIndex);
 
     // Set the localized header captions:
-    model->setHeaderData(categoryIdx, Qt::Horizontal, tr("Category"));
-    model->setHeaderData(tagIdx, Qt::Horizontal, tr("Tag"));
+    model->setHeaderData(CatIndex, Qt::Horizontal, tr("Category"));
+    model->setHeaderData(TagIndex, Qt::Horizontal, tr("Tag"));
     model->setHeaderData(model->fieldIndex("op_date"),
                          Qt::Horizontal, tr("Date"));
     model->setHeaderData(model->fieldIndex("amount"), Qt::Horizontal, tr("Amount"));
@@ -297,7 +293,7 @@ void Account::importOFX(const QString & filename)
                 else
                     description = op.elementsByTagName("PAYEE").at(0).toElement().text();
 
-                addOperationInDB(q, date, 1, amount, 1, description, (amount>0));
+                addOperationInDB(q, date, DEFAULT_GROUP, amount, DEFAULT_GROUP, description, (amount>0));
 
             }
         }
@@ -354,15 +350,15 @@ void Account::addOperation()
     if (aoDiag.exec()) {
 
         QSqlRecord new_record = model->record();
-        new_record.setValue(1, QVariant(aoDiag.date()));
-        new_record.setValue(2, QVariant(aoDiag.category()));
-        new_record.setValue(3, QVariant(aoDiag.amount()));
-        new_record.setValue(4, QVariant(aoDiag.tag()));
-        new_record.setValue(5, QVariant(aoDiag.description()));
+        new_record.setValue(DateIndex, QVariant(aoDiag.date()));
+        new_record.setValue(CatIndex, QVariant(aoDiag.category()));
+        new_record.setValue(AmountIndex, QVariant(aoDiag.amount()));
+        new_record.setValue(TagIndex, QVariant(aoDiag.tag()));
+        new_record.setValue(DesIndex, QVariant(aoDiag.description()));
         if (aoDiag.amount() < 0)
-            new_record.setValue(6, QVariant(0));
+            new_record.setValue(OpTypeIndex, QVariant(0));
         else
-            new_record.setValue(6, QVariant(1));
+            new_record.setValue(OpTypeIndex, QVariant(1));
 
         if (model->insertRecord(-1, new_record))
             commitOnDatabase();
@@ -476,12 +472,12 @@ void Account::saveFile(bool isNewFile)
     q.exec("SELECT * FROM operations");
     while (q.next()) {
         QJsonObject op;
-        op["date"] = q.value(1).toString();
-        op["category"] = q.value(2).toInt();
-        op["amount"] = q.value(3).toDouble();
-        op["tag"] = q.value(4).toInt();
-        op["description"] = q.value(5).toString();
-        op["type"] = q.value(6).toInt();
+        op["date"] = q.value(DateIndex).toString();
+        op["category"] = q.value(CatIndex).toInt();
+        op["amount"] = q.value(AmountIndex).toDouble();
+        op["tag"] = q.value(TagIndex).toInt();
+        op["description"] = q.value(DesIndex).toString();
+        op["type"] = q.value(OpTypeIndex).toInt();
 
         opsArray.append(op);
     }
@@ -704,7 +700,7 @@ QSqlError Account::createFile(const QString & title, double balance)
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
 
-    addTagInDB(q, tr("-AUCUN-"), "#000000" , 0);
+    addTagInDB(q, tr("-AUCUN-"), "#000000" , Expense);
 
     // initialize account
     initAccount();
@@ -725,34 +721,34 @@ QSqlError Account::setStandardCategories()
 
     // Depenses
 
-    addCategoryInDB(q, tr("-AUCUN-"), "#000000" , 0);
+    addCategoryInDB(q, tr("-AUCUN-"), "#000000" , Expense);
 
     int i = 0;
-    addCategoryInDB(q, tr("Abonnements"), colors[i++], 0);
-    addCategoryInDB(q, tr("Alimentation"), colors[i++], 0);
-    addCategoryInDB(q, tr("Animaux"), colors[i++], 0);
-    addCategoryInDB(q, tr("Auto/Moto"), colors[i++], 0);
-    addCategoryInDB(q, tr("Bien-Etre/Soins"), colors[i++], 0);
-    addCategoryInDB(q, tr("Divers"), colors[i++], 0);
-    addCategoryInDB(q, tr("Dons/Cadeaux"), colors[i++], 0);
-    addCategoryInDB(q, tr("Electronique/Informatique"), colors[i++], 0);
-    addCategoryInDB(q, tr("Epargne"), colors[i++], 0);
-    addCategoryInDB(q, tr("Frais"), colors[i++], 0);
-    addCategoryInDB(q, tr("Habillement"), colors[i++], 0);
-    addCategoryInDB(q, tr("Impôts/Taxes"), colors[i++], 0);
-    addCategoryInDB(q, tr("Logement"), colors[i++], 0);
-    addCategoryInDB(q, tr("Loisirs/Culture/Sport"), colors[i++], 0);
-    addCategoryInDB(q, tr("Santé"), colors[i++], 0);
-    addCategoryInDB(q, tr("Transport"), colors[i++], 0);
-    addCategoryInDB(q, tr("Vacances"), colors[i++], 0);
+    addCategoryInDB(q, tr("Abonnements"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Alimentation"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Animaux"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Auto/Moto"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Bien-Etre/Soins"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Divers"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Dons/Cadeaux"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Electronique/Informatique"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Epargne"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Frais"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Habillement"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Impôts/Taxes"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Logement"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Loisirs/Culture/Sport"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Santé"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Transport"), colors[i++], Expense);
+    addCategoryInDB(q, tr("Vacances"), colors[i++], Expense);
 
     // Revenus
 
-    addCategoryInDB(q, tr("Autres Revenus"), colors[i++], 1);
-    addCategoryInDB(q, tr("Indemnités"), colors[i++], 1);
-    addCategoryInDB(q, tr("Placements"), colors[i++], 1);
-    addCategoryInDB(q, tr("Traitements/Salaires"), colors[i++], 1);
-    addCategoryInDB(q, tr("Remboursements"), colors[i++], 1);
+    addCategoryInDB(q, tr("Autres Revenus"), colors[i++], Earning);
+    addCategoryInDB(q, tr("Indemnités"), colors[i++], Earning);
+    addCategoryInDB(q, tr("Placements"), colors[i++], Earning);
+    addCategoryInDB(q, tr("Traitements/Salaires"), colors[i++], Earning);
+    addCategoryInDB(q, tr("Remboursements"), colors[i++], Earning);
 
     return QSqlError();
 }
