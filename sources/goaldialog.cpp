@@ -12,6 +12,12 @@ GoalDialog::GoalDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *pa
     ui->horizontalLayout_2->setAlignment(ui->qrbCats, Qt::AlignCenter);
     ui->horizontalLayout_2->setAlignment(ui->qrbTags, Qt::AlignCenter);
 
+    QDoubleValidator * amValidator = new QDoubleValidator(ui->qleAMount);
+    amValidator->setLocale(QLocale::German);
+    amValidator->setBottom(0);
+    ui->qleAMount->setValidator(amValidator);
+    ui->qleAMount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
+
     connect(ui->qrbCats, SIGNAL(toggled(bool)), this, SLOT(showCats(bool)));
     connect(ui->qrbTags, SIGNAL(toggled(bool)), this, SLOT(showTags(bool)));
 
