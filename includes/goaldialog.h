@@ -20,6 +20,9 @@ public:
 
     Goal goal();
 
+protected slots:
+    void accept() override;
+
 private slots:
     void showCats(bool);
     void showTags(bool);

@@ -1,6 +1,8 @@
 #include "goaldialog.h"
 #include "ui_goaldialog.h"
 
+#include <QMessageBox>
+
 GoalDialog::GoalDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::GoalDialog),
@@ -62,4 +64,22 @@ Goal GoalDialog::goal()
     _goal.typeName = ui->qcbName->currentText();
     _goal.max = ui->qleAMount->text().toDouble();
     return _goal;
+}
+
+void GoalDialog::accept()
+{
+    bool ok;
+    ui->qleAMount->text().toDouble(&ok);
+    if (ui->qcbName->currentIndex() < 0) {
+        QMessageBox::critical(this, tr("Erreur"), tr("Veuillez sélectionner une catégorie ou un tag."));
+        setResult(QDialog::Rejected);
+        return;
+    }
+    else if (!ok) {
+        QMessageBox::critical(this, tr("Erreur"), tr("Veuillez entrer un montant."));
+        setResult(QDialog::Rejected);
+        return;
+    }
+    else
+        QDialog::accept();
 }
