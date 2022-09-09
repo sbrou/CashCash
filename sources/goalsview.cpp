@@ -2,6 +2,11 @@
 
 #include <QHeaderView>
 #include <QPainter>
+#include <QStandardItem>
+#include <QDate>
+#include <QSqlQuery>
+
+#include "utilities.h"
 
 void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
            const QModelIndex &index ) const
@@ -33,19 +38,14 @@ QVariant MyStandardItemModel::data(const QModelIndex &index, int role) const
 }
 
 
-GoalsView::GoalsView(QWidget *parent)
-    : QWidget{parent}
+GoalsView::GoalsView(const QString &accountName, QWidget *parent)
+    : QWidget{parent},
+      databaseName(accountName)
 {
     mainLayout = new QVBoxLayout(this);
 
     goals_model = new MyStandardItemModel(this);
-    goals_model->setRowCount(3);
-    goals_model->setColumnCount(5);
-    goals_model->setHeaderData(0, Qt::Horizontal, tr("Category/Tag"));
-    goals_model->setHeaderData(1, Qt::Horizontal, tr("Progress"));
-    goals_model->setHeaderData(2, Qt::Horizontal, tr("Goal"));
-    goals_model->setHeaderData(3, Qt::Horizontal, tr("Spent"));
-    goals_model->setHeaderData(4, Qt::Horizontal, tr("Rest"));
+    goals_model->setHorizontalHeaderLabels({tr("Category/Tag"), tr("Progress"), tr("Goal"), tr("Spent"), tr("Rest")});
 
     tableView = new QTableView(this);
     tableView->setModel(goals_model);
@@ -54,34 +54,68 @@ GoalsView::GoalsView(QWidget *parent)
     tableView->clearSpans();
     tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableView->setSelectionMode(QAbstractItemView::NoSelection);
-//    tableView->resizeColumnsToContents();
     tableView->setShowGrid(false);
 
     delegate = new GoalsViewDelegate(this);
     tableView->setItemDelegate(delegate);
 
-    init();
-
     mainLayout->addWidget(tableView);
 }
 
-void GoalsView::init()
+double GoalsView::computeGoalProgress(const QString &groupName, int typeId)
 {
-    goals_model->setData(goals_model->index(0, 0), QString("ESSENTIAL"));
-    goals_model->setData(goals_model->index(0, 1), 82);
-    goals_model->setData(goals_model->index(0, 2), 100);
-    goals_model->setData(goals_model->index(0, 3), 82);
-    goals_model->setData(goals_model->index(0, 4), 100-82);
+    double spent = qQNaN();
 
-    goals_model->setData(goals_model->index(1, 0), QString("WANTINGS"));
-    goals_model->setData(goals_model->index(1, 1), 54);
-    goals_model->setData(goals_model->index(1, 2), 100);
-    goals_model->setData(goals_model->index(1, 3), 54);
-    goals_model->setData(goals_model->index(1, 4), 100-54);
+    QDate today = QDate::currentDate();
+    int year = today.year();
+    int month = today.month();
 
-    goals_model->setData(goals_model->index(2, 0), QString("SAVINGS"));
-    goals_model->setData(goals_model->index(2, 1), 23);
-    goals_model->setData(goals_model->index(2, 2), 100);
-    goals_model->setData(goals_model->index(2, 3), 23);
-    goals_model->setData(goals_model->index(2, 4), 100-23);
+    QDate begin(year, month, 1);
+    QDate end(year, month, daysInMonth(month, year));
+    QString date = QString("op_date>='%1' AND op_date<='%2'")
+            .arg(begin.toString(Qt::ISODateWithMs))
+            .arg(end.toString(Qt::ISODateWithMs));
+
+    QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + " AND %1=%2")
+                        .arg(groupName)
+                        .arg(typeId);
+
+    QSqlQuery query(QSqlDatabase::database(databaseName));
+    query.exec(statement);
+    while (query.next()) {
+        spent = qAbs(query.value(0).toDouble());
+    }
+
+    return spent;
+}
+
+void GoalsView::addGoal(Goal newGoal)
+{
+    QString icon = newGoal.type == CatType ? ":/images/images/category_48px.png" : ":/images/images/tag_window_48px.png";
+    QString groupName = newGoal.type == CatType ? "category" : "tag";
+    QString groupTable = newGoal.type == CatType ? "categories" : "tags";
+    QString name;
+
+    QSqlQuery query(QSqlDatabase::database(databaseName));
+    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTable).arg(newGoal.typeId));
+    while (query.next()) {
+        name = query.value(1).toString();
+    }
+
+    QStandardItem *nameItem = new QStandardItem(QIcon(icon),name);
+    nameItem->setData(newGoal.typeId, Qt::UserRole);
+
+    double spent = computeGoalProgress(groupName, newGoal.typeId);
+
+    QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/newGoal.max));
+    QStandardItem *goalItem = new QStandardItem(QString::number(newGoal.max));
+    QStandardItem *spentItem = new QStandardItem(QString::number(spent));
+    QStandardItem *restItem = new QStandardItem(QString::number(newGoal.max-spent));
+    goals_model->appendRow({nameItem, progressItem, goalItem, spentItem, restItem});
+    tableView->resizeRowsToContents();
+}
+
+void GoalsView::updateGoals()
+{
+
 }

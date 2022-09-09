@@ -26,7 +26,7 @@ enum IndexInTable {
 
 struct Goal {
     GroupType type;
-    QString typeName;
+    int typeId;
     double max;
 };
 

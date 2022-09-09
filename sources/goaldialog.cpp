@@ -61,7 +61,7 @@ void GoalDialog::showGroup(unsigned type)
 
 Goal GoalDialog::goal()
 {
-    _goal.typeName = ui->qcbName->currentText();
+    _goal.typeId = ui->qcbName->currentIndex()+1;
     _goal.max = ui->qleAMount->text().toDouble();
     return _goal;
 }

@@ -54,6 +54,7 @@ bool Account::commitOnDatabase()
         updateBalance();
         chartView->updatePie();
         opsView->resizeView();
+        goalsView->updateGoals();
         changeState(Modified);
     }
 
@@ -113,7 +114,7 @@ void Account::initAccount()
 
     addWidget(splitter);
 
-    goalsView = new GoalsView(this);
+    goalsView = new GoalsView(_title, this);
     addWidget(goalsView);
 
     catsWidget = new CatsList(cats_model, this);
@@ -672,6 +673,7 @@ void Account::manageGoals()
     GoalDialog diag(cats_model, tags_model, this);
     if (diag.exec()) {
         goals << diag.goal();
+        goalsView->addGoal(diag.goal());
     }
 }
 

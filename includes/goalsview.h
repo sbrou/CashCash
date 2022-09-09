@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 
 #include "coloredprogressbar.h"
+#include "defines.h"
 
 class GoalsViewDelegate : public QStyledItemDelegate
 {
@@ -33,16 +34,19 @@ class GoalsView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GoalsView(QWidget *parent = nullptr);
+    explicit GoalsView(const QString &accountTitle, QWidget *parent = nullptr);
+    void addGoal(Goal newGoal);
+    void updateGoals();
 
 signals:
 
 private:
     // Methodes
-    void init();
+    double computeGoalProgress(const QString &groupName, int typeId);
 
     // Attributs
     QVBoxLayout *mainLayout;
+    QString databaseName;
 
     QStandardItemModel *goals_model;
     QTableView *tableView;
