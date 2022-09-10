@@ -14,10 +14,14 @@ public:
     ~ColoredProgressBar();
 
     void paint(QPainter *painter, const QRect& rec);
+    void setPercentage(double);
 
 signals:
 
 public slots:
+
+private:
+    double percentage;
 };
 
 #endif // COLOREDPROGRESSBAR_H

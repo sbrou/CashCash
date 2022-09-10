@@ -23,6 +23,7 @@ void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     int progress = qRound(index.data().toDouble());
     progress = progress < 0 ? 0 : progress;
     bar.setValue(progress);
+    bar.setPercentage(index.data().toDouble());
     bar.paint(painter, option.rect);
 }
 
@@ -157,9 +158,9 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
     }
 
     QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/max));
-    QStandardItem *goalItem = new QStandardItem(QString::number(max));
-    QStandardItem *spentItem = new QStandardItem(QString::number(spent));
-    QStandardItem *restItem = new QStandardItem(QString::number(max-spent));
+    QStandardItem *goalItem = new QStandardItem(QString::number(max) + " €");
+    QStandardItem *spentItem = new QStandardItem(QString::number(spent) + " €");
+    QStandardItem *restItem = new QStandardItem(QString::number(max-spent) + " €");
 
     goals_model->setItem(goalIndex, 1, progressItem);
     goals_model->setItem(goalIndex, 2, goalItem);

@@ -8,7 +8,7 @@
 
 ColoredProgressBar::ColoredProgressBar(QWidget *parent) : QProgressBar(parent)
 {
-
+    percentage = value();
 }
 
 ColoredProgressBar::~ColoredProgressBar()
@@ -42,7 +42,12 @@ void ColoredProgressBar::paint(QPainter *painter, const QRect& rec)
     // Paint text
     painter->setPen(Qt::black);
     painter->setBrush(QBrush(Qt::black));
-    painter->drawText(xpos, ypos, w, h, Qt::AlignCenter, QString::number(val) + "%");
+    painter->drawText(xpos, ypos, w, h, Qt::AlignCenter, QString::number(percentage, 'f', 2) + "%");
 
     painter->restore();
+}
+
+void ColoredProgressBar::setPercentage(double doubleValue)
+{
+    percentage = doubleValue;
 }
