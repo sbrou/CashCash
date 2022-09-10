@@ -4,6 +4,7 @@
 #define DEFAULT_GROUP 1
 
 #include <QString>
+#include <QMetaType>
 
 enum OpType {
     Expense = 0,
@@ -29,5 +30,7 @@ struct Goal {
     int typeId;
     double max;
 };
+
+Q_DECLARE_METATYPE(Goal)
 
 #endif // DEFINES_H

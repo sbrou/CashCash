@@ -5,6 +5,9 @@
 #include <QStandardItem>
 #include <QDate>
 #include <QSqlQuery>
+#include <QMenu>
+#include <QInputDialog>
+#include <QMessageBox>
 
 #include "utilities.h"
 
@@ -40,7 +43,8 @@ QVariant MyStandardItemModel::data(const QModelIndex &index, int role) const
 
 GoalsView::GoalsView(const QString &accountName, QWidget *parent)
     : QWidget{parent},
-      databaseName(accountName)
+      databaseName(accountName),
+      currentGoal(-1)
 {
     mainLayout = new QVBoxLayout(this);
 
@@ -59,11 +63,58 @@ GoalsView::GoalsView(const QString &accountName, QWidget *parent)
     delegate = new GoalsViewDelegate(this);
     tableView->setItemDelegate(delegate);
 
+
+    createCustomContextMenu();
+    tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(tableView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
+
     mainLayout->addWidget(tableView);
 }
 
-double GoalsView::computeGoalProgress(const QString &groupName, int typeId)
+void GoalsView::createCustomContextMenu()
 {
+    contextMenu = new QMenu(tableView);
+    QAction *editAct = contextMenu->addAction(QIcon(":/images/images/edit_48px.png"),
+                                              tr("Editer l'objectif"), this, &GoalsView::EditGoal);
+    contextMenu->addAction(editAct);
+    QAction *removeAct = contextMenu->addAction(QIcon(":/images/images/Remove_48px.png"),
+                                                tr("Supprimer l'objectif"), this, &GoalsView::RemoveGoal);
+    contextMenu->addAction(removeAct);
+}
+
+void GoalsView::customMenuRequested(QPoint pos){
+    QModelIndex index=tableView->indexAt(pos);
+    if (index.isValid()) {
+        currentGoal = index.row();
+        contextMenu->popup(tableView->viewport()->mapToGlobal(pos));
+    }
+}
+
+void GoalsView::RemoveGoal()
+{
+
+}
+
+void GoalsView::EditGoal()
+{
+    Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
+    bool ok;
+    double max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
+                                       tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
+                                       Qt::WindowFlags(), 0.01);
+    if (!ok) {
+        QMessageBox::critical(this, tr("Erreur"), tr("Veuillez entrer un montant valide."));
+        return;
+    }
+
+    updateGoalProgress(currentGoal, max);
+}
+
+void GoalsView::updateGoalProgress(int goalIndex, double amount)
+{
+    Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
+    QString groupName = goal.type == CatType ? "category" : "tag";
+    double max = amount > 0 ? amount : goals_model->item(goalIndex,2)->data().toDouble();
     double spent = qQNaN();
 
     QDate today = QDate::currentDate();
@@ -78,7 +129,7 @@ double GoalsView::computeGoalProgress(const QString &groupName, int typeId)
 
     QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + " AND %1=%2")
                         .arg(groupName)
-                        .arg(typeId);
+                        .arg(goal.typeId);
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
     query.exec(statement);
@@ -86,13 +137,22 @@ double GoalsView::computeGoalProgress(const QString &groupName, int typeId)
         spent = qAbs(query.value(0).toDouble());
     }
 
-    return spent;
+    QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/max));
+    QStandardItem *goalItem = new QStandardItem(QString::number(max));
+    QStandardItem *spentItem = new QStandardItem(QString::number(spent));
+    QStandardItem *restItem = new QStandardItem(QString::number(max-spent));
+
+    goals_model->setItem(goalIndex, 1, progressItem);
+    goals_model->setItem(goalIndex, 2, goalItem);
+    goals_model->setItem(goalIndex, 3, spentItem);
+    goals_model->setItem(goalIndex, 4, restItem);
+    tableView->resizeRowsToContents();
+    tableView->resizeColumnToContents(0);
 }
 
 void GoalsView::addGoal(Goal newGoal)
 {
     QString icon = newGoal.type == CatType ? ":/images/images/category_48px.png" : ":/images/images/tag_window_48px.png";
-    QString groupName = newGoal.type == CatType ? "category" : "tag";
     QString groupTable = newGoal.type == CatType ? "categories" : "tags";
     QString name;
 
@@ -103,19 +163,18 @@ void GoalsView::addGoal(Goal newGoal)
     }
 
     QStandardItem *nameItem = new QStandardItem(QIcon(icon),name);
-    nameItem->setData(newGoal.typeId, Qt::UserRole);
+    QVariant qVarGoal;
+    qVarGoal.setValue(newGoal);
+    nameItem->setData(qVarGoal, Qt::UserRole);
 
-    double spent = computeGoalProgress(groupName, newGoal.typeId);
-
-    QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/newGoal.max));
-    QStandardItem *goalItem = new QStandardItem(QString::number(newGoal.max));
-    QStandardItem *spentItem = new QStandardItem(QString::number(spent));
-    QStandardItem *restItem = new QStandardItem(QString::number(newGoal.max-spent));
-    goals_model->appendRow({nameItem, progressItem, goalItem, spentItem, restItem});
-    tableView->resizeRowsToContents();
+    int newRow = goals_model->rowCount();
+    goals_model->insertRow(newRow);
+    goals_model->setItem(newRow, 0, nameItem);
+    updateGoalProgress(newRow, newGoal.max);
 }
 
 void GoalsView::updateGoals()
 {
-
+    for (int row = 0; row < goals_model->rowCount(); ++row)
+        updateGoalProgress(row);
 }

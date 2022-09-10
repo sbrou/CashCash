@@ -38,11 +38,17 @@ public:
     void addGoal(Goal newGoal);
     void updateGoals();
 
-signals:
+public slots:
+    void customMenuRequested(QPoint pos);
+
+private slots:
+    void EditGoal();
+    void RemoveGoal();
 
 private:
     // Methodes
-    double computeGoalProgress(const QString &groupName, int typeId);
+    void createCustomContextMenu();
+    void updateGoalProgress(int goalIndex, double amount = -1);
 
     // Attributs
     QVBoxLayout *mainLayout;
@@ -50,6 +56,8 @@ private:
 
     QStandardItemModel *goals_model;
     QTableView *tableView;
+    QMenu* contextMenu;
+    int currentGoal;
 
     GoalsViewDelegate *delegate;
 };
