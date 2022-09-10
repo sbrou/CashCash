@@ -39,6 +39,9 @@ public:
     void updateGoals();
     QStandardItemModel * goalsModel();
 
+signals:
+    void changeState(AccountState);
+
 public slots:
     void customMenuRequested(QPoint pos);
 

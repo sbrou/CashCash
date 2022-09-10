@@ -118,6 +118,7 @@ void Account::initAccount()
     addWidget(splitter);
 
     goalsView = new GoalsView(_title, this);
+    connect(goalsView, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
     addWidget(goalsView);
 
     catsWidget = new CatsList(cats_model, this);
@@ -386,7 +387,7 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-Account::State Account::state()
+AccountState Account::state()
 {
     return _state;
 }
@@ -396,7 +397,7 @@ QString Account::title()
     return _title;
 }
 
-void Account::changeState(State newState)
+void Account::changeState(AccountState newState)
 {
     _state = newState;
     emit stateChanged( _state == Modified);

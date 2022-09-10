@@ -208,9 +208,9 @@ void MainWindow::about()
 
 bool MainWindow::maybeSave()
 {
-    if (_account != nullptr && _account->state() != Account::Empty)
+    if (_account != nullptr && _account->state() != Empty)
     {
-        if (_account->state() == Account::Modified) {
+        if (_account->state() == Modified) {
             QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Sauvegarder"),
                                                                        tr("Voulez-vous enregistrer vos modifications ?"),
                                                                        QMessageBox::Save | QMessageBox::Cancel | QMessageBox::Discard, QMessageBox::Save);

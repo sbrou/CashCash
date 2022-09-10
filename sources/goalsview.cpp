@@ -109,6 +109,7 @@ void GoalsView::RemoveGoal()
     switch(choice) {
     case QMessageBox::Yes:
         goals_model->removeRow(currentGoal);
+        emit changeState(Modified);
         break;
     default:
         return;
@@ -123,6 +124,8 @@ void GoalsView::EditGoal()
     double max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
                                        tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
                                        Qt::WindowFlags(), 0.01);
+    if (ok)
+        emit changeState(Modified);
 
     updateGoalProgress(currentGoal, max);
 }
@@ -185,6 +188,7 @@ void GoalsView::addGoal(Goal newGoal)
     goals_model->insertRow(newRow);
     goals_model->setItem(newRow, 0, nameItem);
     updateGoalProgress(newRow, newGoal.max);
+    emit changeState(Modified);
 }
 
 void GoalsView::updateGoals()

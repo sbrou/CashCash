@@ -10,6 +10,12 @@
 
 #include <QMetaType>
 
+enum AccountState {
+    Empty,
+    UpToDate,
+    Modified
+};
+
 enum OpType {
     Expense = 0,
     Earning

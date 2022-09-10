@@ -30,13 +30,7 @@ public:
     void saveSettings();
     void readSettings();
 
-    enum State {
-        Empty,
-        UpToDate,
-        Modified
-    };
-
-    State state();
+    AccountState state();
     QString title();
 
 signals:
@@ -53,6 +47,7 @@ public slots:
     void editOperation();
     void removeOperation();
 
+    void changeState(AccountState newState);
     void saveFile(bool isNewFile = false);
     void saveAsFile();
     QSqlError loadFile(const QString& account_file);
@@ -72,7 +67,6 @@ private:
     void updateBalance();
     void importCSV(const QString & filename);
     void importOFX(const QString & filename);
-    void changeState(State newState);
 
     // Attributs
 
@@ -82,7 +76,7 @@ private:
     double _balance;
     double _future_balance;
     QString _filepath;
-    State _state;
+    AccountState _state;
 
     QSplitter * splitter;
 
