@@ -66,6 +66,19 @@ namespace Utilities
         }
     }
 
+    QString selectGroupCmd(GroupType type)
+    {
+        switch(type)
+        {
+        case CatType:
+            return SELECT_CATEGORIES;
+        case TagType:
+            return SELECT_TAGS;
+        default:
+            return "";
+        }
+    }
+
     QString lowerDateCondition(QDate date)
     {
         return QString("op_date>='%1'").arg(date.toString(Qt::ISODateWithMs));
@@ -109,6 +122,44 @@ namespace Utilities
     QString idCondition(int id)
     {
         return QString("id=%1").arg(id);
+    }
+
+    // QueryStatement
+    QueryStatement::QueryStatement(const QString & sqlCommand, const QString & condition)
+        : command(sqlCommand)
+    {
+        if (!condition.isEmpty())
+            conditions << condition;
+    }
+
+    void QueryStatement::setCommand(const QString & sqlCommand, bool clearAllConditions)
+    {
+        command = sqlCommand;
+        if (clearAllConditions)
+            conditions.clear();
+    }
+
+    void QueryStatement::addCondition(const QString & condition)
+    {
+        conditions << condition;
+    }
+
+    QString QueryStatement::get()
+    {
+        QString finalStatement(command);
+        if (conditions.size() > 0) {
+            finalStatement += " WHERE ";
+            finalStatement += conditions.join(COND_SEP);
+        }
+        return finalStatement;
+    }
+
+    void QueryStatement::clearConditions(int i, qsizetype n)
+    {
+        if (i < 0)
+            conditions.clear();
+        else
+            conditions.remove(i,n);
     }
 }
 

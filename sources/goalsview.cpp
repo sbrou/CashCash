@@ -99,7 +99,7 @@ void GoalsView::RemoveGoal()
     QString name;
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE " + idCondition(goal.typeId)).arg(groupTableByType(goal.type)));
+    query.exec(QueryStatement(selectGroupCmd(goal.type), idCondition(goal.typeId)).get());
     while (query.next()) {
         name = query.value(1).toString();
     }
@@ -139,15 +139,13 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
 
     QDate begin(year, month, 1);
     QDate end(year, month, daysInMonth(month, year));
-    QStringList condList;
-    condList << lowerDateCondition(begin);
-    condList << upperDateCondition(end);
-    condList << groupCondition(goal.type, goal.typeId);
-    QString condition = condList.join(COND_SEP);
-    QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + condition);
+    QueryStatement statement(SELECT_SUM);
+    statement.addCondition(lowerDateCondition(begin));
+    statement.addCondition(upperDateCondition(end));
+    statement.addCondition(groupCondition(goal.type, goal.typeId));
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(statement);
+    query.exec(statement.get());
     while (query.next()) {
         spent = qAbs(query.value(0).toDouble());
     }
@@ -173,7 +171,7 @@ void GoalsView::addGoal(Goal newGoal)
 {
     QString name;
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE " + idCondition(newGoal.typeId)).arg(groupTableByType(newGoal.type)));
+    query.exec(QueryStatement(selectGroupCmd(newGoal.type), idCondition(newGoal.typeId)).get());
     while (query.next()) {
         name = query.value(1).toString();
     }

@@ -86,20 +86,22 @@ void ChartsView::updatePie()
 
 void ChartsView::populateSeries(GroupType type, QPieSeries& series)
 {
-    QSqlQuery q(model->database());
-    QString dateCondition = QStringList({lowerDateCondition(beginDate),upperDateCondition(endDate)}).join(COND_SEP);
+    QMap<double, CustomSlice *> sortedSlices;
 
-    QMap<double,CustomSlice*> sortedSlices;
-    
-    q.exec("SELECT * FROM " + groupTableByType(type) + " WHERE " + typeCondition((OpType)0));
+    QueryStatement query_statement(SELECT_SUM);
+    query_statement.addCondition(lowerDateCondition(beginDate));
+    query_statement.addCondition(upperDateCondition(endDate));
+
+    QSqlQuery q(model->database());
+    q.exec(QueryStatement(selectGroupCmd(type), typeCondition((OpType)0)).get());
     while (q.next()) {
         int id = q.value(0).toInt();
         QString name = q.value(1).toString();
         QString color = q.value(2).toString();
 
         QSqlQuery query(model->database());
-        QString condition = dateCondition + COND_SEP + groupCondition(type, id);
-        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + condition));
+        query_statement.addCondition(groupCondition(type, id));
+        query.exec(query_statement.get());
         while (query.next()) {
             qreal amount = query.value(0).toDouble();
             if (amount != 0)
@@ -108,6 +110,7 @@ void ChartsView::populateSeries(GroupType type, QPieSeries& series)
                 sortedSlices.insert(amount, slice);
             }
         }
+        query_statement.clearConditions(2);
     }
 
     foreach (CustomSlice* slice, sortedSlices)

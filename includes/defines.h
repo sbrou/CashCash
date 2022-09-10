@@ -3,8 +3,11 @@
 
 #define DEFAULT_GROUP 1
 #define COND_SEP " AND "
+#define SELECT_OPERATIONS "SELECT * FROM operations"
+#define SELECT_CATEGORIES "SELECT * FROM categories"
+#define SELECT_TAGS "SELECT * FROM tags"
+#define SELECT_SUM "SELECT SUM (amount) FROM operations"
 
-#include <QString>
 #include <QMetaType>
 
 enum OpType {

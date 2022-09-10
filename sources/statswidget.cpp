@@ -58,19 +58,18 @@ void StatsWidget::populateTable()
     table->clear();
 
     int groupTypeIndex = qcbGroupType->currentIndex();
-    QString table_name = groupTableByType((GroupType)groupTypeIndex);
 
     SumsByGroup groups;
-    QString statement = QString("SELECT * FROM %1").arg(table_name);
+    QueryStatement statement(selectGroupCmd((GroupType)groupTypeIndex));
 
     int opTypeIndex = qcbOpType->currentIndex();
     if (opTypeIndex != 2)
     {
-        statement += " WHERE " + typeCondition((OpType)opTypeIndex);
+        statement.addCondition(typeCondition((OpType)opTypeIndex));
     }
     
     QSqlQuery query(QSqlDatabase::database(_account_name));
-    query.exec(statement);
+    query.exec(statement.get());
     while (query.next()) {
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
@@ -96,19 +95,21 @@ void StatsWidget::populateTable()
 
         QDate start = QDate(today.year(), month+1, 1);
         QDate end = QDate(today.year(), month+1, daysInMonth(month+1, today.year()));
-        QString dateCondition = lowerDateCondition(start) + COND_SEP + upperDateCondition(end);
+        statement.setCommand(SELECT_SUM);
+        statement.addCondition(lowerDateCondition(start));
+        statement.addCondition(upperDateCondition(end));
 
         SumsByGroup::iterator it_group = groups.begin();
         while (it_group != groups.end()) {
-            QString conditions = dateCondition + COND_SEP + groupCondition((GroupType)groupTypeIndex, it_group.key().first);
-            statement = "SELECT SUM (amount) FROM operations WHERE " + conditions;
-            query.exec(statement);
+            statement.addCondition(groupCondition((GroupType)groupTypeIndex, it_group.key().first));
+            query.exec(statement.get());
             while (query.next()) {
                 double sum = query.value(0).toDouble();
                 month_result += sum;
                 it_group.value()[month] = sum;
                 it_group.value()[12] += sum;
             }
+            statement.clearConditions(2);
             ++it_group;
         }
 
@@ -153,7 +154,7 @@ double StatsWidget::getBalanceByDate(QDate date)
 {
     double balance = 0;
     QSqlQuery query(QSqlDatabase::database(_account_name));
-    query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + upperDateCondition(date)));
+    query.exec(QueryStatement(SELECT_SUM, upperDateCondition(date)).get());
     while (query.next()) {
         balance = _init_balance + query.value(0).toDouble();
     }

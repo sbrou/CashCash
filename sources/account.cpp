@@ -317,13 +317,14 @@ void Account::importFile()
 void Account::updateBalance()
 {
     QSqlQuery query(QSqlDatabase::database(_title));
-    QString condition = upperDateCondition(QDate::currentDate());
-    query.exec(QString("SELECT SUM (amount) FROM operations WHERE %2").arg(condition));
+    QueryStatement statement(SELECT_SUM, upperDateCondition(QDate::currentDate()));
+    query.exec(statement.get());
     while (query.next()) {
         _balance = _init_balance + query.value(0).toDouble();
     }
 
-    query.exec("SELECT SUM (amount) FROM operations");
+    statement.clearConditions();
+    query.exec(statement.get());
     while (query.next()) {
         _future_balance = _init_balance + query.value(0).toDouble();
     }
@@ -438,7 +439,7 @@ void Account::saveFile(bool isNewFile)
 
     QJsonArray catsArray;
 
-    q.exec("SELECT * FROM categories");
+    q.exec(SELECT_CATEGORIES);
     while (q.next()) {
         QJsonObject cat;
         cat["name"] = q.value(1).toString();
@@ -453,7 +454,7 @@ void Account::saveFile(bool isNewFile)
 
     QJsonArray tagsArray;
 
-    q.exec("SELECT * FROM tags");
+    q.exec(SELECT_TAGS);
     while (q.next()) {
         QJsonObject tag;
         tag["name"] = q.value(1).toString();
@@ -483,7 +484,7 @@ void Account::saveFile(bool isNewFile)
 
     QJsonArray opsArray;
 
-    q.exec("SELECT * FROM operations");
+    q.exec(SELECT_OPERATIONS);
     while (q.next()) {
         QJsonObject op;
         op["date"] = q.value(DateIndex).toString();

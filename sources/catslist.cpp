@@ -26,9 +26,9 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
 
     QSqlQuery q(model->database());
     if (type == CatType)
-        q.exec("SELECT * from categories");
+        q.exec(SELECT_CATEGORIES);
     else
-        q.exec("SELECT * from tags");
+        q.exec(SELECT_TAGS);
     while (q.next())
         catsView->addItem(q.value(1).toString());
 
