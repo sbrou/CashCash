@@ -98,8 +98,6 @@ private:
     CatsList *catsWidget;
     TagsList *tagsWidget;
 
-    QList<Goal> goals;
-
     //////////////////////////////////////////////
 
     QMap<QString,QString> _rules;
@@ -109,6 +107,7 @@ private:
 
     QSqlError readCategories(const QString& query, const QJsonArray &catsArray);
     QSqlError readOperations(const QJsonArray &opsArray);
+    void readGoals(const QJsonArray &goalsArray);
 
 };
 

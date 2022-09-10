@@ -134,7 +134,7 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
 {
     Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
     QString groupName = goal.type == CatType ? "category" : "tag";
-    double max = amount > 0 ? amount : goals_model->item(goalIndex,2)->data().toDouble();
+    double max = amount > 0 ? amount : goals_model->item(goalIndex,2)->data(Qt::UserRole).toDouble();
     double spent = qQNaN();
 
     QDate today = QDate::currentDate();
@@ -159,6 +159,7 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
 
     QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/max));
     QStandardItem *goalItem = new QStandardItem(QString::number(max) + " €");
+    goalItem->setData(max, Qt::UserRole);
     QStandardItem *spentItem = new QStandardItem(QString::number(spent) + " €");
     QStandardItem *restItem = new QStandardItem(QString::number(max-spent) + " €");
 
@@ -197,4 +198,9 @@ void GoalsView::updateGoals()
 {
     for (int row = 0; row < goals_model->rowCount(); ++row)
         updateGoalProgress(row);
+}
+
+QStandardItemModel* GoalsView::goalsModel()
+{
+    return goals_model;
 }

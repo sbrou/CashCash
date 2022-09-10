@@ -460,6 +460,21 @@ void Account::saveFile(bool isNewFile)
     }
     accObject["tags"] = tagsArray;
 
+    ///// Write Goals /////
+
+    QJsonArray goalsArray;
+    QStandardItemModel* goals = goalsView->goalsModel();
+    for (int row = 0; row < goals->rowCount(); ++row) {
+        Goal goal = goals->item(row,0)->data(Qt::UserRole).value<Goal>();
+        QJsonObject goalObj;
+        goalObj["group_type"] = goal.type;
+        goalObj["type_id"] = goal.typeId;
+        goalObj["amount"] = goal.max;
+
+        goalsArray.append(goalObj);
+    }
+    accObject["goals"] = goalsArray;
+
     ///// Write Operations /////
 
     QJsonArray opsArray;
@@ -560,6 +575,12 @@ QSqlError Account::loadFile(const QString& filename)
     _filepath = filename;
     updateBalance();
     initAccount();
+
+    ///// Read Goals after goalsView has been created /////
+    if (loadObject.contains("goals") && loadObject["goals"].isArray()) {
+        readGoals(loadObject["goals"].toArray());
+    }
+
     changeState(UpToDate);
 
     return err;
@@ -652,6 +673,32 @@ QSqlError Account::readOperations(const QJsonArray &opsArray)
     return q.lastError();
 }
 
+void Account::readGoals(const QJsonArray &goalsArray)
+{
+    for (int goalIdx = 0; goalIdx < goalsArray.size(); ++goalIdx) {
+        QJsonObject goalObj = goalsArray[goalIdx].toObject();
+
+        Goal goal;
+
+        if (goalObj.contains("group_type") && goalObj["group_type"].isDouble())
+            goal.type = (GroupType) goalObj["group_type"].toInt();
+        else
+            continue;
+
+        if (goalObj.contains("type_id") && goalObj["type_id"].isDouble())
+            goal.typeId = goalObj["type_id"].toInt();
+        else
+            continue;
+
+        if (goalObj.contains("amount") && goalObj["amount"].isDouble())
+            goal.max = goalObj["amount"].toDouble();
+        else
+            continue;
+
+        goalsView->addGoal(goal);
+    }
+}
+
 void Account::showCategories()
 {
     catsWidget->show();
@@ -672,7 +719,6 @@ void Account::manageGoals()
 {
     GoalDialog diag(cats_model, tags_model, this);
     if (diag.exec()) {
-        goals << diag.goal();
         goalsView->addGoal(diag.goal());
     }
 }

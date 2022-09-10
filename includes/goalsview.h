@@ -37,6 +37,7 @@ public:
     explicit GoalsView(const QString &accountTitle, QWidget *parent = nullptr);
     void addGoal(Goal newGoal);
     void updateGoals();
+    QStandardItemModel * goalsModel();
 
 public slots:
     void customMenuRequested(QPoint pos);
