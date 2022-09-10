@@ -16,6 +16,9 @@
 #include "csvimporterwizard.h"
 
 #include "initdb.h"
+#include "utilities.h"
+
+using namespace Utilities;
 
 Account::Account(QWidget *parent)
     : QSplitter{parent}
@@ -314,7 +317,8 @@ void Account::importFile()
 void Account::updateBalance()
 {
     QSqlQuery query(QSqlDatabase::database(_title));
-    query.exec(QString("SELECT SUM (amount) FROM operations WHERE op_date<='%2'").arg(QDate::currentDate().toString(Qt::ISODateWithMs)));
+    QString condition = upperDateCondition(QDate::currentDate());
+    query.exec(QString("SELECT SUM (amount) FROM operations WHERE %2").arg(condition));
     while (query.next()) {
         _balance = _init_balance + query.value(0).toDouble();
     }

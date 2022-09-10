@@ -59,8 +59,6 @@ void StatsWidget::populateTable()
 
     int groupTypeIndex = qcbGroupType->currentIndex();
     QString table_name = groupTableByType((GroupType)groupTypeIndex);
-    QString group_name = groupNameByType((GroupType)groupTypeIndex);
-    int type = -1;
 
     SumsByGroup groups;
     QString statement = QString("SELECT * FROM %1").arg(table_name);
@@ -68,10 +66,8 @@ void StatsWidget::populateTable()
     int opTypeIndex = qcbOpType->currentIndex();
     if (opTypeIndex != 2)
     {
-        type = opTypeIndex;
-        statement += QString(" WHERE type=%2").arg(type);
+        statement += " WHERE " + typeCondition((OpType)opTypeIndex);
     }
-
     
     QSqlQuery query(QSqlDatabase::database(_account_name));
     query.exec(statement);
@@ -100,16 +96,12 @@ void StatsWidget::populateTable()
 
         QDate start = QDate(today.year(), month+1, 1);
         QDate end = QDate(today.year(), month+1, daysInMonth(month+1, today.year()));
-
-        QString date = QString("op_date>='%1' AND op_date<='%2' AND ")
-                .arg(start.toString(Qt::ISODateWithMs))
-                .arg(end.toString(Qt::ISODateWithMs));
+        QString dateCondition = lowerDateCondition(start) + COND_SEP + upperDateCondition(end);
 
         SumsByGroup::iterator it_group = groups.begin();
         while (it_group != groups.end()) {
-            statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + "%1=%2")
-                    .arg(group_name)
-                    .arg(it_group.key().first);
+            QString conditions = dateCondition + COND_SEP + groupCondition((GroupType)groupTypeIndex, it_group.key().first);
+            statement = "SELECT SUM (amount) FROM operations WHERE " + conditions;
             query.exec(statement);
             while (query.next()) {
                 double sum = query.value(0).toDouble();
@@ -161,8 +153,7 @@ double StatsWidget::getBalanceByDate(QDate date)
 {
     double balance = 0;
     QSqlQuery query(QSqlDatabase::database(_account_name));
-    QString date_query = QString("op_date<='%1'").arg(date.toString(Qt::ISODateWithMs));
-    query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date_query));
+    query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + upperDateCondition(date)));
     while (query.next()) {
         balance = _init_balance + query.value(0).toDouble();
     }

@@ -12,6 +12,7 @@
 #include <QDate>
 
 #include "customslice.h"
+#include "defines.h"
 
 class ChartsView : public QWidget
 {
@@ -27,7 +28,7 @@ private slots:
     void changeTimePeriod(int);
 
 private:
-    void populateSeries(const QString& table, const QString& key, const QDate &begin, const QDate &end, QPieSeries& series);
+    void populateSeries(GroupType type, QPieSeries& series);
     void changeSeries(QPieSeries *o_series, QPieSeries *n_series);
 
 

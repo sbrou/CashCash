@@ -75,8 +75,8 @@ void ChartsView::updatePie()
 
     model->select();
 
-    populateSeries("categories", "category", beginDate, endDate, *cats_series);
-    populateSeries("tags", "tag", beginDate, endDate, *tags_series);
+    populateSeries(CatType, *cats_series);
+    populateSeries(TagType, *tags_series);
 
     chart->addSeries(visible_series);
     chart->setTitle(visible_series->name());
@@ -84,24 +84,22 @@ void ChartsView::updatePie()
 
 
 
-void ChartsView::populateSeries(const QString& table, const QString& key, const QDate& begin, const QDate& end,
-                                QPieSeries& series)
+void ChartsView::populateSeries(GroupType type, QPieSeries& series)
 {
     QSqlQuery q(model->database());
-    QString date = QString("op_date>='%1' AND op_date<='%2' AND ")
-            .arg(beginDate.toString(Qt::ISODateWithMs))
-            .arg(endDate.toString(Qt::ISODateWithMs));
+    QString dateCondition = QStringList({lowerDateCondition(beginDate),upperDateCondition(endDate)}).join(COND_SEP);
 
     QMap<double,CustomSlice*> sortedSlices;
-
-    q.exec("SELECT * FROM " + table + " WHERE type=0");
+    
+    q.exec("SELECT * FROM " + groupTableByType(type) + " WHERE " + typeCondition((OpType)0));
     while (q.next()) {
         int id = q.value(0).toInt();
         QString name = q.value(1).toString();
         QString color = q.value(2).toString();
 
         QSqlQuery query(model->database());
-        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + date + key +"=%1").arg(id));
+        QString condition = dateCondition + COND_SEP + groupCondition(type, id);
+        query.exec(QString("SELECT SUM (amount) FROM operations WHERE " + condition));
         while (query.next()) {
             qreal amount = query.value(0).toDouble();
             if (amount != 0)

@@ -6,6 +6,10 @@
 #include <QFormLayout>
 #include <QAction>
 
+#include "utilities.h"
+
+using namespace Utilities;
+
 filtersWidget::filtersWidget(QWidget *parent)
     : QWidget{parent}
 {
@@ -99,31 +103,32 @@ void filtersWidget::reset()
     qcbTag->setCurrentIndex(-1);
 
 
-    QString statement = QString("op_date>='%1' AND op_date<='%2'").arg(qdeDateFrom->date().toString(Qt::ISODateWithMs))
-                                                                    .arg(qdeDateTo->date().toString(Qt::ISODateWithMs));
+    QString statement = lowerDateCondition(qdeDateFrom->date()) + COND_SEP + upperDateCondition(qdeDateTo->date());
     emit statementBuilt(statement);
 }
 
 void filtersWidget::buildStatement()
 {
-    QString statement = QString("op_date>='%1' AND op_date<='%2'").arg(qdeDateFrom->date().toString(Qt::ISODateWithMs))
-                                                                    .arg(qdeDateTo->date().toString(Qt::ISODateWithMs));
+    QStringList condList;
+    condList << lowerDateCondition(qdeDateFrom->date());
+    condList << upperDateCondition(qdeDateTo->date());
+
     if (!qleSearch->text().isEmpty())
-        statement += QString(" AND description LIKE '%%1%'").arg(qleSearch->text());
+        condList << descriptionCondition(qleSearch->text());
 
     if (!qleMinAmount->text().isEmpty())
-        statement += QString(" AND amount>=%1").arg(qleMinAmount->text().toDouble());
+        condList << lowerAmountCondition(qleMinAmount->text().toDouble());
 
     if (!qleMaxAmount->text().isEmpty())
-        statement += QString(" AND amount<=%1").arg(qleMaxAmount->text().toDouble());
+        condList << upperAmountCondition(qleMaxAmount->text().toDouble());
 
     if (qcbCat->currentIndex()>=0)
-        statement += QString(" AND category=%1").arg(qcbCat->currentIndex()+1);
+        condList << categoryCondition(qcbCat->currentIndex()+1);
 
     if (qcbTag->currentIndex()>=0)
-        statement += QString(" AND tag=%1").arg(qcbTag->currentIndex()+1);
+        condList << tagCondition(qcbTag->currentIndex()+1);
 
-    emit statementBuilt(statement);
+    emit statementBuilt(condList.join(COND_SEP));
 }
 
 void filtersWidget::populateComboBoxes(QSqlTableModel * cats, QSqlTableModel * tags)

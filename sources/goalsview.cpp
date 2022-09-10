@@ -99,13 +99,13 @@ void GoalsView::RemoveGoal()
     QString name;
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTableByType(goal.type)).arg(goal.typeId));
+    query.exec(QString("SELECT * FROM %1 WHERE " + idCondition(goal.typeId)).arg(groupTableByType(goal.type)));
     while (query.next()) {
         name = query.value(1).toString();
     }
 
     QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Supprimer un objectif"),
-                                                               QString(tr("Etes-vous sûr de vouloir supprimer l'objectif sur ") + "\"%1\"").arg(name));
+                                                               QString(tr("Etes-vous sûr de vouloir supprimer l'objectif sur ") + "\"%1\" ?").arg(name));
     switch(choice) {
     case QMessageBox::Yes:
         goals_model->removeRow(currentGoal);
@@ -123,10 +123,6 @@ void GoalsView::EditGoal()
     double max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
                                        tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
                                        Qt::WindowFlags(), 0.01);
-    if (!ok) {
-        QMessageBox::critical(this, tr("Erreur"), tr("Veuillez entrer un montant valide."));
-        return;
-    }
 
     updateGoalProgress(currentGoal, max);
 }
@@ -134,7 +130,7 @@ void GoalsView::EditGoal()
 void GoalsView::updateGoalProgress(int goalIndex, double amount)
 {
     Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
-    double max = amount > 0 ? amount : goals_model->item(goalIndex,2)->data(Qt::UserRole).toDouble();
+    goal.max = amount > 0 ? amount : goal.max;
     double spent = qQNaN();
 
     QDate today = QDate::currentDate();
@@ -143,13 +139,12 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
 
     QDate begin(year, month, 1);
     QDate end(year, month, daysInMonth(month, year));
-    QString date = QString("op_date>='%1' AND op_date<='%2'")
-            .arg(begin.toString(Qt::ISODateWithMs))
-            .arg(end.toString(Qt::ISODateWithMs));
-
-    QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + " AND %1=%2")
-                        .arg(groupNameByType(goal.type))
-                        .arg(goal.typeId);
+    QStringList condList;
+    condList << lowerDateCondition(begin);
+    condList << upperDateCondition(end);
+    condList << groupCondition(goal.type, goal.typeId);
+    QString condition = condList.join(COND_SEP);
+    QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + condition);
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
     query.exec(statement);
@@ -157,11 +152,14 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
         spent = qAbs(query.value(0).toDouble());
     }
 
-    QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/max));
-    QStandardItem *goalItem = new QStandardItem(QString::number(max) + " €");
-    goalItem->setData(max, Qt::UserRole);
+    QVariant qVarGoal;
+    qVarGoal.setValue(goal);
+    goals_model->item(goalIndex,0)->setData(qVarGoal, Qt::UserRole);
+
+    QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/goal.max));
+    QStandardItem *goalItem = new QStandardItem(QString::number(goal.max) + " €");
     QStandardItem *spentItem = new QStandardItem(QString::number(spent) + " €");
-    QStandardItem *restItem = new QStandardItem(QString::number(max-spent) + " €");
+    QStandardItem *restItem = new QStandardItem(QString::number(goal.max-spent) + " €");
 
     goals_model->setItem(goalIndex, 1, progressItem);
     goals_model->setItem(goalIndex, 2, goalItem);
@@ -175,7 +173,7 @@ void GoalsView::addGoal(Goal newGoal)
 {
     QString name;
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTableByType(newGoal.type)).arg(newGoal.typeId));
+    query.exec(QString("SELECT * FROM %1 WHERE " + idCondition(newGoal.typeId)).arg(groupTableByType(newGoal.type)));
     while (query.next()) {
         name = query.value(1).toString();
     }

@@ -52,6 +52,64 @@ namespace Utilities
             return "";
         }
     }
+
+    QString groupCondition(GroupType type, int id)
+    {
+        switch(type)
+        {
+        case CatType:
+            return categoryCondition(id);
+        case TagType:
+            return tagCondition(id);
+        default:
+            return "";
+        }
+    }
+
+    QString lowerDateCondition(QDate date)
+    {
+        return QString("op_date>='%1'").arg(date.toString(Qt::ISODateWithMs));
+    }
+
+    QString upperDateCondition(QDate date)
+    {
+        return QString("op_date<='%1'").arg(date.toString(Qt::ISODateWithMs));
+    }
+
+    QString categoryCondition(int id)
+    {
+        return QString("category=%1").arg(id);
+    }
+
+    QString tagCondition(int id)
+    {
+        return QString("tag=%1").arg(id);
+    }
+
+    QString lowerAmountCondition(double amount)
+    {
+        return QString("amount>=%1").arg(amount);
+    }
+
+    QString upperAmountCondition(double amount)
+    {
+        return QString("amount<=%1").arg(amount);
+    }
+
+    QString descriptionCondition(QString str)
+    {
+        return QString("description LIKE '%%1%'").arg(str);
+    }
+
+    QString typeCondition(OpType type)
+    {
+        return QString("type=%1").arg(type);
+    }
+
+    QString idCondition(int id)
+    {
+        return QString("id=%1").arg(id);
+    }
 }
 
 

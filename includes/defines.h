@@ -2,6 +2,7 @@
 #define DEFINES_H
 
 #define DEFAULT_GROUP 1
+#define COND_SEP " AND "
 
 #include <QString>
 #include <QMetaType>
