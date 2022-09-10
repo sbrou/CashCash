@@ -4,11 +4,15 @@
 #include <QSqlError>
 #include <QSqlRecord>
 #include "catdialog.h"
+#include "utilities.h"
+
+using namespace Utilities;
 
 GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     : QDialog{parent}
     , model(mod)
 {
+    setWindowIcon(QIcon(groupIconByType(type)));
     mainLayout = new QGridLayout(this);
 
     catsView = new QListWidget(this);
@@ -114,9 +118,7 @@ void GroupList::remove()
 
 CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(CatType, mod, parent)
 {
-    setWindowIcon(QIcon(":/images/images/category_48px.png"));
     setWindowTitle(tr("Manage categories"));
-
     qpbAddNew->setText(tr("New Category"));
     qpbEdit->setText(tr("Edit Category"));
     qpbRemove->setText(tr("Remove Category"));
@@ -126,9 +128,7 @@ CatsList::CatsList(QSqlTableModel * mod, QWidget *parent) : GroupList(CatType, m
 
 TagsList::TagsList(QSqlTableModel * mod, QWidget *parent) : GroupList(TagType, mod, parent)
 {
-    setWindowIcon(QIcon(":/images/images/tag_window_48px.png"));
     setWindowTitle(tr("Manage tags"));
-
     qpbAddNew->setText(tr("New Tag"));
     qpbEdit->setText(tr("Edit Tag"));
     qpbRemove->setText(tr("Remove Tag"));

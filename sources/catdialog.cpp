@@ -3,6 +3,10 @@
 #include <QColorDialog>
 #include <QRadioButton>
 
+#include "utilities.h"
+
+using namespace Utilities;
+
 GroupDialog::GroupDialog()
 {
     inputLayout = new QGridLayout;
@@ -117,7 +121,7 @@ void GroupDialog::setFields(QSqlRecord rec)
 
 CatDialog::CatDialog() : GroupDialog()
 {
-    setWindowIcon(QIcon(":/images/images/category_48px.png"));
+    setWindowIcon(QIcon(groupIconByType(CatType)));
     setWindowTitle(tr("Category"));
 }
 
@@ -125,6 +129,6 @@ CatDialog::CatDialog() : GroupDialog()
 
 TagDialog::TagDialog() : GroupDialog()
 {
-    setWindowIcon(QIcon(":/images/images/tag_window_48px.png"));
+    setWindowIcon(QIcon(groupIconByType(TagType)));
     setWindowTitle(tr("Tag"));
 }

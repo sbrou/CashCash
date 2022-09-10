@@ -11,6 +11,8 @@
 
 #include "utilities.h"
 
+using namespace Utilities;
+
 void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
            const QModelIndex &index ) const
 {
@@ -94,11 +96,10 @@ void GoalsView::customMenuRequested(QPoint pos){
 void GoalsView::RemoveGoal()
 {
     Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
-    QString groupTable = goal.type == CatType ? "categories" : "tags";
     QString name;
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTable).arg(goal.typeId));
+    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTableByType(goal.type)).arg(goal.typeId));
     while (query.next()) {
         name = query.value(1).toString();
     }
@@ -133,7 +134,6 @@ void GoalsView::EditGoal()
 void GoalsView::updateGoalProgress(int goalIndex, double amount)
 {
     Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
-    QString groupName = goal.type == CatType ? "category" : "tag";
     double max = amount > 0 ? amount : goals_model->item(goalIndex,2)->data(Qt::UserRole).toDouble();
     double spent = qQNaN();
 
@@ -148,7 +148,7 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
             .arg(end.toString(Qt::ISODateWithMs));
 
     QString statement = QString("SELECT SUM (amount) FROM operations WHERE " + date + " AND %1=%2")
-                        .arg(groupName)
+                        .arg(groupNameByType(goal.type))
                         .arg(goal.typeId);
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
@@ -173,17 +173,14 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
 
 void GoalsView::addGoal(Goal newGoal)
 {
-    QString icon = newGoal.type == CatType ? ":/images/images/category_48px.png" : ":/images/images/tag_window_48px.png";
-    QString groupTable = newGoal.type == CatType ? "categories" : "tags";
     QString name;
-
     QSqlQuery query(QSqlDatabase::database(databaseName));
-    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTable).arg(newGoal.typeId));
+    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTableByType(newGoal.type)).arg(newGoal.typeId));
     while (query.next()) {
         name = query.value(1).toString();
     }
 
-    QStandardItem *nameItem = new QStandardItem(QIcon(icon),name);
+    QStandardItem *nameItem = new QStandardItem(QIcon(groupIconByType(newGoal.type)),name);
     QVariant qVarGoal;
     qVarGoal.setValue(newGoal);
     nameItem->setData(qVarGoal, Qt::UserRole);

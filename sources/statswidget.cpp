@@ -10,6 +10,8 @@
 #include "defines.h"
 #include "utilities.h"
 
+using namespace Utilities;
+
 StatsWidget::StatsWidget(double balance, const QString & account_title, QWidget *parent)
     : QDialog{parent}
     , _init_balance(balance)
@@ -55,22 +57,12 @@ void StatsWidget::populateTable()
 {
     table->clear();
 
-    QString table_name;
-    QString group_name;
+    int groupTypeIndex = qcbGroupType->currentIndex();
+    QString table_name = groupTableByType((GroupType)groupTypeIndex);
+    QString group_name = groupNameByType((GroupType)groupTypeIndex);
     int type = -1;
 
     SumsByGroup groups;
-
-    int groupTypeIndex = qcbGroupType->currentIndex();
-    if (groupTypeIndex == 0) {
-        table_name = "categories";
-        group_name = "category";
-    }
-    else {
-        table_name = "tags";
-        group_name = "tag";
-    }
-
     QString statement = QString("SELECT * FROM %1").arg(table_name);
 
     int opTypeIndex = qcbOpType->currentIndex();
