@@ -92,7 +92,26 @@ void GoalsView::customMenuRequested(QPoint pos){
 
 void GoalsView::RemoveGoal()
 {
+    Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
+    QString groupTable = goal.type == CatType ? "categories" : "tags";
+    QString name;
 
+    QSqlQuery query(QSqlDatabase::database(databaseName));
+    query.exec(QString("SELECT * FROM %1 WHERE id=%2").arg(groupTable).arg(goal.typeId));
+    while (query.next()) {
+        name = query.value(1).toString();
+    }
+
+    QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Supprimer un objectif"),
+                                                               QString(tr("Etes-vous sûr de vouloir supprimer l'objectif sur ") + "\"%1\"").arg(name));
+    switch(choice) {
+    case QMessageBox::Yes:
+        goals_model->removeRow(currentGoal);
+        break;
+    default:
+        return;
+        break;
+    }
 }
 
 void GoalsView::EditGoal()
