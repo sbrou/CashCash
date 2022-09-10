@@ -614,7 +614,7 @@ QSqlError Account::readCategories(const QString& query, const QJsonArray &catsAr
         else
             continue;
 
-        addCategoryInDB(q, name, color, type);
+        addGroupInDB(q, name, color, type);
     }
 
     return q.lastError();
@@ -744,7 +744,7 @@ QSqlError Account::createFile(const QString & title, double balance)
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
 
-    addTagInDB(q, tr("-AUCUN-"), "#000000" , Expense);
+    addGroupInDB(q, tr("-AUCUN-"), "#000000" , Expense);
 
     // initialize account
     initAccount();
@@ -764,34 +764,34 @@ QSqlError Account::setStandardCategories()
 
     // Depenses
 
-    addCategoryInDB(q, tr("-AUCUN-"), "#000000" , Expense);
+    addGroupInDB(q, tr("-AUCUN-"), "#000000" , Expense);
 
     int i = 0;
-    addCategoryInDB(q, tr("Abonnements"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Alimentation"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Animaux"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Auto/Moto"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Bien-Etre/Soins"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Divers"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Dons/Cadeaux"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Electronique/Informatique"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Epargne"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Frais"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Habillement"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Impôts/Taxes"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Logement"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Loisirs/Culture/Sport"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Santé"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Transport"), colors[i++], Expense);
-    addCategoryInDB(q, tr("Vacances"), colors[i++], Expense);
+    addGroupInDB(q, tr("Abonnements"), colors[i++], Expense);
+    addGroupInDB(q, tr("Alimentation"), colors[i++], Expense);
+    addGroupInDB(q, tr("Animaux"), colors[i++], Expense);
+    addGroupInDB(q, tr("Auto/Moto"), colors[i++], Expense);
+    addGroupInDB(q, tr("Bien-Etre/Soins"), colors[i++], Expense);
+    addGroupInDB(q, tr("Divers"), colors[i++], Expense);
+    addGroupInDB(q, tr("Dons/Cadeaux"), colors[i++], Expense);
+    addGroupInDB(q, tr("Electronique/Informatique"), colors[i++], Expense);
+    addGroupInDB(q, tr("Epargne"), colors[i++], Expense);
+    addGroupInDB(q, tr("Frais"), colors[i++], Expense);
+    addGroupInDB(q, tr("Habillement"), colors[i++], Expense);
+    addGroupInDB(q, tr("Impôts/Taxes"), colors[i++], Expense);
+    addGroupInDB(q, tr("Logement"), colors[i++], Expense);
+    addGroupInDB(q, tr("Loisirs/Culture/Sport"), colors[i++], Expense);
+    addGroupInDB(q, tr("Santé"), colors[i++], Expense);
+    addGroupInDB(q, tr("Transport"), colors[i++], Expense);
+    addGroupInDB(q, tr("Vacances"), colors[i++], Expense);
 
     // Revenus
 
-    addCategoryInDB(q, tr("Autres Revenus"), colors[i++], Earning);
-    addCategoryInDB(q, tr("Indemnités"), colors[i++], Earning);
-    addCategoryInDB(q, tr("Placements"), colors[i++], Earning);
-    addCategoryInDB(q, tr("Traitements/Salaires"), colors[i++], Earning);
-    addCategoryInDB(q, tr("Remboursements"), colors[i++], Earning);
+    addGroupInDB(q, tr("Autres Revenus"), colors[i++], Earning);
+    addGroupInDB(q, tr("Indemnités"), colors[i++], Earning);
+    addGroupInDB(q, tr("Placements"), colors[i++], Earning);
+    addGroupInDB(q, tr("Traitements/Salaires"), colors[i++], Earning);
+    addGroupInDB(q, tr("Remboursements"), colors[i++], Earning);
 
     return QSqlError();
 }
