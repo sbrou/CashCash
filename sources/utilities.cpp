@@ -109,7 +109,7 @@ namespace Utilities
         return QString("amount<=%1").arg(amount);
     }
 
-    QString descriptionCondition(QString str)
+    QString descriptionCondition(const QString &str)
     {
         return QString("description LIKE '%%1%'").arg(str);
     }

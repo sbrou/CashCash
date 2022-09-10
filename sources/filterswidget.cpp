@@ -31,6 +31,7 @@ filtersWidget::filtersWidget(QWidget *parent)
 
     qleSearch = new QLineEdit(this);
     qleSearch->setPlaceholderText(tr("Search"));
+    qleSearch->setClearButtonEnabled(true);
     qleSearch->addAction(QIcon(":/images/images/search_48px.png"), QLineEdit::LeadingPosition);
 
     QPushButton *qpbSearch = new QPushButton(this);
