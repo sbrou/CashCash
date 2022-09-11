@@ -23,6 +23,10 @@ void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 
     ColoredProgressBar bar;
     int progress = qRound(index.data().toDouble());
+    if (progress < 0)
+        progress = 0;
+    else if (progress > 100)
+        progress = 100;
     progress = progress < 0 ? 0 : progress;
     bar.setValue(progress);
     bar.setPercentage(index.data().toDouble());
