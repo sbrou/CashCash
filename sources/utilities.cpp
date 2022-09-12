@@ -14,6 +14,76 @@ namespace Utilities
             return month % 2 ? 30 : 31;
     }
 
+    QString monthName(int month)
+    {
+        switch(month) {
+        case 1:
+            return QObject::tr("Janvier");
+        case 2:
+            return QObject::tr("Février");
+        case 3:
+            return QObject::tr("Mars");
+        case 4:
+            return QObject::tr("Avril");
+        case 5:
+            return QObject::tr("Mai");
+        case 6:
+            return QObject::tr("Juin");
+        case 7:
+            return QObject::tr("Juillet");
+        case 8:
+            return QObject::tr("Août");
+        case 9:
+            return QObject::tr("Septembre");
+        case 10:
+            return QObject::tr("Octobre");
+        case 11:
+            return QObject::tr("Novembre");
+        case 12:
+            return QObject::tr("Décembre");
+        default:
+            return "";
+        }
+    }
+
+    void getTimePeriod(TimePeriod timePeriod, QDate & beginDate, QDate & endDate)
+    {
+        QDate today = QDate::currentDate();
+        int year = today.year();
+        int month = today.month();
+
+        int pre_month = month - 1;
+        if (pre_month == 0) pre_month = 12;
+
+        int three_months_before = month - 2;
+        if (three_months_before <= 0) three_months_before += 12;
+
+
+        switch (timePeriod)
+        {
+        case PreviousMonth:
+            beginDate = QDate(year, pre_month , 1);
+            endDate = QDate(year, pre_month, daysInMonth(pre_month, year));
+            break;
+        case ThreePastMonths:
+            beginDate = QDate(year, three_months_before, 1);
+            endDate = QDate(year, month, today.daysInMonth());
+            break;
+        case CurrentYear:
+            beginDate = QDate(year, 1, 1);
+            endDate = QDate(year, 12, 31);
+            break;
+        case PreviousYear:
+            beginDate = QDate(year-1, 1, 1);
+            endDate = QDate(year-1, 12, 31);
+            break;
+        default:
+            beginDate = QDate(year, month, 1);
+            endDate = QDate(year, month, today.daysInMonth());
+            break;
+        }
+    }
+
     QString groupIconByType(GroupType type)
     {
         switch (type)

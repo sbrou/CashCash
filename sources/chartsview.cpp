@@ -141,30 +141,19 @@ void ChartsView::changeChart(int id)
 
 void ChartsView::changeTimePeriod(int index)
 {
-    QDate today = QDate::currentDate();
-    int year = today.year();
-    int month = today.month();
-    int pre_month = month - 1;
-
-    if (pre_month == 0) pre_month = 12;
-
     switch (index)
     {
     case 1: // previous month
-        beginDate = QDate(year, pre_month , 1);
-        endDate = QDate(year, pre_month, daysInMonth(pre_month, year));
+        getTimePeriod(PreviousMonth,beginDate,endDate);
         break;
     case 2: // this year
-        beginDate = QDate(year, 1, 1);
-        endDate = QDate(year, 12, 31);
+        getTimePeriod(CurrentYear,beginDate,endDate);
         break;
     case 3: // previous year
-        beginDate = QDate(year-1, 1, 1);
-        endDate = QDate(year-1, 12, 31);
+        getTimePeriod(PreviousYear,beginDate,endDate);
         break;
     default: // this month (default : 0) or else
-        beginDate = QDate(year, month, 1);
-        endDate = QDate(year, month, today.daysInMonth());
+        getTimePeriod(CurrentMonth,beginDate,endDate);
     }
 
     updatePie();

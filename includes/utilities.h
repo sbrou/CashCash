@@ -9,6 +9,8 @@ namespace Utilities
 {
     // Date functions
     int daysInMonth(int month, int year);
+    QString monthName(int month);
+    void getTimePeriod(TimePeriod timePeriod, QDate & beginDate, QDate & endDate);
 
     // Group functions
     QString groupIconByType(GroupType type);

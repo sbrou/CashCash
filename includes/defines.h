@@ -43,4 +43,12 @@ struct Goal {
 
 Q_DECLARE_METATYPE(Goal)
 
+enum TimePeriod {
+    CurrentMonth,
+    PreviousMonth,
+    ThreePastMonths,
+    CurrentYear,
+    PreviousYear
+};
+
 #endif // DEFINES_H
