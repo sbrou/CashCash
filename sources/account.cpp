@@ -75,8 +75,6 @@ void Account::showError(const QSqlError &err)
 
 void Account::initAccount()
 {
-     readSettings();
-
     // Create the data model:
     opsView = new OperationsView;
     model = new QSqlRelationalTableModel(opsView->table(), QSqlDatabase::database(_title));
@@ -131,6 +129,8 @@ void Account::initAccount()
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
     statsWidget = new StatsWidget(_init_balance, _title);
+
+    readSettings();
 
     changeState(Modified);
     emit accountReady(_title);
@@ -525,8 +525,8 @@ void Account::saveSettings()
 void Account::readSettings()
 {
     QSettings settings;
-    splitter->restoreState(settings.value("subSplitterSizes").toByteArray());
     restoreState(settings.value("mainSplitterSizes").toByteArray());
+    splitter->restoreState(settings.value("subSplitterSizes").toByteArray());
 }
 
 QSqlError Account::loadFile(const QString& filename)
