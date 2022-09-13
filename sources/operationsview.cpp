@@ -52,6 +52,7 @@ void OperationsView::readSettings()
 {
     QSettings settings;
     bool isVisible = settings.value("operations/filtersVisible", false).toBool();
+    qpbHideOrShowFilters->setChecked(isVisible);
     slotShowFilters(isVisible);
 }
 
