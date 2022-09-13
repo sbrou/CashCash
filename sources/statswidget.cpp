@@ -1,11 +1,11 @@
 #include "statswidget.h"
+#include "ui_statswidget.h"
 
 #include <QGuiApplication>
 #include <QScreen>
 #include <QSqlQuery>
 #include <QPair>
 #include <QDate>
-#include <QFormLayout>
 
 #include "defines.h"
 #include "utilities.h"
@@ -13,73 +13,50 @@
 using namespace Utilities;
 
 StatsWidget::StatsWidget(double balance, const QString & account_title, QWidget *parent)
-    : QDialog{parent}
-    , _init_balance(balance)
-    , _account_name(account_title)
+    : QWidget{parent},
+      ui(new Ui::StatsWidget),
+     _init_balance(balance),
+     _account_name(account_title)
 {
-    QGridLayout * mainLayout = new QGridLayout(this);
+    ui->setupUi(this);
 
-    QGroupBox * settings = new QGroupBox(tr("Opérations"), this);
-    QFormLayout *sLayout = new QFormLayout(settings);
-    qcbOpType = new QComboBox;
-    qcbOpType->addItems({ tr("Dépenses"), tr("Revenus"), tr("Tout") });
-    connect(qcbOpType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
-    sLayout->addRow(tr("Type :"), qcbOpType);
-    qcbGroupType = new QComboBox;
-    qcbGroupType->addItems({ tr("Categories"), tr("Tags") });
-    connect(qcbGroupType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
-    sLayout->addRow(tr("Par :"), qcbGroupType);
-    mainLayout->addWidget(settings, 0, 0);
+    setWindowTitle(_account_name + " - " + tr("Statistiques"));
 
-    QGroupBox * dateFilter = new QGroupBox(tr("Période"), this);
-    QVBoxLayout * vlayout = new QVBoxLayout(dateFilter);
-    qcbPeriod = new QComboBox(this);
-    qcbPeriod->addItems({ tr("Ce Mois"), tr("Ce trimestre"), tr("Cette année"),
+    ui->qcbOpType->addItems({ tr("Dépenses"), tr("Revenus"), tr("Tout") });
+    connect(ui->qcbOpType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
+
+    ui->qcbGroupType->addItems({ tr("Categories"), tr("Tags") });
+    connect(ui->qcbGroupType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
+
+    ui->qcbPeriod->addItems({ tr("Ce Mois"), tr("Ce trimestre"), tr("Cette année"),
                           tr("L'année dernière"), tr("Personnalisé")});
-    connect(qcbPeriod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTimePeriod(int)));
+    connect(ui->qcbPeriod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTimePeriod(int)));
     getTimePeriod(CurrentMonth, dateFrom, dateTo);
-    vlayout->addWidget(qcbPeriod);
 
-    QFormLayout *dLayout = new QFormLayout;
+    ui->qdeDateFrom->setDate(dateFrom);
+    ui->qdeDateFrom->setEnabled(false);
+    connect(ui->qdeDateFrom, SIGNAL(dateChanged(QDate)), this, SLOT(setDateFrom(QDate)));
 
-    qdeDateFrom = new QDateEdit(this);
-    qdeDateFrom->setCalendarPopup(true);
-    qdeDateFrom->setDate(dateFrom);
-    qdeDateFrom->setEnabled(false);
-    connect(qdeDateFrom, SIGNAL(dateChanged(QDate)), this, SLOT(setDateFrom(QDate)));
-    dLayout->addRow("From :", qdeDateFrom);
+    ui->qdeDateTo->setDate(dateTo);
+    ui->qdeDateTo->setEnabled(false);
+    connect(ui->qdeDateTo, SIGNAL(dateChanged(QDate)), this, SLOT(setDateTo(QDate)));
 
-    qdeDateTo = new QDateEdit(this);
-    qdeDateTo->setCalendarPopup(true);
-    qdeDateTo->setDate(dateTo);
-    qdeDateTo->setEnabled(false);
-    connect(qdeDateTo, SIGNAL(dateChanged(QDate)), this, SLOT(setDateTo(QDate)));
-    dLayout->addRow("To :", qdeDateTo);
-    vlayout->addLayout(dLayout);
-    mainLayout->addWidget(dateFilter, 1, 0);
+    connect(ui->qpbRefresh, SIGNAL(clicked()), this, SLOT(populateTable()));
 
-    table = new QTableWidget(this);
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    populateTable();
-    mainLayout->addWidget(table, 0, 1, 3, 5);
-
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect  screenGeometry = screen->availableGeometry();
-    int height = 3*screenGeometry.height() / 4;
-    int width = 3*screenGeometry.width() / 4;
-    resize(width, height);
+    ui->table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setWindowFlags(Qt::Window);
 }
 
 void StatsWidget::populateTable()
 {
-    table->clear();
+    ui->table->clear();
 
-    int groupTypeIndex = qcbGroupType->currentIndex();
+    int groupTypeIndex = ui->qcbGroupType->currentIndex();
 
     SumsByGroup groups;
     QueryStatement statement(selectGroupCmd((GroupType)groupTypeIndex));
 
-    int opTypeIndex = qcbOpType->currentIndex();
+    int opTypeIndex = ui->qcbOpType->currentIndex();
     if (opTypeIndex != 2)
     {
         statement.addCondition(typeCondition((OpType)opTypeIndex));
@@ -98,16 +75,16 @@ void StatsWidget::populateTable()
         groups.insert(qMakePair(id,name), sums);
     }
 
-    table->setRowCount(2); // Resultat et solde
-    table->setVerticalHeaderLabels({ tr("Resultats"), tr("Solde") });
+    ui->table->setRowCount(2); // Resultat et solde
+    ui->table->setVerticalHeaderLabels({ tr("Resultats"), tr("Solde") });
 
-    table->setColumnCount(nb_months + 2); // les mois + moyenne de l'annee + total
+    ui->table->setColumnCount(nb_months + 2); // les mois + moyenne de l'annee + total
     QStringList verticalsLabels;
     for (int i = month1; i <= month2; ++i)
         verticalsLabels << monthName(i);
     verticalsLabels << tr("Moyenne");
     verticalsLabels << tr("Total");
-    table->setHorizontalHeaderLabels(verticalsLabels);
+    ui->table->setHorizontalHeaderLabels(verticalsLabels);
 
     double results_sum = 0;
     QDate today = QDate::currentDate();
@@ -149,10 +126,10 @@ void StatsWidget::populateTable()
         QList<double> sums = cgroup.value();
         if (sums.at(nb_months) != 0)
         {
-            table->insertRow(row);
-            table->setVerticalHeaderItem(row, new QTableWidgetItem(cgroup.key().second));
+            ui->table->insertRow(row);
+            ui->table->setVerticalHeaderItem(row, new QTableWidgetItem(cgroup.key().second));
 
-            for (qsizetype i = 0; i < table->columnCount(); ++i) {
+            for (qsizetype i = 0; i < ui->table->columnCount(); ++i) {
                 double amount;
                 if (i == nb_months)
                     amount = sums.at(nb_months) / nb_months;
@@ -168,11 +145,11 @@ void StatsWidget::populateTable()
         ++cgroup;
     }
 
-    addItemInTable(results_sum/nb_months, table->rowCount() - 2, nb_months); // Moyenne resultats
-    addItemInTable(results_sum, table->rowCount() - 2, nb_months + 1); // total resultats
+    addItemInTable(results_sum/nb_months, ui->table->rowCount() - 2, nb_months); // Moyenne resultats
+    addItemInTable(results_sum, ui->table->rowCount() - 2, nb_months + 1); // total resultats
 
-    table->setItem(table->rowCount() - 1, nb_months, new QTableWidgetItem("-")); // Moyenne solde : sens ?
-    addItemInTable(getBalanceByDate(today), table->rowCount() - 1, nb_months + 1); // Solde actuel
+    ui->table->setItem(ui->table->rowCount() - 1, nb_months, new QTableWidgetItem("-")); // Moyenne solde : sens ?
+    addItemInTable(getBalanceByDate(today), ui->table->rowCount() - 1, nb_months + 1); // Solde actuel
 }
 
 double StatsWidget::getBalanceByDate(QDate date)
@@ -192,18 +169,19 @@ void StatsWidget::addItemInTable(double amount, int row, int column)
     QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(qAbs(amount)));
     newItem->setForeground(QBrush(aColor));
     newItem->setTextAlignment(Qt::AlignCenter);
-    table->setItem(row, column, newItem);
+    ui->table->setItem(row, column, newItem);
 }
 
 void StatsWidget::changeTimePeriod(int index)
 {
-    qdeDateFrom->setEnabled(index > 3);
-    qdeDateTo->setEnabled(index > 3);
+    ui->qdeDateFrom->setEnabled(index > 3);
+    ui->qdeDateTo->setEnabled(index > 3);
 
     switch (index)
     {
     case 0:
         getTimePeriod(CurrentMonth, dateFrom, dateTo);
+        break;
     case 1:
         getTimePeriod(ThreePastMonths,dateFrom,dateTo);
         break;

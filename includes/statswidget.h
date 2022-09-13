@@ -2,26 +2,26 @@
 #define STATSWIDGET_H
 
 #include <QWidget>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QTableWidget>
-#include <QDialog>
-#include <QComboBox>
-#include <QDateEdit>
+#include <QDate>
+
 
 typedef QMap<QPair<int, QString>, QList<double> > SumsByGroup;
 
+namespace Ui {
+class StatsWidget;
+}
 
-
-class StatsWidget : public QDialog
+class StatsWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit StatsWidget(double balance, const QString & account_title, QWidget *parent = nullptr);
     double getBalanceByDate(QDate date);
 
-private slots:
+public slots:
     void populateTable();
+
+private slots:
     void changeTimePeriod(int index);
     void setDateFrom(QDate);
     void setDateTo(QDate);
@@ -32,16 +32,10 @@ private:
 
     // Attributs
 
-    QComboBox *qcbOpType;
-    QComboBox *qcbGroupType;
+    Ui::StatsWidget *ui;
 
-    QComboBox *qcbPeriod;
-    QDateEdit *qdeDateFrom;
     QDate dateFrom;
-    QDateEdit *qdeDateTo;
     QDate dateTo;
-
-    QTableWidget *table;
 
     double _init_balance;
     QString _account_name;

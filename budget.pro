@@ -57,7 +57,8 @@ FORMS += \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/goaldialog.ui \
     resources/uiFiles/mainwindow.ui \
-    resources/uiFiles/newaccountdialog.ui
+    resources/uiFiles/newaccountdialog.ui \
+    resources/uiFiles/statswidget.ui
 
 TRANSLATIONS += \
     resources/translation/budget_en_US.ts

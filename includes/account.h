@@ -17,6 +17,7 @@
 #include "chartsview.h"
 #include "goalsview.h"
 #include "catslist.h"
+#include "statswidget.h"
 
 class Account : public QSplitter
 {
@@ -88,6 +89,7 @@ private:
     OperationsView *opsView;
     ChartsView *chartView;
     GoalsView *goalsView;
+    StatsWidget *statsWidget;
 
     CatsList *catsWidget;
     TagsList *tagsWidget;

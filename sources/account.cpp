@@ -58,6 +58,9 @@ bool Account::commitOnDatabase()
         chartView->updatePie();
         opsView->resizeView();
         goalsView->updateGoals();
+        if (statsWidget->isVisible())
+            statsWidget->populateTable();
+
         changeState(Modified);
     }
 
@@ -126,6 +129,8 @@ void Account::initAccount()
 
     tagsWidget = new TagsList(tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
+
+    statsWidget = new StatsWidget(_init_balance, _title);
 
     changeState(Modified);
     emit accountReady(_title);
@@ -717,8 +722,8 @@ void Account::showTags()
 
 void Account::showStats()
 {
-    StatsWidget stats(_init_balance, _title, this);
-    stats.exec();
+    statsWidget->populateTable();
+    statsWidget->show();
 }
 
 void Account::manageGoals()
