@@ -80,9 +80,9 @@ QDate AddOpDialog::date()
     return ui->qdeDate->date();
 }
 
-double AddOpDialog::amount()
+float AddOpDialog::amount()
 {
-    return ui->qleAmount->text().toDouble();
+    return ui->qleAmount->text().toFloat();
 }
 
 int AddOpDialog::category()
@@ -105,7 +105,7 @@ void AddOpDialog::setDate(QDate date)
     ui->qdeDate->setDate(date);
 }
 
-void AddOpDialog::setAmount(double amount)
+void AddOpDialog::setAmount(float amount)
 {
     ui->qleAmount->setText(QString::number(amount));
 }

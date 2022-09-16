@@ -22,14 +22,14 @@ void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     }
 
     ColoredProgressBar bar;
-    int progress = qRound(index.data().toDouble());
+    int progress = qRound(index.data().toFloat());
     if (progress < 0)
         progress = 0;
     else if (progress > 100)
         progress = 100;
     progress = progress < 0 ? 0 : progress;
     bar.setValue(progress);
-    bar.setPercentage(index.data().toDouble());
+    bar.setPercentage(index.data().toFloat());
     bar.paint(painter, option.rect);
 }
 
@@ -125,7 +125,7 @@ void GoalsView::EditGoal()
 {
     Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
     bool ok;
-    double max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
+    float max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
                                        tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
                                        Qt::WindowFlags(), 0.01);
     if (ok)
@@ -134,11 +134,11 @@ void GoalsView::EditGoal()
     updateGoalProgress(currentGoal, max);
 }
 
-void GoalsView::updateGoalProgress(int goalIndex, double amount)
+void GoalsView::updateGoalProgress(int goalIndex, float amount)
 {
     Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
     goal.max = amount > 0 ? amount : goal.max;
-    double spent = qQNaN();
+    float spent = qQNaN();
 
     QDate today = QDate::currentDate();
     int year = today.year();
@@ -154,7 +154,7 @@ void GoalsView::updateGoalProgress(int goalIndex, double amount)
     QSqlQuery query(QSqlDatabase::database(databaseName));
     query.exec(statement.get());
     while (query.next()) {
-        spent = qAbs(query.value(0).toDouble());
+        spent = qAbs(query.value(0).toFloat());
     }
 
     QVariant qVarGoal;

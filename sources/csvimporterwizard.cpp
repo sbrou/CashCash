@@ -118,7 +118,7 @@ void CSVImporterWizard::accept()
         Operation op;
         op.date = QDate::fromString(tab->item(r, 0)->text(),"yyyy-MM-dd");
         op.cat = tab->item(r, 2)->text().toInt();
-        op.amount = tab->item(r, 3)->text().toDouble();
+        op.amount = tab->item(r, 3)->text().toFloat();
         op.tag = tab->item(r, 5)->text().toInt();
         op.description = tab->item(r, 6)->text();
 
@@ -672,12 +672,12 @@ void ConclusionPage::process_line(int row, GroupsMap* catsMap, GroupsMap* tagsMa
 
         //// amount
         bool ok;
-        double amount;
+        float amount;
         QLocale german(QLocale::German);
-        amount = german.toDouble(infos.at(amountCol), &ok);
+        amount = german.toFloat(infos.at(amountCol), &ok);
         if (!ok) { // try with locale c
             QLocale c(QLocale::C);
-            amount = c.toDouble(infos.at(amountCol), &ok);
+            amount = c.toFloat(infos.at(amountCol), &ok);
         }
         QTableWidgetItem *amountItem = new QTableWidgetItem(QString::number(amount));
         tableWidget->setItem(row, 3, amountItem);

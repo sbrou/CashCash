@@ -37,7 +37,7 @@ public:
 signals:
     void accountReady(const QString&);
     void selectionChanged(const QItemSelection&);
-    void balanceChanged(double, double);
+    void balanceChanged(float, float);
     void stateChanged(bool isModified);
 
 public slots:
@@ -52,7 +52,7 @@ public slots:
     void saveFile(bool isNewFile = false);
     void saveAsFile();
     QSqlError loadFile(const QString& account_file);
-    QSqlError createFile(const QString & title, double balance);
+    QSqlError createFile(const QString & title, float balance);
 
     void showCategories();
     void showTags();
@@ -73,9 +73,9 @@ private:
 
     QLocale _locale;
     QString _title;
-    double _init_balance;
-    double _balance;
-    double _future_balance;
+    float _init_balance;
+    float _balance;
+    float _future_balance;
     QString _filepath;
     AccountState _state;
 

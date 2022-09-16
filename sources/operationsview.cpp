@@ -102,7 +102,7 @@ void OperationsView::applyFilters(const QString & statement)
     model->setFilter(statement);
 }
 
-void OperationsView::setBalance(double balance, double future_balance)
+void OperationsView::setBalance(float balance, float future_balance)
 {
     QString bColor = balance >= 0 ? "green" : "red";
     QString fbColor = future_balance >= 0 ? "green" : "red";

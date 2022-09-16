@@ -19,13 +19,13 @@ public:
     ~AddOpDialog();
 
     QDate date();
-    double amount();
+    float amount();
     int category();
     int tag();
     QString description();
 
     void setDate(QDate);
-    void setAmount(double);
+    void setAmount(float);
     void setCategory(int);
     void setTag(int);
     void setDescription(const QString &);

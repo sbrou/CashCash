@@ -110,7 +110,7 @@ void Account::initAccount()
     opsView->setBalance(_balance, _future_balance);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
     connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
-    connect(this, SIGNAL(balanceChanged(double, double)), opsView, SLOT(setBalance(double, double)));
+    connect(this, SIGNAL(balanceChanged(float, float)), opsView, SLOT(setBalance(float, float)));
     splitter->addWidget(opsView);
 
     chartView = new ChartsView(model, this);
@@ -291,7 +291,7 @@ void Account::importOFX(const QString & filename)
                 QDate date = QDate::fromString(date_elt.text(),"yyyyMMdd");
 
                 QDomElement amt_elt = op.elementsByTagName("TRNAMT").at(0).toElement();
-                double amount = amt_elt.text().toDouble();
+                float amount = amt_elt.text().toFloat();
 
                 QDomNodeList des_node = op.elementsByTagName("NAME");
                 QString description;
@@ -326,13 +326,13 @@ void Account::updateBalance()
     QueryStatement statement(SELECT_SUM, upperDateCondition(QDate::currentDate()));
     query.exec(statement.get());
     while (query.next()) {
-        _balance = _init_balance + query.value(0).toDouble();
+        _balance = _init_balance + query.value(0).toFloat();
     }
 
     statement.clearConditions();
     query.exec(statement.get());
     while (query.next()) {
-        _future_balance = _init_balance + query.value(0).toDouble();
+        _future_balance = _init_balance + query.value(0).toFloat();
     }
 
     emit balanceChanged(_balance, _future_balance);
@@ -495,7 +495,7 @@ void Account::saveFile(bool isNewFile)
         QJsonObject op;
         op["date"] = q.value(DateIndex).toString();
         op["category"] = q.value(CatIndex).toInt();
-        op["amount"] = q.value(AmountIndex).toDouble();
+        op["amount"] = q.value(AmountIndex).toFloat();
         op["tag"] = q.value(TagIndex).toInt();
         op["description"] = q.value(DesIndex).toString();
         op["type"] = q.value(OpTypeIndex).toInt();
@@ -643,7 +643,7 @@ QSqlError Account::readOperations(const QJsonArray &opsArray)
 
         QDate date;
         int category;
-        double amount;
+        float amount;
         int tag;
         QString description;
         int type;
@@ -734,7 +734,7 @@ void Account::manageGoals()
     }
 }
 
-QSqlError Account::createFile(const QString & title, double balance)
+QSqlError Account::createFile(const QString & title, float balance)
 {
     _title = title;
     _init_balance = balance;

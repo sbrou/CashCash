@@ -12,7 +12,7 @@
 
 using namespace Utilities;
 
-StatsWidget::StatsWidget(double balance, const QString & account_title, QWidget *parent)
+StatsWidget::StatsWidget(float balance, const QString & account_title, QWidget *parent)
     : QWidget{parent},
       ui(new Ui::StatsWidget),
      _init_balance(balance),
@@ -71,7 +71,7 @@ void StatsWidget::populateTable()
     while (query.next()) {
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
-        QList<double> sums(nb_months + 1, 0); // les mois + la somme des mois
+        QList<float> sums(nb_months + 1, 0); // les mois + la somme des mois
         groups.insert(qMakePair(id,name), sums);
     }
 
@@ -86,13 +86,13 @@ void StatsWidget::populateTable()
     verticalsLabels << tr("Total");
     ui->table->setHorizontalHeaderLabels(verticalsLabels);
 
-    double results_sum = 0;
+    float results_sum = 0;
     QDate today = QDate::currentDate();
 
     for (int m = month1; m <= month2; ++m)
     {
         int month = m - month1;
-        double month_result = 0;
+        float month_result = 0;
 
         QDate start = m == month1 ? dateFrom : QDate(today.year(), m, 1);
         QDate end = m == month2 ? dateTo : QDate(today.year(), m, daysInMonth(m, today.year()));
@@ -106,7 +106,7 @@ void StatsWidget::populateTable()
             statement.addCondition(groupCondition((GroupType)groupTypeIndex, it_group.key().first));
             query.exec(statement.get());
             while (query.next()) {
-                double sum = query.value(0).toDouble();
+                float sum = query.value(0).toFloat();
                 month_result += sum;
                 it_group.value()[month] = sum;
                 it_group.value()[nb_months] += sum;
@@ -123,14 +123,14 @@ void StatsWidget::populateTable()
     int row = 0;
     SumsByGroup::const_iterator cgroup = groups.constBegin();
     while (cgroup != groups.constEnd()) {
-        QList<double> sums = cgroup.value();
+        QList<float> sums = cgroup.value();
         if (sums.at(nb_months) != 0)
         {
             ui->table->insertRow(row);
             ui->table->setVerticalHeaderItem(row, new QTableWidgetItem(cgroup.key().second));
 
             for (qsizetype i = 0; i < ui->table->columnCount(); ++i) {
-                double amount;
+                float amount;
                 if (i == nb_months)
                     amount = sums.at(nb_months) / nb_months;
                 else if (i == nb_months + 1)
@@ -152,18 +152,18 @@ void StatsWidget::populateTable()
     addItemInTable(getBalanceByDate(today), ui->table->rowCount() - 1, nb_months + 1); // Solde actuel
 }
 
-double StatsWidget::getBalanceByDate(QDate date)
+float StatsWidget::getBalanceByDate(QDate date)
 {
-    double balance = 0;
+    float balance = 0;
     QSqlQuery query(QSqlDatabase::database(_account_name));
     query.exec(QueryStatement(SELECT_SUM, upperDateCondition(date)).get());
     while (query.next()) {
-        balance = _init_balance + query.value(0).toDouble();
+        balance = _init_balance + query.value(0).toFloat();
     }
     return balance;
 }
 
-void StatsWidget::addItemInTable(double amount, int row, int column)
+void StatsWidget::addItemInTable(float amount, int row, int column)
 {
     QColor aColor = amount >= 0 ? Qt::darkGreen : Qt::darkRed;
     QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(qAbs(amount)));

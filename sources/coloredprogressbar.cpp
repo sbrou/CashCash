@@ -47,7 +47,7 @@ void ColoredProgressBar::paint(QPainter *painter, const QRect& rec)
     painter->restore();
 }
 
-void ColoredProgressBar::setPercentage(double doubleValue)
+void ColoredProgressBar::setPercentage(float doubleValue)
 {
     percentage = doubleValue;
 }

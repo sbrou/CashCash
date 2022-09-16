@@ -24,8 +24,8 @@ namespace Utilities
     QString upperDateCondition(QDate date);
     QString categoryCondition(int id);
     QString tagCondition(int id);
-    QString lowerAmountCondition(double amount);
-    QString upperAmountCondition(double amount);
+    QString lowerAmountCondition(float amount);
+    QString upperAmountCondition(float amount);
     QString descriptionCondition(const QString &str);
     QString typeCondition(OpType type);
     QString idCondition(int id);

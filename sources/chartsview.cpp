@@ -86,7 +86,7 @@ void ChartsView::updatePie()
 
 void ChartsView::populateSeries(GroupType type, QPieSeries& series)
 {
-    QMap<double, CustomSlice *> sortedSlices;
+    QMap<float, CustomSlice *> sortedSlices;
 
     QueryStatement query_statement(SELECT_SUM);
     query_statement.addCondition(lowerDateCondition(beginDate));
@@ -103,7 +103,7 @@ void ChartsView::populateSeries(GroupType type, QPieSeries& series)
         query_statement.addCondition(groupCondition(type, id));
         query.exec(query_statement.get());
         while (query.next()) {
-            qreal amount = query.value(0).toDouble();
+            float amount = query.value(0).toFloat();
             if (amount != 0)
             {
                 CustomSlice *slice = new CustomSlice(amount, name, QColor(color));

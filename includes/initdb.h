@@ -6,7 +6,7 @@
 
 // les revenus ont comme type 1
 void addOperationInDB(QSqlQuery &q, QDate date, const QVariant &categoryId,
-             double amount, const QVariant &tagId, const QString &description, int type=Expense)
+             float amount, const QVariant &tagId, const QString &description, int type=Expense)
 {
     q.addBindValue(date);
     q.addBindValue(categoryId);

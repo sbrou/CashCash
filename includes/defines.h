@@ -38,7 +38,7 @@ enum IndexInTable {
 struct Goal {
     GroupType type;
     int typeId;
-    double max;
+    float max;
 };
 
 Q_DECLARE_METATYPE(Goal)

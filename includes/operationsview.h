@@ -25,7 +25,7 @@ public:
 
 public slots:
     void applyFilters(const QString &);
-    void setBalance(double, double);
+    void setBalance(float, float);
     void resizeView();
 
 private slots:

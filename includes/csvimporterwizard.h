@@ -75,7 +75,7 @@ struct Operation
 {
     QDate date;
     int cat;
-    double amount;
+    float amount;
     int tag;
     QString description;
 };

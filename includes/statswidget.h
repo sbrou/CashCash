@@ -5,7 +5,7 @@
 #include <QDate>
 
 
-typedef QMap<QPair<int, QString>, QList<double> > SumsByGroup;
+typedef QMap<QPair<int, QString>, QList<float> > SumsByGroup;
 
 namespace Ui {
 class StatsWidget;
@@ -15,8 +15,8 @@ class StatsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit StatsWidget(double balance, const QString & account_title, QWidget *parent = nullptr);
-    double getBalanceByDate(QDate date);
+    explicit StatsWidget(float balance, const QString & account_title, QWidget *parent = nullptr);
+    float getBalanceByDate(QDate date);
 
 public slots:
     void populateTable();
@@ -28,7 +28,7 @@ private slots:
 
 private:
     // Méthodes
-    void addItemInTable(double amount, int row, int column);
+    void addItemInTable(float amount, int row, int column);
 
     // Attributs
 
@@ -37,7 +37,7 @@ private:
     QDate dateFrom;
     QDate dateTo;
 
-    double _init_balance;
+    float _init_balance;
     QString _account_name;
 
 };

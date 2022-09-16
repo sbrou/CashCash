@@ -169,12 +169,12 @@ namespace Utilities
         return QString("tag=%1").arg(id);
     }
 
-    QString lowerAmountCondition(double amount)
+    QString lowerAmountCondition(float amount)
     {
         return QString("amount>=%1").arg(amount);
     }
 
-    QString upperAmountCondition(double amount)
+    QString upperAmountCondition(float amount)
     {
         return QString("amount<=%1").arg(amount);
     }

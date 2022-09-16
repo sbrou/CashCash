@@ -52,7 +52,7 @@ private slots:
 private:
     // Methodes
     void createCustomContextMenu();
-    void updateGoalProgress(int goalIndex, double amount = -1);
+    void updateGoalProgress(int goalIndex, float amount = -1);
 
     // Attributs
     QVBoxLayout *mainLayout;

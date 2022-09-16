@@ -62,14 +62,14 @@ void GoalDialog::showGroup(unsigned type)
 Goal GoalDialog::goal()
 {
     _goal.typeId = ui->qcbName->currentIndex()+1;
-    _goal.max = ui->qleAMount->text().toDouble();
+    _goal.max = ui->qleAMount->text().toFloat();
     return _goal;
 }
 
 void GoalDialog::accept()
 {
     bool ok;
-    ui->qleAMount->text().toDouble(&ok);
+    ui->qleAMount->text().toFloat(&ok);
     if (ui->qcbName->currentIndex() < 0) {
         QMessageBox::critical(this, tr("Erreur"), tr("Veuillez sélectionner une catégorie ou un tag."));
         setResult(QDialog::Rejected);

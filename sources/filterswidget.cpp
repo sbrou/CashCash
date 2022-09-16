@@ -118,10 +118,10 @@ void filtersWidget::buildStatement()
         condList << descriptionCondition(qleSearch->text());
 
     if (!qleMinAmount->text().isEmpty())
-        condList << lowerAmountCondition(qleMinAmount->text().toDouble());
+        condList << lowerAmountCondition(qleMinAmount->text().toFloat());
 
     if (!qleMaxAmount->text().isEmpty())
-        condList << upperAmountCondition(qleMaxAmount->text().toDouble());
+        condList << upperAmountCondition(qleMaxAmount->text().toFloat());
 
     if (qcbCat->currentIndex()>=0)
         condList << categoryCondition(qcbCat->currentIndex()+1);

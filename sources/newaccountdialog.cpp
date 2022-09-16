@@ -19,7 +19,7 @@ QString NewAccountDialog::title()
     return ui->qleTitle->text();
 }
 
-double NewAccountDialog::balance()
+float NewAccountDialog::balance()
 {
-    return ui->qleBalance->text().toDouble();
+    return ui->qleBalance->text().toFloat();
 }

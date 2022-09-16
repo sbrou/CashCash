@@ -16,7 +16,7 @@ public:
     ~NewAccountDialog();
 
     QString title();
-    double balance();
+    float balance();
 
 private:
     Ui::NewAccountDialog *ui;
