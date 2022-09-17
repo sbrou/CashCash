@@ -79,7 +79,7 @@ void Account::initAccount()
 {
     // Create the data model:
     opsView = new OperationsView;
-    model = new QSqlRelationalTableModel(opsView->table(), QSqlDatabase::database(_title));
+    model = new SqlRelationalTableModel(opsView->table(), QSqlDatabase::database(_title));
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->setTable("operations");
     model->setSort(1, Qt::DescendingOrder);
@@ -825,7 +825,7 @@ QSqlError Account::createFile(const QString & title, float balance)
     if (!q.prepare(INSERT_TAG_SQL))
         return q.lastError();
 
-    addGroupInDB(q, tr("-AUCUN-"), "#000000" , Expense);
+    addGroupInDB(q, DEFAULT_GROUP_NAME, "#000000" , Expense);
 
     // initialize account
     initAccount();
@@ -845,7 +845,7 @@ QSqlError Account::setStandardCategories()
 
     // Depenses
 
-    addGroupInDB(q, tr("-AUCUN-"), "#000000" , Expense);
+    addGroupInDB(q, DEFAULT_GROUP_NAME, "#000000" , Expense);
 
     int i = 0;
     addGroupInDB(q, tr("Abonnements"), colors[i++], Expense);

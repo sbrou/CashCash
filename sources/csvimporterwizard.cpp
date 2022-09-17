@@ -52,11 +52,10 @@
 
 #include "csvimporterwizard.h"
 
-#include <QSqlRelationalTableModel>
 #include <QScrollArea>
 #include <set>
 
-CSVImporterWizard::CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename, QWidget *parent)
+CSVImporterWizard::CSVImporterWizard(SqlRelationalTableModel * mod, const QString & filename, QWidget *parent)
     : QWizard(parent),
       catsModel(mod->relationModel(2)),
       tagsModel(mod->relationModel(4))

@@ -5,7 +5,7 @@
 #include <QGridLayout>
 #include <QListWidget>
 #include <QPushButton>
-#include <QSqlRelationalTableModel>
+#include <QSqlTableModel>
 #include <QMenu>
 
 #include "utilities.h"

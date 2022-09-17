@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <QTableView>
-#include <QSqlRelationalTableModel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -11,6 +10,7 @@
 #include <QMenu>
 
 #include "filterswidget.h"
+#include "sqlrelationalmodel.h"
 
 class OperationsView : public QWidget
 {
@@ -19,7 +19,7 @@ public:
     OperationsView();
     ~OperationsView();
 
-    void loadModel(QSqlRelationalTableModel * mod);
+    void loadModel(SqlRelationalTableModel * mod);
     QTableView* table();
     QMenu *contextMenu();
     void saveSettings();
@@ -43,7 +43,7 @@ private:
     QTableView *opsTable;
     QMenu* cxtMenu;
 
-    QSqlRelationalTableModel * model;
+    SqlRelationalTableModel * model;
 
     QPushButton *qpbHideOrShowFilters;
     filtersWidget *filters;

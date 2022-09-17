@@ -12,6 +12,7 @@
 #include <QSplitter>
 
 #include "defines.h"
+#include "sqlrelationalmodel.h"
 #include "operationsview.h"
 #include "customslice.h"
 #include "chartsview.h"
@@ -83,7 +84,7 @@ private:
 
     QSplitter * splitter;
 
-    QSqlRelationalTableModel *model;
+    SqlRelationalTableModel *model;
     QSqlTableModel *cats_model;
     QSqlTableModel *tags_model;
     unsigned _nbOperations;

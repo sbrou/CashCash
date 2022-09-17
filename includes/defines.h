@@ -2,6 +2,7 @@
 #define DEFINES_H
 
 #define DEFAULT_GROUP 1
+#define DEFAULT_GROUP_NAME tr("-AUCUN-")
 #define COND_SEP " AND "
 
 #define SELECT_OPERATIONS "SELECT * FROM operations"

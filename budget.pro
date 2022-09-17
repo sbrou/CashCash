@@ -32,7 +32,8 @@ SOURCES += \
     sources/statswidget.cpp \
     sources/utilities.cpp \
     sources/welcomedialog.cpp \
-    sources/tablewidget.cpp
+    sources/tablewidget.cpp \
+    sources/sqlrelationalmodel.cpp
 
 HEADERS += \
     includes/account.h \
@@ -57,7 +58,8 @@ HEADERS += \
     includes/welcomedialog.h \
     includes/rulesdialog.h \
     includes/ruleslist.h \
-    includes/tablewidget.h
+    includes/tablewidget.h \
+    includes/sqlrelationalmodel.h
 
 FORMS += \
     resources/uiFiles/catslist.ui \

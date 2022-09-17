@@ -5,6 +5,8 @@
 #include <QtSql>
 #include <QDataWidgetMapper>
 
+#include "sqlrelationalmodel.h"
+
 namespace Ui {
 class AddOpDialog;
 }
@@ -15,7 +17,7 @@ class AddOpDialog : public QDialog
 
 public:
     explicit AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *parent = nullptr);
-    explicit AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent = nullptr);
+    explicit AddOpDialog(int id, SqlRelationalTableModel *model, QWidget *parent = nullptr);
     ~AddOpDialog();
 
     QDate date();

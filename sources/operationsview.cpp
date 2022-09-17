@@ -1,8 +1,10 @@
 #include "operationsview.h"
 
-#include <QSqlRelationalDelegate>
 #include <QHeaderView>
+#include <QSqlRelationalDelegate>
 #include <QSettings>
+
+#include "defines.h"
 
 OperationsView::OperationsView()
 {
@@ -91,7 +93,7 @@ QMenu* OperationsView::contextMenu()
     return cxtMenu;
 }
 
-void OperationsView::loadModel(QSqlRelationalTableModel * mod)
+void OperationsView::loadModel(SqlRelationalTableModel * mod)
 {
     model = mod;
     opsTable->setModel(model);

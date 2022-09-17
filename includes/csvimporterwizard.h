@@ -55,6 +55,7 @@
 #include <QDate>
 
 #include "csveditor.h"
+#include "sqlrelationalmodel.h"
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -66,7 +67,6 @@ class QComboBox;
 class QTableWidget;
 class QAbstractItemModel;
 class QFormLayout;
-class QSqlRelationalTableModel;
 class QSqlTableModel;
 
 QT_END_NAMESPACE
@@ -95,7 +95,7 @@ public:
            Page_Tags,
            Page_Conclusion };
 
-    CSVImporterWizard(QSqlRelationalTableModel * mod, const QString & filename = "", QWidget *parent = nullptr);
+    CSVImporterWizard(SqlRelationalTableModel * mod, const QString & filename = "", QWidget *parent = nullptr);
     void accept() override;
 
     void setNbOperations(int nb);

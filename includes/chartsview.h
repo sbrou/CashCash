@@ -4,13 +4,13 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QChartView>
-#include <QSqlRelationalTableModel>
 #include <QPushButton>
 #include <QPieSlice>
 #include <QButtonGroup>
 #include <QComboBox>
 #include <QDate>
 
+#include "sqlrelationalmodel.h"
 #include "customslice.h"
 #include "defines.h"
 
@@ -18,7 +18,7 @@ class ChartsView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ChartsView(QSqlRelationalTableModel* mod, QWidget *parent = nullptr);
+    explicit ChartsView(SqlRelationalTableModel* mod, QWidget *parent = nullptr);
 
 public slots:
     void updatePie();
@@ -36,7 +36,7 @@ private:
     QChart *chart;
     QChartView *chartView;
 
-    QSqlRelationalTableModel *model;
+    SqlRelationalTableModel *model;
 
     QPieSeries *tags_series;
     QPieSeries *cats_series;

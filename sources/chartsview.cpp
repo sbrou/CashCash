@@ -9,7 +9,7 @@
 
 using namespace Utilities;
 
-ChartsView::ChartsView(QSqlRelationalTableModel *mod, QWidget *parent)
+ChartsView::ChartsView(SqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}
     , model(mod)
 {

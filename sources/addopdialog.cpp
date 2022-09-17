@@ -32,7 +32,7 @@ AddOpDialog::AddOpDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *
 }
 
 
-AddOpDialog::AddOpDialog(int id, QSqlRelationalTableModel *model, QWidget *parent) :
+AddOpDialog::AddOpDialog(int id, SqlRelationalTableModel *model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddOpDialog),
     opId(id)
