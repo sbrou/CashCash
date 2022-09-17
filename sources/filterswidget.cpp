@@ -100,9 +100,7 @@ void filtersWidget::reset()
     qleMinAmount->clear();
     qleMaxAmount->clear();
 
-    qcbCat->setCurrentIndex(-1);
-    qcbTag->setCurrentIndex(-1);
-
+    initComboBoxes();
 
     QString statement = lowerDateCondition(qdeDateFrom->date()) + COND_SEP + upperDateCondition(qdeDateTo->date());
     emit statementBuilt(statement);
@@ -136,9 +134,15 @@ void filtersWidget::populateComboBoxes(QSqlTableModel * cats, QSqlTableModel * t
 {
     qcbCat->setModel(cats);
     qcbCat->setModelColumn(1);
-    qcbCat->setCurrentIndex(-1);
 
     qcbTag->setModel(tags);
     qcbTag->setModelColumn(1);
+
+    initComboBoxes();
+}
+
+void filtersWidget::initComboBoxes()
+{
+    qcbCat->setCurrentIndex(-1);
     qcbTag->setCurrentIndex(-1);
 }

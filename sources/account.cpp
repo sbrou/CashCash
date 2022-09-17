@@ -54,6 +54,8 @@ bool Account::commitOnDatabase()
     {
         model->database().commit();
         model->select();
+        cats_model->select();
+        tags_model->select();
         updateBalance();
         chartView->updatePie();
         opsView->resizeView();
@@ -122,10 +124,10 @@ void Account::initAccount()
     connect(goalsView, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
     addWidget(goalsView);
 
-    catsWidget = new CatsList(cats_model, this);
+    catsWidget = new GroupList(CatType, cats_model, this);
     connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
-    tagsWidget = new TagsList(tags_model, this);
+    tagsWidget = new GroupList(TagType, tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
     rulesWidget = new RulesList(cats_model, tags_model, this);

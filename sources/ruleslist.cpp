@@ -24,11 +24,8 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     setWindowModality(Qt::WindowModal);
     rulesWidget = new TableWidget(this);
 
-    QToolBar *toolBar = new QToolBar;
-    toolBar->addAction(ADD_ICON, tr("A&dd"), this, &RulesList::addRule);
-    toolBar->addAction(EDIT_ICON, tr("E&dit"), this, &RulesList::editRule);
-    toolBar->addAction(REMOVE_ICON, tr("R&emove"), this, &RulesList::removeRule);
-    toolBar->setIconSize(QSize(18,18));
+    ToolBar *toolBar = new ToolBar;
+    connect(toolBar, SIGNAL(actTriggered(Action)), this, SLOT(applyAction(Action)));
     rulesWidget->addToolBar(toolBar);
 
     model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});
@@ -50,6 +47,24 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     int height = screenGeometry.height() / 4;
     int width = screenGeometry.width() / 4;
     resize(width, height);
+}
+
+void RulesList::applyAction(Action act)
+{
+    switch (act)
+    {
+        case AddAction:
+            addRule();
+            break;
+        case EditAction:
+            editRule();
+            break;
+        case RemoveAction:
+            removeRule();
+            break;
+        default:
+            break;
+    }
 }
 
 void RulesList::createRule(const QString & database, const QString &expr, bool isCaseSensitive, int catId, int tagId)

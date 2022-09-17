@@ -15,6 +15,7 @@ public:
     ~filtersWidget();
 
     void populateComboBoxes(QSqlTableModel * cats, QSqlTableModel * tags);
+    void initComboBoxes();
 
 public slots:
     void buildStatement();

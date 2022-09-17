@@ -25,6 +25,9 @@ public slots:
     void editRule();
     void removeRule();
 
+protected slots:
+    void applyAction(Action);
+
 private:
     // Attributs
     QSqlTableModel *cats, *tags;

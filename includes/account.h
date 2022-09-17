@@ -93,8 +93,8 @@ private:
     GoalsView *goalsView;
     StatsWidget *statsWidget;
 
-    CatsList *catsWidget;
-    TagsList *tagsWidget;
+    GroupList *catsWidget;
+    GroupList *tagsWidget;
     RulesList *rulesWidget;
 
     //////////////////////////////////////////////

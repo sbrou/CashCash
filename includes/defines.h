@@ -56,4 +56,11 @@ enum TimePeriod {
     PreviousYear
 };
 
+enum Action
+{
+    AddAction,
+    EditAction,
+    RemoveAction
+};
+
 #endif // DEFINES_H

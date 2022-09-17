@@ -11,11 +11,13 @@
 #include <QDialogButtonBox>
 #include <QSqlRecord>
 
+#include <defines.h>
+
 class GroupDialog : public QDialog
 {
     Q_OBJECT
 public:
-    GroupDialog();
+    GroupDialog(GroupType type);
     ~GroupDialog();
 
     QString name();
@@ -44,22 +46,6 @@ private:
     QRadioButton *earnings;
 
     QDialogButtonBox *buttonBox;
-};
-
-///// CatDialog
-
-class CatDialog : public GroupDialog
-{
-public:
-    CatDialog();
-};
-
-///// TagDialog
-
-class TagDialog : public GroupDialog
-{
-public:
-    TagDialog();
 };
 
 #endif // CATDIALOG_H

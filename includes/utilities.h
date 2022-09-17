@@ -2,6 +2,8 @@
 #define UTILITIES_H
 
 #include <QStringList>
+#include <QWidget>
+#include <QToolBar>
 
 #include "defines.h"
 
@@ -45,6 +47,21 @@ namespace Utilities
     private:
         QString command;
         QStringList conditions;
+    };
+
+    class ToolBar : public QToolBar
+    {
+        Q_OBJECT
+    public:
+        ToolBar(QWidget* parent = 0);
+
+    signals:
+        void actTriggered(Action);
+
+    private slots:
+        void addTriggered();
+        void editTriggered();
+        void removeTriggered();
     };
 }
 

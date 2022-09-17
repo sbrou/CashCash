@@ -19,5 +19,6 @@
         <file>images/tag_window_48px.png</file>
         <file>images/arrow_down.png</file>
         <file>images/arrow_up.png</file>
+        <file>images/check_rules.png</file>
     </qresource>
 </RCC>

@@ -194,6 +194,7 @@ namespace Utilities
         return QString("id=%1").arg(id);
     }
 
+
     // QueryStatement
     QueryStatement::QueryStatement(const QString & sqlCommand, const QString & condition)
         : command(sqlCommand)
@@ -230,6 +231,42 @@ namespace Utilities
             conditions.clear();
         else
             conditions.remove(i,n);
+    }
+
+
+    // class ToolBar
+    ToolBar::ToolBar(QWidget *parent)
+        : QToolBar{parent}
+    {
+        QAction* addAct = new QAction(ADD_ICON, tr("A&dd"), this);
+        connect(addAct, SIGNAL(triggered()), this, SLOT(addTriggered()));
+
+        QAction* editAct = new QAction(EDIT_ICON, tr("E&dit"), this);
+        connect(editAct, SIGNAL(triggered()), this, SLOT(editTriggered()));
+
+        QAction* removeAct = new QAction(REMOVE_ICON, tr("R&emove"), this);
+        connect(removeAct, SIGNAL(triggered()), this, SLOT(removeTriggered()));
+
+        addAction(addAct);
+        addAction(editAct);
+        addAction(removeAct);
+
+        setIconSize(QSize(18,18));
+    }
+
+    void ToolBar::addTriggered()
+    {
+        emit actTriggered(AddAction);
+    }
+
+    void ToolBar::editTriggered()
+    {
+        emit actTriggered(EditAction);
+    }
+
+    void ToolBar::removeTriggered()
+    {
+        emit actTriggered(RemoveAction);
     }
 }
 

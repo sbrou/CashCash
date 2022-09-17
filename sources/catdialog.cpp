@@ -7,8 +7,12 @@
 
 using namespace Utilities;
 
-GroupDialog::GroupDialog()
+GroupDialog::GroupDialog(GroupType type)
 {
+    setWindowIcon(QIcon(groupIconByType(type)));
+    QString groupeName(groupNameByType(type));
+    setWindowTitle(groupeName.replace(0, 1, groupeName[0].toUpper()));
+
     inputLayout = new QGridLayout;
 
     qlName = new QLabel(tr("&Name:"));
@@ -115,20 +119,4 @@ void GroupDialog::setFields(QSqlRecord rec)
         expenses->setChecked(true);
     else
         earnings->setChecked(true);
-}
-
-///// CatDialog
-
-CatDialog::CatDialog() : GroupDialog()
-{
-    setWindowIcon(QIcon(groupIconByType(CatType)));
-    setWindowTitle(tr("Category"));
-}
-
-///// TagDialog
-
-TagDialog::TagDialog() : GroupDialog()
-{
-    setWindowIcon(QIcon(groupIconByType(TagType)));
-    setWindowTitle(tr("Tag"));
 }

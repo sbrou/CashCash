@@ -117,6 +117,7 @@ void OperationsView::setBalance(float balance, float future_balance)
 
 void OperationsView::resizeView()
 {
+    filters->initComboBoxes();
     opsTable->resizeRowsToContents();
     opsTable->resizeColumnsToContents();
 }
