@@ -17,8 +17,8 @@ public:
     ~RulesDialog();
 
     QString expression() const;
-    QRegularExpression regExpression() const;
-    void setExpression(const QRegularExpression & regex);
+    bool isCaseSensitive() const;
+    void setExpression(const QString & expr, bool isCaseSensitive);
     int categoryId() const;
     QString categoryName() const;
     void setCategory(int id);

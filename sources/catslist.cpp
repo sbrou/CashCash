@@ -13,6 +13,7 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     , model(mod)
 {
     setWindowIcon(QIcon(groupIconByType(type)));
+    setWindowModality(Qt::WindowModal);
     mainLayout = new QGridLayout(this);
 
     catsView = new QListWidget(this);

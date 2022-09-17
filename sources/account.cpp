@@ -129,6 +129,7 @@ void Account::initAccount()
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
     rulesWidget = new RulesList(cats_model, tags_model, this);
+    connect(rulesWidget, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
 
     statsWidget = new StatsWidget(_init_balance, _title);
 
@@ -169,6 +170,7 @@ void Account::importCSV(const QString & filename)
         for (int r = 0; r < ops->size(); ++r )
         {
             Operation op = ops->at(r);
+            rulesWidget->assignDescriptionToGroups(op.description, op.cat, op.tag);
             addOperationInDB(q, op.date, op.cat, op.amount, op.tag, op.description, (op.amount>0));
         }
     }
@@ -302,7 +304,9 @@ void Account::importOFX(const QString & filename)
                 else
                     description = op.elementsByTagName("PAYEE").at(0).toElement().text();
 
-                addOperationInDB(q, date, DEFAULT_GROUP, amount, DEFAULT_GROUP, description, (amount>0));
+                int cat, tag;
+                rulesWidget->assignDescriptionToGroups(description, cat, tag);
+                addOperationInDB(q, date, cat, amount, tag, description, (amount>0));
 
             }
         }
@@ -506,6 +510,21 @@ void Account::saveFile(bool isNewFile)
     }
     accObject["operations"] = opsArray;
 
+    ///// Write Rules /////
+
+    QJsonArray rulesArray;
+    QStandardItemModel* rules = rulesWidget->model();
+    for (int row = 0; row < rules->rowCount(); ++row) {
+        QJsonObject ruleObj;
+        ruleObj["expression"] = rules->item(row,0)->data(Qt::DisplayRole).toString();
+        ruleObj["case_sensitive"] = rules->item(row,0)->data(Qt::UserRole).toBool();
+        ruleObj["cat_id"] = rules->item(row,1)->data(Qt::UserRole).toInt();
+        ruleObj["tag_id"] = rules->item(row,2)->data(Qt::UserRole).toInt();
+
+        rulesArray.append(ruleObj);
+    }
+    accObject["rules"] = rulesArray;
+
     saveFile.write(QCborValue::fromJsonValue(accObject).toCbor());
     changeState(UpToDate);
 }
@@ -592,6 +611,11 @@ QSqlError Account::loadFile(const QString& filename)
     ///// Read Goals after goalsView has been created /////
     if (loadObject.contains("goals") && loadObject["goals"].isArray()) {
         readGoals(loadObject["goals"].toArray());
+    }
+
+    ///// Read rules after rulesWidget has been created /////
+    if (loadObject.contains("rules") && loadObject["rules"].isArray()) {
+        readRules(loadObject["rules"].toArray());
     }
 
     QSettings().setValue("lastFile", QVariant(_filepath));
@@ -710,6 +734,40 @@ void Account::readGoals(const QJsonArray &goalsArray)
             continue;
 
         goalsView->addGoal(goal);
+    }
+}
+
+void Account::readRules(const QJsonArray &rulesArray)
+{
+    for (int ruleIdx = 0; ruleIdx < rulesArray.size(); ++ruleIdx) {
+        QJsonObject ruleObj = rulesArray[ruleIdx].toObject();
+
+        QString expr;
+        bool isCaseSensitive;
+        int catId;
+        int tagId;
+
+        if (ruleObj.contains("expression") && ruleObj["expression"].isString())
+            expr = ruleObj["expression"].toString();
+        else
+            continue;
+
+        if (ruleObj.contains("case_sensitive") && ruleObj["case_sensitive"].isBool())
+            isCaseSensitive = ruleObj["case_sensitive"].toBool();
+        else
+            continue;
+
+        if (ruleObj.contains("cat_id") && ruleObj["cat_id"].isDouble())
+            catId = ruleObj["cat_id"].toInt();
+        else
+            continue;
+
+        if (ruleObj.contains("tag_id") && ruleObj["tag_id"].isDouble())
+            tagId = ruleObj["tag_id"].toInt();
+        else
+            continue;
+
+        rulesWidget->createRule(_title, expr, isCaseSensitive, catId, tagId);
     }
 }
 

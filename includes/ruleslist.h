@@ -13,6 +13,12 @@ class RulesList : public QDialog
 
 public:
     explicit RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidget *parent = nullptr);
+    QStandardItemModel *model();
+    void createRule(const QString & database, const QString &expr, bool isCaseSensitive, int catId, int tagId);
+    void assignDescriptionToGroups(const QString & description, int & cat, int & tag);
+
+signals:
+    void changeState(AccountState);
 
 public slots:
     void addRule();
@@ -25,6 +31,7 @@ private:
     TableWidget *rulesWidget;
 
     void setRuleInModel(int row, const RulesDialog &);
+    void setRuleItems(int row, QStandardItem *expr, QStandardItem *cat, QStandardItem *tag);
 };
 
 #endif // RULESLIST_H

@@ -24,15 +24,6 @@ QString RulesDialog::expression() const
     return ui->qleExpression->text();
 }
 
-QRegularExpression RulesDialog::regExpression() const
-{
-    QString exp(ui->qleExpression->text());
-    if (!ui->qcbCasse->isChecked())
-        return QRegularExpression(exp, QRegularExpression::CaseInsensitiveOption);
-    else
-        return QRegularExpression(exp);
-}
-
 int RulesDialog::categoryId() const
 {
     return ui->qcbCat->currentIndex() + 1;
@@ -53,10 +44,15 @@ QString RulesDialog::tagName() const
     return ui->qcbTag->currentText();
 }
 
-void RulesDialog::setExpression(const QRegularExpression & expression)
+bool RulesDialog::isCaseSensitive() const
 {
-    ui->qleExpression->setText(expression.pattern());
-    ui->qcbCasse->setChecked(expression.patternOptions() & QRegularExpression::CaseInsensitiveOption);
+    return ui->qcbCasse->isChecked();
+}
+
+void RulesDialog::setExpression(const QString & expression, bool isCaseSensitive)
+{
+    ui->qleExpression->setText(expression);
+    ui->qcbCasse->setChecked(isCaseSensitive);
 }
 
 void RulesDialog::setCategory(int id)

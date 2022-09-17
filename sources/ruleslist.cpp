@@ -7,8 +7,12 @@
 #include <QHeaderView>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QSqlQuery>
 
 #include "tablewidget.h"
+#include "utilities.h"
+
+using namespace Utilities;
 
 RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidget *parent) :
     QDialog(parent),
@@ -17,6 +21,7 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
 {
     setWindowIcon(QIcon(":/images/images/check_rules.png"));
     setWindowTitle("Règles d'affectations");
+    setWindowModality(Qt::WindowModal);
     rulesWidget = new TableWidget(this);
 
     QToolBar *toolBar = new QToolBar;
@@ -26,7 +31,8 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     toolBar->setIconSize(QSize(18,18));
     rulesWidget->addToolBar(toolBar);
 
-    rulesWidget->model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});
+    model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});
+    rulesWidget->table()->setSelectionBehavior(QAbstractItemView::SelectRows);
     rulesWidget->table()->setSelectionMode(QAbstractItemView::ExtendedSelection);
     rulesWidget->table()->resizeColumnsToContents();
     rulesWidget->table()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
@@ -46,19 +52,45 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     resize(width, height);
 }
 
+void RulesList::createRule(const QString & database, const QString &expr, bool isCaseSensitive, int catId, int tagId)
+{
+    QStandardItem *exprItem = new QStandardItem(expr);
+    exprItem->setData(isCaseSensitive, Qt::UserRole);
+
+    QString name;
+    QSqlQuery query(QSqlDatabase::database(database));
+    query.exec(QueryStatement(selectGroupCmd(CatType), idCondition(catId)).get());
+    while (query.next())
+        name = query.value(1).toString();
+
+    QStandardItem *catItem = new QStandardItem(name);
+    catItem->setData(catId, Qt::UserRole);
+
+    query.exec(QueryStatement(selectGroupCmd(TagType), idCondition(tagId)).get());
+    while (query.next())
+        name = query.value(1).toString();
+
+    QStandardItem *tagItem = new QStandardItem(name);
+    tagItem->setData(tagId, Qt::UserRole);
+
+    int newRow = model()->rowCount();
+    model()->insertRow(newRow);
+    setRuleItems(newRow, exprItem, catItem, tagItem);
+}
+
 void RulesList::addRule()
 {
     RulesDialog diag(cats, tags, this);
     if (diag.exec()) {
-        int newRow = rulesWidget->model()->rowCount();
-        rulesWidget->model()->insertRow(newRow);
+        int newRow = model()->rowCount();
+        model()->insertRow(newRow);
         setRuleInModel(newRow, diag);
     }
 }
 
 void RulesList::removeRule()
 {
-    QString exp = rulesWidget->model()->item(rulesWidget->currentRow(),0)->data().toString();
+    QString exp = model()->item(rulesWidget->currentRow(),0)->data(Qt::DisplayRole).toString();
 
     rulesWidget->setRemoveTitle(tr("Supprimer une règle d'affectation"));
     rulesWidget->setRemoveQuestion(QString(tr("Etes-vous sûr de vouloir supprimer la règle d'affection sur ") + "\"%1\" ?").arg(exp));
@@ -70,9 +102,9 @@ void RulesList::editRule()
 {
     RulesDialog diag(cats, tags, this);
     int row = rulesWidget->currentRow();
-    diag.setExpression(rulesWidget->model()->item(row,0)->data(Qt::UserRole).toRegularExpression());
-    diag.setCategory(rulesWidget->model()->item(row,1)->data(Qt::UserRole).toInt());
-    diag.setTag(rulesWidget->model()->item(row,2)->data(Qt::UserRole).toInt());
+    diag.setExpression(model()->item(row,0)->data(Qt::DisplayRole).toString(), model()->item(row,0)->data(Qt::UserRole).toBool());
+    diag.setCategory(model()->item(row,1)->data(Qt::UserRole).toInt());
+    diag.setTag(model()->item(row,2)->data(Qt::UserRole).toInt());
     if (diag.exec()) {
         setRuleInModel(row, diag);
     }
@@ -81,7 +113,7 @@ void RulesList::editRule()
 void RulesList::setRuleInModel(int row, const RulesDialog & diag)
 {
     QStandardItem *exprItem = new QStandardItem(diag.expression());
-    exprItem->setData(diag.regExpression(), Qt::UserRole);
+    exprItem->setData(diag.isCaseSensitive(), Qt::UserRole);
 
     QStandardItem *catItem = new QStandardItem(diag.categoryName());
     catItem->setData(diag.categoryId(), Qt::UserRole);
@@ -89,11 +121,45 @@ void RulesList::setRuleInModel(int row, const RulesDialog & diag)
     QStandardItem *tagItem = new QStandardItem(diag.tagName());
     tagItem->setData(diag.tagId(), Qt::UserRole);
 
-    rulesWidget->model()->setItem(row, 0, exprItem);
-    rulesWidget->model()->setItem(row, 1, catItem);
-    rulesWidget->model()->setItem(row, 2, tagItem);
+    setRuleItems(row, exprItem, catItem, tagItem);
+}
+
+QStandardItemModel* RulesList::model()
+{
+    return rulesWidget->model();
+}
+
+void RulesList::setRuleItems(int row, QStandardItem *expr, QStandardItem *cat, QStandardItem *tag)
+{
+    model()->setItem(row, 0, expr);
+    model()->setItem(row, 1, cat);
+    model()->setItem(row, 2, tag);
 
     rulesWidget->table()->resizeRowsToContents();
     rulesWidget->table()->resizeColumnToContents(1);
     rulesWidget->table()->resizeColumnToContents(2);
+
+    emit changeState(Modified);
+}
+
+void RulesList::assignDescriptionToGroups(const QString & description, int & cat, int & tag)
+{
+    cat = DEFAULT_GROUP;
+    tag = DEFAULT_GROUP;
+    
+    for (int row = 0; row < model()->rowCount(); ++row)
+    {
+        QString exp(model()->item(row,0)->data(Qt::DisplayRole).toString());
+        QRegularExpression regex;
+        if (!model()->item(row,0)->data(Qt::UserRole).toBool())
+            regex = QRegularExpression(exp, QRegularExpression::CaseInsensitiveOption);
+        else
+            regex = QRegularExpression(exp);
+
+        if (description.contains(regex)) {
+            cat = model()->item(row,1)->data(Qt::UserRole).toInt();
+            tag = model()->item(row,2)->data(Qt::UserRole).toInt();
+            break;
+        }
+    }
 }

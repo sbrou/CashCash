@@ -107,6 +107,7 @@ private:
     QSqlError readCategories(const QString& query, const QJsonArray &catsArray);
     QSqlError readOperations(const QJsonArray &opsArray);
     void readGoals(const QJsonArray &goalsArray);
+    void readRules(const QJsonArray &rulesArray);
 
 };
 
