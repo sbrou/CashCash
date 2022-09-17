@@ -33,7 +33,21 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     while (q.next())
         ui->catsView->addItem(q.value(1).toString());
 
+    contextMenu = new QMenu(ui->catsView);
+    QString editTitle = type == CatType ? tr("Editer une catégorie") : tr("Editer un tag");
+    QString removeTitle = type == CatType ? tr("Supprimer une catégorie") : tr("Supprimer un tag");
+    contextMenu->addAction(EDIT_ICON, editTitle, this, &GroupList::edit);
+    contextMenu->addAction(REMOVE_ICON, removeTitle, this, &GroupList::remove);
+    ui->catsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->catsView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customMenuRequested(QPoint)));
     ui->catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+}
+
+void GroupList::customMenuRequested(QPoint pos){
+    QModelIndex index=ui->catsView->indexAt(pos);
+    if (index.isValid()) {
+        contextMenu->popup(ui->catsView->viewport()->mapToGlobal(pos));
+    }
 }
 
 void GroupList::applyAction(Action act)

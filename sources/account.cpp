@@ -110,6 +110,8 @@ void Account::initAccount()
 
     opsView->loadModel(model);
     opsView->setBalance(_balance, _future_balance);
+    opsView->contextMenu()->addAction(EDIT_ICON, tr("Editer une opération"), this, &Account::editOperation);
+    opsView->contextMenu()->addAction(REMOVE_ICON, tr("Supprimer une opération"), this, &Account::removeOperation);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
     connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
     connect(this, SIGNAL(balanceChanged(float, float)), opsView, SLOT(setBalance(float, float)));

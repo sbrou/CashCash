@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QMenu>
 
 #include "filterswidget.h"
 
@@ -20,10 +21,12 @@ public:
 
     void loadModel(QSqlRelationalTableModel * mod);
     QTableView* table();
+    QMenu *contextMenu();
     void saveSettings();
     void readSettings();
 
 public slots:
+    void customMenuRequested(QPoint pos);
     void applyFilters(const QString &);
     void setBalance(float, float);
     void resizeView();
@@ -38,6 +41,7 @@ private:
     QVBoxLayout *mainLayout;
     QHBoxLayout *balanceLayout;
     QTableView *opsTable;
+    QMenu* cxtMenu;
 
     QSqlRelationalTableModel * model;
 

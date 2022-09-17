@@ -29,7 +29,18 @@ OperationsView::OperationsView()
 
     opsTable = new QTableView;
 
+    cxtMenu = new QMenu(opsTable);
+    opsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(opsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customMenuRequested(QPoint)));
+
     readSettings();
+}
+
+void OperationsView::customMenuRequested(QPoint pos){
+    QModelIndex index=opsTable->indexAt(pos);
+    if (index.isValid()) {
+        cxtMenu->popup(opsTable->viewport()->mapToGlobal(pos));
+    }
 }
 
 OperationsView::~OperationsView()
@@ -73,6 +84,11 @@ void OperationsView::slotShowFilters(bool isVisible)
 QTableView* OperationsView::table()
 {
     return opsTable;
+}
+
+QMenu* OperationsView::contextMenu()
+{
+    return cxtMenu;
 }
 
 void OperationsView::loadModel(QSqlRelationalTableModel * mod)

@@ -6,6 +6,7 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QSqlRelationalTableModel>
+#include <QMenu>
 
 #include <defines.h>
 
@@ -20,6 +21,9 @@ class GroupList : public QDialog
 public:
     explicit GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent = nullptr);
 
+public slots:
+    void customMenuRequested(QPoint pos);
+
 signals:
     void commit();
 
@@ -32,6 +36,7 @@ protected slots:
 private:
     Ui::GroupList *ui;
     QSqlTableModel *model;
+    QMenu *contextMenu;
     GroupType groupType;
 };
 
