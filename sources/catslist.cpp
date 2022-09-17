@@ -21,8 +21,8 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     setWindowTitle(tr("Manage ") + groupTableByType(type));
     setWindowModality(Qt::WindowModal);
 
-    ToolBar *toolBar = new ToolBar;
-    connect(ui->catsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), toolBar, SLOT(updateActions(QItemSelection)));
+    toolBar = new ToolBar;
+    connect(ui->catsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(updateActions(QItemSelection)));
     connect(toolBar, SIGNAL(actTriggered(Action)), this, SLOT(applyAction(Action)));
     ui->toolLayout->addWidget(toolBar);
 
@@ -41,7 +41,7 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     contextMenu->addAction(REMOVE_ICON, removeTitle, this, &GroupList::remove);
     ui->catsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->catsView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customMenuRequested(QPoint)));
-    ui->catsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->catsView->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 void GroupList::customMenuRequested(QPoint pos){
@@ -129,6 +129,15 @@ void GroupList::remove()
         ui->catsView->model()->removeRow(row);
     }
     emit commit();
+}
+
+void GroupList::updateActions(const QItemSelection &selected)
+{
+    QModelIndexList indexes = selected.indexes();
+    if (indexes.first().row() == 0)
+        toolBar->updateActions(QItemSelection());
+    else
+        toolBar->updateActions(selected);
 }
 
 

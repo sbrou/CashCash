@@ -8,7 +8,8 @@
 #include <QSqlRelationalTableModel>
 #include <QMenu>
 
-#include <defines.h>
+#include "utilities.h"
+#include "defines.h"
 
 namespace Ui {
 class GroupList;
@@ -23,6 +24,7 @@ public:
 
 public slots:
     void customMenuRequested(QPoint pos);
+    void updateActions(const QItemSelection &selected);
 
 signals:
     void commit();
@@ -35,6 +37,7 @@ protected slots:
 
 private:
     Ui::GroupList *ui;
+    Utilities::ToolBar *toolBar;
     QSqlTableModel *model;
     QMenu *contextMenu;
     GroupType groupType;
