@@ -60,6 +60,7 @@ HEADERS += \
     includes/tablewidget.h
 
 FORMS += \
+    resources/uiFiles/catslist.ui \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/goaldialog.ui \
     resources/uiFiles/mainwindow.ui \
