@@ -22,6 +22,7 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     setWindowModality(Qt::WindowModal);
 
     ToolBar *toolBar = new ToolBar;
+    connect(ui->catsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), toolBar, SLOT(updateActions(QItemSelection)));
     connect(toolBar, SIGNAL(actTriggered(Action)), this, SLOT(applyAction(Action)));
     ui->toolLayout->addWidget(toolBar);
 

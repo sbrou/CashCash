@@ -26,6 +26,7 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
 
     ToolBar *toolBar = new ToolBar;
     connect(toolBar, SIGNAL(actTriggered(Action)), this, SLOT(applyAction(Action)));
+    connect(rulesWidget->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), toolBar, SLOT(updateActions(QItemSelection)));
     rulesWidget->addToolBar(toolBar);
 
     model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});

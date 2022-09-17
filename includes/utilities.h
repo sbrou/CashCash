@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QWidget>
 #include <QToolBar>
+#include <QItemSelection>
 
 #include "defines.h"
 
@@ -55,6 +56,9 @@ namespace Utilities
     public:
         ToolBar(QWidget* parent = 0);
 
+    public slots:
+        void updateActions(const QItemSelection &selected);
+
     signals:
         void actTriggered(Action);
 
@@ -62,6 +66,10 @@ namespace Utilities
         void addTriggered();
         void editTriggered();
         void removeTriggered();
+
+    private:
+        QAction* editAct;
+        QAction* removeAct;
     };
 }
 

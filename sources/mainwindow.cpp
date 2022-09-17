@@ -269,7 +269,7 @@ void MainWindow::enableAccountActions(const QString& title)
         setWindowTitle(QString("MoulagApp - %1").arg(title));
 
     addOpAct->setEnabled(true);
-    removeOpAct->setEnabled(true);
+    removeOpAct->setEnabled(false);
     editOpAct->setEnabled(false);
     importOpAct->setEnabled(true);
     catAct->setEnabled(true);

@@ -241,15 +241,18 @@ namespace Utilities
         QAction* addAct = new QAction(ADD_ICON, tr("A&dd"), this);
         connect(addAct, SIGNAL(triggered()), this, SLOT(addTriggered()));
 
-        QAction* editAct = new QAction(EDIT_ICON, tr("E&dit"), this);
+        editAct = new QAction(EDIT_ICON, tr("E&dit"), this);
         connect(editAct, SIGNAL(triggered()), this, SLOT(editTriggered()));
 
-        QAction* removeAct = new QAction(REMOVE_ICON, tr("R&emove"), this);
+        removeAct = new QAction(REMOVE_ICON, tr("R&emove"), this);
         connect(removeAct, SIGNAL(triggered()), this, SLOT(removeTriggered()));
 
         addAction(addAct);
         addAction(editAct);
         addAction(removeAct);
+
+        removeAct->setEnabled(false);
+        editAct->setEnabled(false);
 
         setIconSize(QSize(18,18));
     }
@@ -267,6 +270,14 @@ namespace Utilities
     void ToolBar::removeTriggered()
     {
         emit actTriggered(RemoveAction);
+    }
+
+    void ToolBar::updateActions(const QItemSelection &selected)
+    {
+        QModelIndexList indexes = selected.indexes();
+        bool enabled = !indexes.isEmpty();
+        removeAct->setEnabled(enabled);
+        editAct->setEnabled(enabled);
     }
 }
 
