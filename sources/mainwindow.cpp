@@ -98,6 +98,7 @@ void MainWindow::initFile(bool newFile, const QString & filename)
     connect(tagAct, SIGNAL(triggered()), _account, SLOT(showTags()));
     connect(goalAct, SIGNAL(triggered()), _account, SLOT(manageGoals()));
     connect(statsAct, SIGNAL(triggered()), _account, SLOT(showStats()));
+    connect(rulesAct, SIGNAL(triggered()), _account, SLOT(manageRules()));
     connect(_account, SIGNAL(selectionChanged(QItemSelection)), this, SLOT(updateAccountActions(QItemSelection)));
 
     connect(_account, SIGNAL(accountReady(const QString&)), this, SLOT(enableAccountActions(const QString&)));
@@ -151,17 +152,17 @@ void MainWindow::createActions()
 
     fileToolBar->addSeparator();
 
-    addOpAct = new QAction(QIcon(":/images/images/add_48px.png"), tr("&New Operation"), this);
+    addOpAct = new QAction(ADD_ICON, tr("&New Operation"), this);
     addOpAct->setStatusTip(tr("Add an operation"));
     addOpAct->setEnabled(false);
     fileToolBar->addAction(addOpAct);
 
-    removeOpAct = new QAction(QIcon(":/images/images/Remove_48px.png"), tr("&Delete operations"), this);
+    removeOpAct = new QAction(REMOVE_ICON, tr("&Delete operations"), this);
     removeOpAct->setEnabled(false);
     removeOpAct->setStatusTip(tr("Delete the selected operations"));
     fileToolBar->addAction(removeOpAct);
 
-    editOpAct = new QAction(QIcon(":/images/images/edit_48px.png"), tr("&Edit operation"), this);
+    editOpAct = new QAction(EDIT_ICON, tr("&Edit operation"), this);
     editOpAct->setEnabled(false);
     editOpAct->setStatusTip(tr("Edit the selected operation"));
     fileToolBar->addAction(editOpAct);
@@ -187,6 +188,11 @@ void MainWindow::createActions()
     goalAct->setStatusTip(tr("Create, edit or delete budget goals"));
     goalAct->setEnabled(false);
     fileToolBar->addAction(goalAct);
+
+    rulesAct = new QAction(QIcon(":/images/images/check_rules.png"), tr("&Manage affectation rules"), this);
+    rulesAct->setStatusTip(tr("Create, edit or delete affectation rules"));
+    rulesAct->setEnabled(false);
+    fileToolBar->addAction(rulesAct);
 
     statsAct = new QAction(QIcon(":/images/images/graph_48px.png"), tr("&Show stats"), this);
     statsAct->setStatusTip(tr("Show statistics"));
@@ -270,6 +276,7 @@ void MainWindow::enableAccountActions(const QString& title)
     tagAct->setEnabled(true);
     goalAct->setEnabled(true);
     statsAct->setEnabled(true);
+    rulesAct->setEnabled(true);
 }
 
 void MainWindow::updateAccountActions(const QItemSelection& selected)

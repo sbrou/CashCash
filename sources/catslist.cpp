@@ -20,9 +20,9 @@ GroupList::GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent)
     qpbEdit = new QPushButton(this);
     qpbRemove = new QPushButton(this);
 
-    qpbAddNew->setIcon(QIcon(":/images/images/add_48px.png"));
-    qpbEdit->setIcon(QIcon(":/images/images/edit_48px.png"));
-    qpbRemove->setIcon(QIcon(":/images/images/Remove_48px.png"));
+    qpbAddNew->setIcon(ADD_ICON);
+    qpbEdit->setIcon(EDIT_ICON);
+    qpbRemove->setIcon(REMOVE_ICON);
 
     QSqlQuery q(model->database());
     if (type == CatType)

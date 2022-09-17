@@ -57,5 +57,6 @@ private:
     QAction *tagAct;
     QAction *goalAct;
     QAction *statsAct;
+    QAction *rulesAct;
 };
 #endif // MAINWINDOW_H

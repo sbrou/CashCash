@@ -1,13 +1,12 @@
 #include "goalsview.h"
 
-#include <QHeaderView>
 #include <QPainter>
 #include <QStandardItem>
 #include <QDate>
 #include <QSqlQuery>
-#include <QMenu>
 #include <QInputDialog>
-#include <QMessageBox>
+#include <QMenu>
+#include <QHeaderView>
 
 #include "utilities.h"
 
@@ -34,72 +33,24 @@ void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 }
 
 
-MyStandardItemModel::MyStandardItemModel(QObject *parent) : QStandardItemModel(parent)
-{
-
-}
-
-QVariant MyStandardItemModel::data(const QModelIndex &index, int role) const
-{
-    if (role == Qt::TextAlignmentRole )
-        return Qt::AlignCenter;
-    else
-        return QStandardItemModel::data(index, role);
-}
-
-
 GoalsView::GoalsView(const QString &accountName, QWidget *parent)
-    : QWidget{parent},
-      databaseName(accountName),
-      currentGoal(-1)
+    : TableWidget{parent},
+      databaseName(accountName)
 {
-    mainLayout = new QVBoxLayout(this);
-
-    goals_model = new MyStandardItemModel(this);
-    goals_model->setHorizontalHeaderLabels({tr("Category/Tag"), tr("Progress"), tr("Goal"), tr("Spent"), tr("Rest")});
-
-    tableView = new QTableView(this);
-    tableView->setModel(goals_model);
-    tableView->verticalHeader()->hide();
-    tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
-    tableView->clearSpans();
-    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tableView->setSelectionMode(QAbstractItemView::NoSelection);
-    tableView->setShowGrid(false);
+    model()->setHorizontalHeaderLabels({tr("Category/Tag"), tr("Progress"), tr("Goal"), tr("Spent"), tr("Rest")});
+    table()->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
+    table()->setSelectionMode(QAbstractItemView::NoSelection);
 
     delegate = new GoalsViewDelegate(this);
-    tableView->setItemDelegate(delegate);
+    setTableDelegate(delegate);
 
-
-    createCustomContextMenu();
-    tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(tableView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
-
-    mainLayout->addWidget(tableView);
-}
-
-void GoalsView::createCustomContextMenu()
-{
-    contextMenu = new QMenu(tableView);
-    QAction *editAct = contextMenu->addAction(QIcon(":/images/images/edit_48px.png"),
-                                              tr("Editer l'objectif"), this, &GoalsView::EditGoal);
-    contextMenu->addAction(editAct);
-    QAction *removeAct = contextMenu->addAction(QIcon(":/images/images/Remove_48px.png"),
-                                                tr("Supprimer l'objectif"), this, &GoalsView::RemoveGoal);
-    contextMenu->addAction(removeAct);
-}
-
-void GoalsView::customMenuRequested(QPoint pos){
-    QModelIndex index=tableView->indexAt(pos);
-    if (index.isValid()) {
-        currentGoal = index.row();
-        contextMenu->popup(tableView->viewport()->mapToGlobal(pos));
-    }
+    contextMenu()->addAction(EDIT_ICON, tr("Editer l'objectif"), this, &GoalsView::EditGoal);
+    contextMenu()->addAction(REMOVE_ICON, tr("Supprimer l'objectif"), this, &GoalsView::RemoveGoal);
 }
 
 void GoalsView::RemoveGoal()
 {
-    Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
+    Goal goal = model()->item(currentRow(),0)->data(Qt::UserRole).value<Goal>();
     QString name;
 
     QSqlQuery query(QSqlDatabase::database(databaseName));
@@ -108,22 +59,15 @@ void GoalsView::RemoveGoal()
         name = query.value(1).toString();
     }
 
-    QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Supprimer un objectif"),
-                                                               QString(tr("Etes-vous sûr de vouloir supprimer l'objectif sur ") + "\"%1\" ?").arg(name));
-    switch(choice) {
-    case QMessageBox::Yes:
-        goals_model->removeRow(currentGoal);
-        emit changeState(Modified);
-        break;
-    default:
-        return;
-        break;
-    }
+    setRemoveTitle(tr("Supprimer un objectif"));
+    setRemoveQuestion(QString(tr("Etes-vous sûr de vouloir supprimer l'objectif sur ") + "\"%1\" ?").arg(name));
+
+    TableWidget::removeRow();
 }
 
 void GoalsView::EditGoal()
 {
-    Goal goal = goals_model->item(currentGoal,0)->data(Qt::UserRole).value<Goal>();
+    Goal goal = model()->item(currentRow(),0)->data(Qt::UserRole).value<Goal>();
     bool ok;
     float max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
                                        tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
@@ -131,12 +75,12 @@ void GoalsView::EditGoal()
     if (ok)
         emit changeState(Modified);
 
-    updateGoalProgress(currentGoal, max);
+    updateGoalProgress(currentRow(), max);
 }
 
 void GoalsView::updateGoalProgress(int goalIndex, float amount)
 {
-    Goal goal = goals_model->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
+    Goal goal = model()->item(goalIndex,0)->data(Qt::UserRole).value<Goal>();
     goal.max = amount > 0 ? amount : goal.max;
     float spent = qQNaN();
 
@@ -159,19 +103,19 @@ void GoalsView::updateGoalProgress(int goalIndex, float amount)
 
     QVariant qVarGoal;
     qVarGoal.setValue(goal);
-    goals_model->item(goalIndex,0)->setData(qVarGoal, Qt::UserRole);
+    model()->item(goalIndex,0)->setData(qVarGoal, Qt::UserRole);
 
     QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/goal.max));
     QStandardItem *goalItem = new QStandardItem(QString::number(goal.max) + " €");
     QStandardItem *spentItem = new QStandardItem(QString::number(spent) + " €");
     QStandardItem *restItem = new QStandardItem(QString::number(goal.max-spent) + " €");
 
-    goals_model->setItem(goalIndex, 1, progressItem);
-    goals_model->setItem(goalIndex, 2, goalItem);
-    goals_model->setItem(goalIndex, 3, spentItem);
-    goals_model->setItem(goalIndex, 4, restItem);
-    tableView->resizeRowsToContents();
-    tableView->resizeColumnToContents(0);
+    model()->setItem(goalIndex, 1, progressItem);
+    model()->setItem(goalIndex, 2, goalItem);
+    model()->setItem(goalIndex, 3, spentItem);
+    model()->setItem(goalIndex, 4, restItem);
+    table()->resizeRowsToContents();
+    table()->resizeColumnToContents(0);
 }
 
 void GoalsView::addGoal(Goal newGoal)
@@ -188,20 +132,16 @@ void GoalsView::addGoal(Goal newGoal)
     qVarGoal.setValue(newGoal);
     nameItem->setData(qVarGoal, Qt::UserRole);
 
-    int newRow = goals_model->rowCount();
-    goals_model->insertRow(newRow);
-    goals_model->setItem(newRow, 0, nameItem);
+    int newRow = model()->rowCount();
+    model()->insertRow(newRow);
+    model()->setItem(newRow, 0, nameItem);
     updateGoalProgress(newRow, newGoal.max);
     emit changeState(Modified);
 }
 
 void GoalsView::updateGoals()
 {
-    for (int row = 0; row < goals_model->rowCount(); ++row)
+    for (int row = 0; row < model()->rowCount(); ++row)
         updateGoalProgress(row);
 }
 
-QStandardItemModel* GoalsView::goalsModel()
-{
-    return goals_model;
-}

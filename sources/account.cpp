@@ -128,6 +128,8 @@ void Account::initAccount()
     tagsWidget = new TagsList(tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
 
+    rulesWidget = new RulesList(cats_model, tags_model, this);
+
     statsWidget = new StatsWidget(_init_balance, _title);
 
     readSettings();
@@ -344,7 +346,7 @@ void Account::editOperation()
 
     AddOpDialog aoDiag(idx, model);
     aoDiag.setWindowTitle(tr("Edit an operation"));
-    aoDiag.setWindowIcon(QIcon(":/images/images/edit_48px.png"));
+    aoDiag.setWindowIcon(EDIT_ICON);
 
     if (aoDiag.exec())
         commitOnDatabase();
@@ -354,7 +356,7 @@ void Account::addOperation()
 {
     AddOpDialog aoDiag(cats_model, tags_model);
     aoDiag.setWindowTitle(tr("Add an operation"));
-    aoDiag.setWindowIcon(QIcon(":/images/images/add_48px.png"));
+    aoDiag.setWindowIcon(ADD_ICON);
     if (aoDiag.exec()) {
 
         QSqlRecord new_record = model->record();
@@ -474,7 +476,7 @@ void Account::saveFile(bool isNewFile)
     ///// Write Goals /////
 
     QJsonArray goalsArray;
-    QStandardItemModel* goals = goalsView->goalsModel();
+    QStandardItemModel* goals = goalsView->model();
     for (int row = 0; row < goals->rowCount(); ++row) {
         Goal goal = goals->item(row,0)->data(Qt::UserRole).value<Goal>();
         QJsonObject goalObj;
@@ -592,6 +594,7 @@ QSqlError Account::loadFile(const QString& filename)
         readGoals(loadObject["goals"].toArray());
     }
 
+    QSettings().setValue("lastFile", QVariant(_filepath));
     changeState(UpToDate);
 
     return err;
@@ -732,6 +735,11 @@ void Account::manageGoals()
     if (diag.exec()) {
         goalsView->addGoal(diag.goal());
     }
+}
+
+void Account::manageRules()
+{
+    rulesWidget->show();
 }
 
 QSqlError Account::createFile(const QString & title, float balance)

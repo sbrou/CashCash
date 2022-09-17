@@ -3,10 +3,15 @@
 
 #define DEFAULT_GROUP 1
 #define COND_SEP " AND "
+
 #define SELECT_OPERATIONS "SELECT * FROM operations"
 #define SELECT_CATEGORIES "SELECT * FROM categories"
 #define SELECT_TAGS "SELECT * FROM tags"
 #define SELECT_SUM "SELECT SUM (amount) FROM operations"
+
+#define ADD_ICON QIcon(":/images/images/add_48px.png")
+#define EDIT_ICON QIcon(":/images/images/edit_48px.png")
+#define REMOVE_ICON QIcon(":/images/images/Remove_48px.png")
 
 #include <QMetaType>
 

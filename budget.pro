@@ -11,6 +11,8 @@ CONFIG += c++11
 INCLUDEPATH = includes/ sources/ resources/ resources/uiFiles resources/translation
 
 SOURCES += \
+    sources/rulesdialog.cpp \
+    sources/ruleslist.cpp \
     sources/account.cpp \
     sources/addopdialog.cpp \
     sources/catdialog.cpp \
@@ -29,7 +31,8 @@ SOURCES += \
     sources/operationsview.cpp \
     sources/statswidget.cpp \
     sources/utilities.cpp \
-    sources/welcomedialog.cpp
+    sources/welcomedialog.cpp \
+    sources/tablewidget.cpp
 
 HEADERS += \
     includes/account.h \
@@ -51,14 +54,19 @@ HEADERS += \
     includes/operationsview.h \
     includes/statswidget.h \
     includes/utilities.h \
-    includes/welcomedialog.h
+    includes/welcomedialog.h \
+    includes/rulesdialog.h \
+    includes/ruleslist.h \
+    includes/tablewidget.h
 
 FORMS += \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/goaldialog.ui \
     resources/uiFiles/mainwindow.ui \
     resources/uiFiles/newaccountdialog.ui \
-    resources/uiFiles/statswidget.ui
+    resources/uiFiles/statswidget.ui \
+    resources/uiFiles/rulesdialog.ui \
+    resources/uiFiles/tablewidget.ui
 
 TRANSLATIONS += \
     resources/translation/budget_en_US.ts

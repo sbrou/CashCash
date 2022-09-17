@@ -17,6 +17,7 @@
 #include "chartsview.h"
 #include "goalsview.h"
 #include "catslist.h"
+#include "ruleslist.h"
 #include "statswidget.h"
 
 class Account : public QSplitter
@@ -57,6 +58,7 @@ public slots:
     void showCategories();
     void showTags();
     void manageGoals();
+    void manageRules();
     void showStats();
 
 private slots:
@@ -93,6 +95,7 @@ private:
 
     CatsList *catsWidget;
     TagsList *tagsWidget;
+    RulesList *rulesWidget;
 
     //////////////////////////////////////////////
 
