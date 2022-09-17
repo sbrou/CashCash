@@ -40,8 +40,9 @@ void ColoredProgressBar::paint(QPainter *painter, const QRect& rec)
     painter->drawRoundedRect(xpos, ypos, pos, h, 8, 8);
 
     // Paint text
-    painter->setPen(Qt::black);
-    painter->setBrush(QBrush(Qt::black));
+    QColor textColor = percentage < 100 ? Qt::black : Qt::red;
+    painter->setPen(textColor);
+    painter->setBrush(QBrush(textColor));
     painter->drawText(xpos, ypos, w, h, Qt::AlignCenter, QString::number(percentage, 'f', 2) + "%");
 
     painter->restore();
