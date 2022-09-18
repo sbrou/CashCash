@@ -116,6 +116,7 @@ void Account::initAccount()
     connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
     connect(this, SIGNAL(balanceChanged(float, float)), opsView, SLOT(setBalance(float, float)));
     splitter->addWidget(opsView);
+    opsView->resizeView();
 
     chartView = new ChartsView(model, this);
     splitter->addWidget(chartView);

@@ -55,6 +55,8 @@ AddOpDialog::AddOpDialog(int id, SqlRelationalTableModel *model, QWidget *parent
     mapper->addMapping(ui->qcbTag, TagIndex);
     mapper->addMapping(ui->qleDes, DesIndex, "text");
     mapper->setCurrentIndex(id);
+
+    ui->qleAmount->setText(QString::number(ui->qleAmount->text().toFloat()));
 }
 
 void AddOpDialog::revert()

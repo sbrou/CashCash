@@ -28,10 +28,7 @@ QVariant SqlRelationalTableModel::data(const QModelIndex &index, int role) const
         return index.data() == DEFAULT_GROUP_NAME ? QBrush(Qt::red) : QBrush(Qt::black);
 
     if (role == Qt::DisplayRole && column == AmountIndex)
-    {
-        QString amount = QString::number(QSqlRelationalTableModel::data(index, Qt::DisplayRole).toFloat(), 'f', 2);
-        return amount + " €";
-    }
+        return QString::number(QSqlRelationalTableModel::data(index, Qt::DisplayRole).toFloat()) + " €";
 
     return QSqlRelationalTableModel::data(index, role);
 }
