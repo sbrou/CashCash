@@ -37,8 +37,10 @@ GroupList::GroupList(const QString & database, GroupType type, QSqlTableModel * 
     contextMenu->addAction(EDIT_ICON, editTitle, this, &GroupList::edit);
     contextMenu->addAction(REMOVE_ICON, removeAGroup(type), this, &GroupList::remove);
     ui->catsView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->catsView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customMenuRequested(QPoint)));
     ui->catsView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->catsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    connect(ui->catsView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customMenuRequested(QPoint)));
+    connect(ui->catsView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(edit()));
 }
 
 void GroupList::customMenuRequested(QPoint pos){
@@ -89,8 +91,11 @@ void GroupList::add()
 void GroupList::edit()
 {
     int row = ui->catsView->selectionModel()->selectedIndexes().first().row();
-
     QSqlRecord current_record = model->record(row);
+
+    if (current_record.value(0).toInt() == DEFAULT_GROUP)
+        return;
+
     GroupDialog diag(groupType);
     diag.setFields(current_record);
     if (diag.exec())
