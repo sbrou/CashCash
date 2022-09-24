@@ -17,13 +17,13 @@ public:
     explicit GroupInputDialog(QWidget *parent, Qt::WindowFlags flags = Qt::WindowFlags());
     ~GroupInputDialog();
 
-    static int getIndex(QWidget *parent, const QString &title, const QString &label,
+    static int getId(QWidget *parent, const QString &title, const QString &label,
                         QSqlTableModel *mod, bool *ok = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
 protected:
     void setLabelText(const QString & label);
     void setComboBoxModel(QSqlTableModel *model);
-    int getComboBoxIndex();
+    int getGroupId();
 
 private:
     Ui::GroupInputDialog *ui;

@@ -116,11 +116,12 @@ void GroupList::remove()
     foreach (index, indexes) {
 
         int row = index.row();
+        int group_id = model->record(row).value(0).toInt();
 
         QString text = tr("Etes-vous sûr de vouloir ") + removeTheGroup(groupType) + QString(" \"%1\" ?").arg(index.data().toString());
         QMessageBox::StandardButton choice = QMessageBox::question(this, removeAGroup(groupType), text);
         if (choice == QMessageBox::Yes) {
-            QueryStatement statement(SELECT_OPERATIONS, groupCondition(groupType, row+1));
+            QueryStatement statement(SELECT_OPERATIONS, groupCondition(groupType, group_id));
             QSqlQuery query(QSqlDatabase::database(databaseName));
             int nb_ops = 0;
             query.exec(statement.get());
@@ -128,7 +129,11 @@ void GroupList::remove()
                 ++nb_ops;
             }
             if (nb_ops > 0) {
-                emit groupToBeRemoved(groupType, index.data().toString(), row+1);
+                emit groupToBeRemoved(groupType, index.data().toString(), group_id, row);
+            }
+            else {
+                model->removeRow(row);
+                emit commit();
             }
         }
     }

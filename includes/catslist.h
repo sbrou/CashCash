@@ -28,7 +28,8 @@ public slots:
 
 signals:
     void commit();
-    void groupToBeRemoved(GroupType, const QString &, int);
+    // row corresponds to the row in the group model
+    void groupToBeRemoved(GroupType type, const QString & name, int group_id, int row);
 
 protected slots:
     void applyAction(Action);

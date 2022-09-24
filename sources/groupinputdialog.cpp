@@ -14,7 +14,7 @@ GroupInputDialog::~GroupInputDialog()
     delete ui;
 }
 
-int GroupInputDialog::getIndex(QWidget *parent, const QString &title, const QString &label,
+int GroupInputDialog::getId(QWidget *parent, const QString &title, const QString &label,
                                QSqlTableModel *model, bool *ok, Qt::WindowFlags flags)
 {
     GroupInputDialog* dialog(new GroupInputDialog(parent, flags));
@@ -26,7 +26,7 @@ int GroupInputDialog::getIndex(QWidget *parent, const QString &title, const QStr
     if (ok)
         *ok = !!ret;
     if (ret) {
-        return dialog->getComboBoxIndex();
+        return dialog->getGroupId();
     } else {
         return DEFAULT_GROUP;
     }
@@ -43,7 +43,10 @@ void GroupInputDialog::setComboBoxModel(QSqlTableModel *model)
     ui->comboBox->setModelColumn(1);
 }
 
-int GroupInputDialog::getComboBoxIndex()
+int GroupInputDialog::getGroupId()
 {
-    return ui->comboBox->currentIndex() + 1;
+    int row = ui->comboBox->currentIndex();
+    QModelIndex idx = ui->comboBox->model()->index(row, 0); // first column : id_column
+    QVariant data = ui->comboBox->model()->data(idx);
+    return data.toInt();
 }

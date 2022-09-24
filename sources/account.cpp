@@ -130,11 +130,11 @@ void Account::initAccount()
 
     catsWidget = new GroupList(_title, CatType, cats_model, this);
     connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
-    connect(catsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int)), this, SLOT(removeGroup(GroupType,QString,int)));
+    connect(catsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int,int)), this, SLOT(removeGroup(GroupType,QString,int,int)));
 
     tagsWidget = new GroupList(_title, TagType, tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
-    connect(tagsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int)), this, SLOT(removeGroup(GroupType,QString,int)));
+    connect(tagsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int,int)), this, SLOT(removeGroup(GroupType,QString,int,int)));
 
     rulesWidget = new RulesList(cats_model, tags_model, this);
     connect(rulesWidget, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
@@ -406,7 +406,7 @@ void Account::removeOperation()
     commitOnDatabase();
 }
 
-void Account::removeGroup(GroupType type, const QString & name, int id)
+void Account::removeGroup(GroupType type, const QString & name, int id, int row)
 {
     model->setFilter(groupCondition( type, id));
     int rows = model->rowCount();
@@ -426,9 +426,11 @@ void Account::removeGroup(GroupType type, const QString & name, int id)
     text += tr("Voulez-vous leur en attribuer ") + sub2 + " ?";
     QMessageBox::StandardButton choice = QMessageBox::question(this, removeAGroup(type), text);
     QSqlTableModel * groupModel = type == CatType ? cats_model : tags_model;
+    groupModel->removeRow(row);
+    groupModel->select();
     int new_group = DEFAULT_GROUP;
     if (choice == QMessageBox::Yes) {
-        new_group = GroupInputDialog::getIndex(this, groupName(type) + tr(" de remplacement"), groupName(type), groupModel);
+        new_group = GroupInputDialog::getId(this, groupName(type) + tr(" de remplacement"), groupName(type), groupModel);
     }
 
     int fieldIndex = type == CatType ? CatIndex : TagIndex;
@@ -437,7 +439,6 @@ void Account::removeGroup(GroupType type, const QString & name, int id)
         op.setValue(fieldIndex, QVariant(new_group));
         model->setRecord(r, op);
     }
-    groupModel->removeRow(id-1);
     commitOnDatabase();
     opsView->resetView();
     opsView->resizeView();
