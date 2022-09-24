@@ -64,6 +64,8 @@ HEADERS += \
     includes/sqlrelationalmodel.h
 
 FORMS += \
+    resources/uiFiles/fieldspage.ui \
+    resources/uiFiles/linepage.ui \
     resources/uiFiles/groupinputdialog.ui \
     resources/uiFiles/catslist.ui \
     resources/uiFiles/addopdialog.ui \

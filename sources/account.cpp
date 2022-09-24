@@ -183,8 +183,8 @@ void Account::importCSV(const QString & filename)
             rulesWidget->assignDescriptionToGroups(op.description, op.cat, op.tag);
             addOperationInDB(q, op.date, op.cat, op.amount, op.tag, op.description, (op.amount>0));
         }
+        commitOnDatabase();
     }
-    commitOnDatabase();
 }
 
 void Account::importOFX(const QString & filename)
@@ -919,23 +919,4 @@ QSqlError Account::setStandardCategories()
     addGroupInDB(q, tr("Remboursements"), colors[i++], Earning);
 
     return QSqlError();
-}
-
-void Account::setStandardRules()
-{
-    _rules.insert("CARREFOUR","FOOD");
-    _rules.insert("HOMESERVE","HOUSE");
-    _rules.insert("PHARMACIE","HEALTH");
-    _rules.insert("FNAC","HOBBIES");
-    _rules.insert("Maxi Zoo","MAIKO");
-    _rules.insert("CHANTURGUE","HOUSE");
-    _rules.insert("TotalEnergies","HOUSE");
-    _rules.insert("PROXISERV","HOUSE");
-    _rules.insert("AVANSSUR","HOUSE");
-    _rules.insert("JOINT","JOINT");
-    _rules.insert("T2C","TRANSPORT");
-    _rules.insert("FR5110011000207555808944J","SAVING");
-    _rules.insert("BOUYGUES","SUBS");
-    _rules.insert("Deezer","SUBS");
-    _rules.insert("ASTEK","SALARY");
 }

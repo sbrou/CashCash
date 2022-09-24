@@ -83,6 +83,11 @@ struct Operation
 typedef QMap<QString,QPair<int,QString> > GroupsMap;
 typedef QVector<Operation> OperationsVector;
 
+namespace Ui {
+class LinePage;
+class FieldsPage;
+}
+
 class CSVImporterWizard : public QWizard
 {
     Q_OBJECT
@@ -103,9 +108,6 @@ public:
     OperationsVector* getOperations();
     GroupsMap* matchedCategories();
     GroupsMap* matchedTags();
-
-private slots:
-    void showHelp();
 
 private:
     int nbOps;
@@ -134,9 +136,9 @@ private:
     QLabel *fileLabel;
     QLineEdit   *qleFile;
     QPushButton *qpbChooseFile;
-    QRadioButton *newConfigRadioButton;
-    QRadioButton *useConfigRadioButton;
-    QComboBox *configsList;
+//    QRadioButton *newConfigRadioButton;
+//    QRadioButton *useConfigRadioButton;
+//    QComboBox *configsList;
 
     QString _file;
 };
@@ -156,12 +158,7 @@ private slots:
     void updateOpLine(const QString &);
 
 private:
-    QLabel *topLabel;
-    CSVEditor *csvEditor;
-    QLabel *lineLabel;
-    QLineEdit *qleLineSelected;
-    QCheckBox *enterOpLine;
-    QLineEdit *qleOpLine;
+    Ui::LinePage *ui;
 };
 
 
@@ -175,14 +172,7 @@ public:
     void initializePage() override;
 
 private:
-    QLineEdit *qleDate;
-    QLineEdit *qleDateFormat;
-    QLineEdit *qleCat;
-    QLineEdit *qleAmount;
-    QLineEdit *qleTag;
-    QLineEdit *qleDes;
-    QLabel *qlHeaders;
-    CSVEditor *csvEditor;
+    Ui::FieldsPage *ui;
 };
 
 
@@ -228,7 +218,6 @@ public:
     QTableWidget * table();
 
 private:
-    QLabel *bottomLabel;
     QTableWidget *tableWidget;
 
     void process_line(int row, GroupsMap*, GroupsMap*, const QString&);

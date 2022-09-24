@@ -50,6 +50,8 @@
 
 #include <QtWidgets>
 
+#include "ui_linepage.h"
+#include "ui_fieldspage.h"
 #include "csvimporterwizard.h"
 
 #include <QScrollArea>
@@ -70,41 +72,9 @@ CSVImporterWizard::CSVImporterWizard(SqlRelationalTableModel * mod, const QStrin
     setPage(Page_Conclusion, new ConclusionPage);
 
     setStartId(Page_Intro);
-
-    setOption(HaveHelpButton, true);
     setOption(NoDefaultButton, true);
 
-    connect(this, &QWizard::helpRequested, this, &CSVImporterWizard::showHelp);
-
-    setWindowTitle(tr("CSV Importer"));
-}
-
-void CSVImporterWizard::showHelp()
-{
-    static QString lastHelpMessage;
-
-    QString message;
-
-    switch (currentId()) {
-    case Page_Intro:
-        message = tr("The decision you make here will affect which page you "
-                     "get to see next.");
-        break;
-    case Page_Conclusion:
-        message = tr("You must accept the terms and conditions of the "
-                     "license to proceed.");
-        break;
-    default:
-        message = tr("This help is likely not to be of any help.");
-    }
-
-    if (lastHelpMessage == message)
-        message = tr("Sorry, I already gave what help I could. "
-                     "Maybe you should try asking a human?");
-
-    QMessageBox::information(this, tr("License Wizard Help"), message);
-
-    lastHelpMessage = message;
+    setWindowTitle(tr("Assistant d'importation de fichier CSV"));
 }
 
 void CSVImporterWizard::accept()
@@ -159,9 +129,7 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
 {
     setTitle(tr("Introduction"));
 
-    topLabel = new QLabel(tr("This wizard will help you register your copy of "
-                             "<i>Super Product One</i>&trade; or start "
-                             "evaluating the product."));
+    topLabel = new QLabel(tr("Cet assistant vous aidera à importer des opérations à partir d'un fichier CSV."));
     topLabel->setWordWrap(true);
 
     fileLabel = new QLabel(tr("F&ichier:"));
@@ -169,7 +137,7 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
     qleFile->setReadOnly(true);
     fileLabel->setBuddy(qleFile);
 
-    qpbChooseFile = new QPushButton(tr("Choose..."));
+    qpbChooseFile = new QPushButton(tr("Choisir..."));
     connect(qpbChooseFile, SIGNAL(clicked()), this, SLOT(chooseFile()));
 
     QHBoxLayout *hbox = new QHBoxLayout;
@@ -179,23 +147,23 @@ IntroPage::IntroPage(const QString & filename, QWidget *parent)
 
     registerField("filename*", qleFile);
 
-    newConfigRadioButton = new QRadioButton(tr("&Create a new configuration"));
-    useConfigRadioButton = new QRadioButton(tr("&Use a configuration"));
-    newConfigRadioButton->setChecked(true);
+//    newConfigRadioButton = new QRadioButton(tr("&Create a new configuration"));
+//    newConfigRadioButton->setChecked(true);
 
-    configsList = new QComboBox;
-    configsList->setEnabled(false);
-    connect(useConfigRadioButton, SIGNAL(toggled(bool)), configsList, SLOT(setEnabled(bool)));
+//    useConfigRadioButton = new QRadioButton(tr("&Use a configuration"));
+//    configsList = new QComboBox;
+//    configsList->setEnabled(false);
+//    connect(useConfigRadioButton, SIGNAL(toggled(bool)), configsList, SLOT(setEnabled(bool)));
 
-    QGridLayout *gbox = new QGridLayout;
-    gbox->addWidget(newConfigRadioButton, 0, 0);
-    gbox->addWidget(useConfigRadioButton, 1, 0);
-    gbox->addWidget(configsList, 1, 1);
+//    QGridLayout *gbox = new QGridLayout;
+//    gbox->addWidget(newConfigRadioButton, 0, 0);
+//    gbox->addWidget(useConfigRadioButton, 1, 0);
+//    gbox->addWidget(configsList, 1, 1);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(topLabel);
     layout->addLayout(hbox);
-    layout->addLayout(gbox);
+//    layout->addLayout(gbox);
     setLayout(layout);
 }
 
@@ -210,17 +178,13 @@ void IntroPage::initializePage()
 
 int IntroPage::nextId() const
 {
-    if (newConfigRadioButton->isChecked()) {
-        return CSVImporterWizard::Page_Line;
-    } else {
-        return CSVImporterWizard::Page_Conclusion;
-    }
+    return CSVImporterWizard::Page_Line;
 }
 
 void IntroPage::chooseFile()
 {
-    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Selectionner un fichier à importer"), QDir::home().dirName(),
-                                                    tr("csv files (*.csv)"));
+    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Sélectionner un fichier à importer"), QDir::home().dirName(),
+                                                    tr("Fichiers CSV (*.csv)"));
     if (filename.isEmpty())
         return;
 
@@ -238,51 +202,34 @@ void IntroPage::chooseFile()
 /////////////////////////////////////
 
 LinePage::LinePage(QWidget *parent)
-    : QWizardPage(parent)
+    : QWizardPage(parent),
+      ui(new Ui::LinePage)
 {
-    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
-    setSubTitle(tr("Please fill the following field with the operations header line number."));
+    ui->setupUi(this);
 
-    lineLabel = new QLabel(tr("L&igne sélectionnée:"));
-    qleLineSelected = new QLineEdit;
-    qleLineSelected->setValidator(new QIntValidator);
-    lineLabel->setBuddy(qleLineSelected);
+    ui->qleLineSelected->setValidator(new QIntValidator);
+    registerField("OpHeaderLine*", ui->qleLineSelected);
 
-    registerField("OpHeaderLine*", qleLineSelected);
+    ui->qleOpLine->setValidator(new QIntValidator);
+    connect(ui->enterOpLine, SIGNAL(stateChanged(int)), this, SLOT(handleOpLine(int)));
+    connect(ui->qleLineSelected, SIGNAL(textChanged(QString)), this, SLOT(updateOpLine(QString)));
 
-    enterOpLine = new QCheckBox(tr("The line right after the operations header line is not the first operation. In which case, please enter"
-                                   " the first operation line number below."));
-    qleOpLine = new QLineEdit;
-    qleOpLine->setValidator(new QIntValidator);
-    connect(enterOpLine, SIGNAL(stateChanged(int)), this, SLOT(handleOpLine(int)));
-    connect(qleLineSelected, SIGNAL(textChanged(QString)), this, SLOT(updateOpLine(QString)));
-
-    registerField("firstOpLine", qleOpLine);
-
-    csvEditor = new CSVEditor;
-
-    QVBoxLayout *vbox = new QVBoxLayout;
-
-    QFormLayout *layout = new QFormLayout;
-    layout->addRow(lineLabel, qleLineSelected);
-
-    vbox->addLayout(layout);
-    vbox->addWidget(enterOpLine);
-    vbox->addWidget(qleOpLine);
-    vbox->addWidget(csvEditor);
-    setLayout(vbox);
+    registerField("firstOpLine", ui->qleOpLine);
 }
 
 void LinePage::handleOpLine(int state)
 {
     if (state == Qt::Checked)
     {
-        qleOpLine->setEnabled(true);
+        ui->qleOpLine->setEnabled(true);
     }
     else
     {
-        qleOpLine->setEnabled(false);
-        setField("firstOpLine","");
+        ui->qleOpLine->setEnabled(false);
+        bool ok;
+        int line = ui->qleLineSelected->text().toInt(&ok);
+        if (ok)
+            setField("firstOpLine",line+1);
     }
 }
 
@@ -303,7 +250,7 @@ void LinePage::initializePage()
 
     QFile file(field("filename").toString());
     if (file.open(QFile::ReadOnly | QFile::Text))
-        csvEditor->setPlainText(file.readAll());
+        ui->csvEditor->setPlainText(file.readAll());
 
     file.close();
 }
@@ -311,49 +258,21 @@ void LinePage::initializePage()
 /////////////////////////////////////
 
 FieldsPage::FieldsPage(QWidget *parent)
-    : QWizardPage(parent)
+    : QWizardPage(parent),
+      ui(new Ui::FieldsPage)
 {
-    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
-    setSubTitle(tr("Please fill both fields. Make sure to provide a valid "
-                   "email address (e.g., john.smith@example.com)."));
+    ui->setupUi(this);
 
-    qleDate = new QLineEdit;
-    qleDate->setValidator(new QIntValidator);
-    qleDateFormat = new QLineEdit;
-    qleCat = new QLineEdit;
-    qleCat->setValidator(new QIntValidator);
-    qleAmount = new QLineEdit;
-    qleAmount->setValidator(new QIntValidator);
-    qleTag = new QLineEdit;
-    qleTag->setValidator(new QIntValidator);
-    qleDes = new QLineEdit;
-    qleDes->setValidator(new QIntValidator);
+    ui->qcbDateFormat->addItems({"dd/MM/yyyy", "MM/dd/yyyy"});
 
-    QFormLayout *form = new QFormLayout;
-    form->addRow(tr("Date :"), qleDate);
-    form->addRow(tr("Format Date (ex: dd/MM/yyyy) : "), qleDateFormat);
-    form->addRow(tr("Catégorie : "), qleCat);
-    form->addRow(tr("Montant : "), qleAmount);
-    form->addRow(tr("Etiquette : "), qleTag);
-    form->addRow(tr("Description : "), qleDes);
+    registerField("dateColumn*", ui->qleDate);
+    registerField("dateFormat*", ui->qcbDateFormat, "currentText", SIGNAL(currentTextChanged(QString)));
+    registerField("catColumn", ui->qleCat);
+    registerField("amountColumn*", ui->qleAmount);
+    registerField("tagColumn", ui->qleTag);
+    registerField("desColumn*", ui->qleDes);
 
-    registerField("dateColumn*", qleDate);
-    registerField("dateFormat*", qleDateFormat);
-    registerField("catColumn", qleCat);
-    registerField("amountColumn*", qleAmount);
-    registerField("tagColumn", qleTag);
-    registerField("desColumn*", qleDes);
-
-    qlHeaders = new QLabel;
-    qlHeaders->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-
-    csvEditor = new CSVEditor;
-
-    QGridLayout *gbox = new QGridLayout;
-    gbox->addLayout(form, 0, 0, Qt::AlignCenter);
-    gbox->addWidget(qlHeaders, 0, 1);
-    gbox->addWidget(csvEditor, 1, 0, 1, 2);
-    setLayout(gbox);
+    ui->qlHeaders->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 }
 
 int FieldsPage::nextId() const
@@ -393,9 +312,9 @@ void FieldsPage::initializePage()
         }
         file.close();
         file.open(QFile::ReadOnly | QFile::Text);
-        csvEditor->setPlainText(file.readAll());
+        ui->csvEditor->setPlainText(file.readAll());
         file.close();
-        qlHeaders->setText(text);
+        ui->qlHeaders->setText(text);
     }
 
     qobject_cast<CSVImporterWizard*>(wizard())->setNbOperations(nbLines);
@@ -407,9 +326,8 @@ CategoriesPage::CategoriesPage(QSqlTableModel *mod, QWidget *parent)
     : QWizardPage(parent),
       cats(mod)
 {
-    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
-    setSubTitle(tr("Please fill both fields. Make sure to provide a valid "
-                   "email address (e.g., john.smith@example.com)."));
+    setTitle(tr("Associer les catégories"));
+    setSubTitle(tr("Veuiller associer les catégories du fichier CSV à celles de votre compte."));
 
     QScrollArea * scrollArea = new QScrollArea;
     QWidget * scrollWidget = new QWidget;
@@ -493,9 +411,8 @@ TagsPage::TagsPage(QSqlTableModel *mod, QWidget *parent)
     : QWizardPage(parent),
       tags(mod)
 {
-    setTitle(tr("Evaluate <i>Super Product One</i>&trade;"));
-    setSubTitle(tr("Please fill both fields. Make sure to provide a valid "
-                   "email address (e.g., john.smith@example.com)."));
+    setTitle(tr("Associer les tags"));
+    setSubTitle(tr("Veuiller associer les tags du fichier CSV à ceux de votre compte."));
 
     QScrollArea * scrollArea = new QScrollArea;
     QWidget * scrollWidget = new QWidget;
@@ -575,20 +492,15 @@ int TagsPage::nextId() const
 ConclusionPage::ConclusionPage(QWidget *parent)
     : QWizardPage(parent)
 {
-    setTitle(tr("Complete Your Registration"));
-
-    bottomLabel = new QLabel;
-    bottomLabel->setWordWrap(true);
-    bottomLabel->setText("<u>Upgrade License Agreement:</u> "
-                         "This software is licensed under the terms of your "
-                         "current license.");
+    setTitle(tr("Terminer l'importation"));
+    setSubTitle(tr("Pour compléter l'importation, veuillez vérifier les opérations."));
 
     tableWidget = new QTableWidget;
     tableWidget->setColumnCount(7);
     tableWidget->horizontalHeader()->setStretchLastSection(true);
     tableWidget->verticalHeader()->hide();
-    tableWidget->setHorizontalHeaderLabels(QStringList({"Date", "Category", "CatId",
-                                                        "Amount", "Tag", "TagId", "Description"}));
+    tableWidget->setHorizontalHeaderLabels(QStringList({"Date", "Catégorie", "CatId",
+                                                        "Montant", "Tag", "TagId", "Description"}));
     tableWidget->hideColumn(2);
     tableWidget->hideColumn(5);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -596,7 +508,6 @@ ConclusionPage::ConclusionPage(QWidget *parent)
     tableWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(bottomLabel);
     layout->addWidget(tableWidget);
     setLayout(layout);
 }
