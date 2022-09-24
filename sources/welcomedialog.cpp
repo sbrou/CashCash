@@ -2,9 +2,9 @@
 
 welcomeDialog::welcomeDialog(QWidget *parent) : QDialog(parent)
 {
-    newFile = new QPushButton(tr("Create a new account"), this);
-    lastFile = new QPushButton(tr("Load last opened account"), this);
-    oldFile = new QPushButton(tr("Load another account"), this);
+    newFile = new QPushButton(tr("Créer un nouveau compte"), this);
+    lastFile = new QPushButton(tr("Charger le dernier compte ouvert"), this);
+    oldFile = new QPushButton(tr("Charger un autre compte"), this);
     QPushButton *quitApp = new QPushButton(tr("Quitter MoulagApp"), this);
 
     group = new QButtonGroup(this);

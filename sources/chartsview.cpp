@@ -15,13 +15,13 @@ ChartsView::ChartsView(SqlRelationalTableModel *mod, QWidget *parent)
 {
     mainLayout = new QGridLayout(this);
 
-    qpbCats = new QPushButton(tr("Categories"), this);
-    qpbCats->setToolTip(tr("Show categories chart"));
+    qpbCats = new QPushButton(tr("Catégories"), this);
+    qpbCats->setToolTip(tr("Montrer le diagramme des catégories"));
     qpbCats->setCheckable(true);
     qpbCats->setChecked(true);
 
     qpbTags = new QPushButton(tr("Tags"));
-    qpbTags->setToolTip(tr("Show tags chart"));
+    qpbTags->setToolTip(tr("Montrer le diagramme des tags"));
     qpbTags->setCheckable(true);
 
     buttons = new QButtonGroup(this);
@@ -50,10 +50,10 @@ ChartsView::ChartsView(SqlRelationalTableModel *mod, QWidget *parent)
     chart->legend()->setAlignment(Qt::AlignRight);
 
     tags_series = new QPieSeries(this);
-    tags_series->setName("Tags");
+    tags_series->setName(tr("Tags"));
 
     cats_series = new QPieSeries(this);
-    cats_series->setName("Categories");
+    cats_series->setName(tr("Catégories"));
 
     visible_series = cats_series;
 

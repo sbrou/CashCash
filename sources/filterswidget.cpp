@@ -20,32 +20,32 @@ filtersWidget::filtersWidget(QWidget *parent)
     qdeDateFrom->setDate(QDate(today.year(), today.month(), 1));
 
     QFormLayout *fromForm = new QFormLayout;
-    fromForm->addRow("From :", qdeDateFrom);
+    fromForm->addRow("De :", qdeDateFrom);
 
     qdeDateTo = new QDateEdit(this);
     qdeDateTo->setCalendarPopup(true);
     qdeDateTo->setDate(QDate(today.year(), today.month(), today.daysInMonth()));
 
     QFormLayout *toForm = new QFormLayout;
-    toForm->addRow("To :", qdeDateTo);
+    toForm->addRow("À :", qdeDateTo);
 
     qleSearch = new QLineEdit(this);
-    qleSearch->setPlaceholderText(tr("Search"));
+    qleSearch->setPlaceholderText(tr("Rechercher"));
     qleSearch->setClearButtonEnabled(true);
     qleSearch->addAction(QIcon(":/images/images/search_48px.png"), QLineEdit::LeadingPosition);
 
     QPushButton *qpbSearch = new QPushButton(this);
-    qpbSearch->setText(tr("Apply"));
+    qpbSearch->setText(tr("Appliquer"));
     connect(qpbSearch, SIGNAL(clicked()), this, SLOT(buildStatement()));
 
-    qpbSearch->setStyleSheet("QPushButton { background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
-                             "stop: 0 #55aaff, stop: 1 #dadbde); }");
+//    qpbSearch->setStyleSheet("QPushButton { background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
+//                             "stop: 0 #55aaff, stop: 1 #dadbde); }");
 
     qleMinAmount = new QLineEdit(this);
     QDoubleValidator * minValidator = new QDoubleValidator(qleMinAmount);
     minValidator->setLocale(QLocale::German);
     qleMinAmount->setValidator(minValidator);
-    qleMinAmount->setPlaceholderText(tr("Min amount"));
+    qleMinAmount->setPlaceholderText(tr("Montant min"));
     qleMinAmount->setWindowIcon(QIcon(""));
     qleMinAmount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
 
@@ -53,12 +53,12 @@ filtersWidget::filtersWidget(QWidget *parent)
     QDoubleValidator * maxValidator = new QDoubleValidator(qleMaxAmount);
     maxValidator->setLocale(QLocale::German);
     qleMaxAmount->setValidator(maxValidator);
-    qleMaxAmount->setPlaceholderText(tr("Max amount"));
+    qleMaxAmount->setPlaceholderText(tr("Montant max"));
     qleMaxAmount->setWindowIcon(QIcon(""));
     qleMaxAmount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
 
     qcbCat = new QComboBox(this);
-    qcbCat->setPlaceholderText(tr("Category"));
+    qcbCat->setPlaceholderText(tr("Catégorie"));
 
     qcbTag = new QComboBox(this);
     qcbTag->setPlaceholderText(tr("Tag"));

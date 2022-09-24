@@ -269,13 +269,13 @@ namespace Utilities
     ToolBar::ToolBar(QWidget *parent)
         : QToolBar{parent}
     {
-        QAction* addAct = new QAction(ADD_ICON, tr("A&dd"), this);
+        QAction* addAct = new QAction(ADD_ICON, tr("A&jouter"), this);
         connect(addAct, SIGNAL(triggered()), this, SLOT(addTriggered()));
 
-        editAct = new QAction(EDIT_ICON, tr("E&dit"), this);
+        editAct = new QAction(EDIT_ICON, tr("É&diter"), this);
         connect(editAct, SIGNAL(triggered()), this, SLOT(editTriggered()));
 
-        removeAct = new QAction(REMOVE_ICON, tr("R&emove"), this);
+        removeAct = new QAction(REMOVE_ICON, tr("S&upprimer"), this);
         connect(removeAct, SIGNAL(triggered()), this, SLOT(removeTriggered()));
 
         addAction(addAct);

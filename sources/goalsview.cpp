@@ -36,14 +36,14 @@ GoalsView::GoalsView(const QString &accountName, QWidget *parent)
     : TableWidget{parent},
       databaseName(accountName)
 {
-    model()->setHorizontalHeaderLabels({tr("Category/Tag"), tr("Progress"), tr("Goal"), tr("Spent"), tr("Rest")});
+    model()->setHorizontalHeaderLabels({tr("Catégorie/Tag"), tr("Progression"), tr("Objectif"), tr("Dépensé"), tr("Résultat")});
     table()->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
     table()->setSelectionMode(QAbstractItemView::NoSelection);
 
     delegate = new GoalsViewDelegate(this);
     setTableDelegate(delegate);
 
-    contextMenu()->addAction(EDIT_ICON, tr("Editer l'objectif"), this, &GoalsView::EditGoal);
+    contextMenu()->addAction(EDIT_ICON, tr("Éditer l'objectif"), this, &GoalsView::EditGoal);
     contextMenu()->addAction(REMOVE_ICON, tr("Supprimer l'objectif"), this, &GoalsView::RemoveGoal);
 }
 
@@ -68,7 +68,7 @@ void GoalsView::EditGoal()
 {
     Goal goal = model()->item(currentRow(),0)->data(Qt::UserRole).value<Goal>();
     bool ok;
-    float max = QInputDialog::getDouble(this, tr("Editer l'objectif"),
+    float max = QInputDialog::getDouble(this, tr("Éditer l'objectif"),
                                        tr("Montant:"), goal.max, 0, INT_MAX, 2, &ok,
                                        Qt::WindowFlags(), 0.01);
     if (ok)

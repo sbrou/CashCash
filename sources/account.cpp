@@ -72,8 +72,10 @@ bool Account::commitOnDatabase()
 
 void Account::showError(const QSqlError &err)
 {
-    QMessageBox::critical(this, "Unable to initialize Database",
-                    "Error initializing database: " + err.text());
+    QMessageBox msg(QMessageBox::Critical, tr("Erreur"),
+                    tr("L'initialisation de la base de donnée a échoué."), QMessageBox::StandardButton::Ok);
+    msg.setDetailedText(err.text());
+    msg.exec();
 }
 
 void Account::initAccount()
@@ -93,11 +95,11 @@ void Account::initAccount()
     tags_model = model->relationModel(TagIndex);
 
     // Set the localized header captions:
-    model->setHeaderData(CatIndex, Qt::Horizontal, tr("Category"));
+    model->setHeaderData(CatIndex, Qt::Horizontal, tr("Catégorie"));
     model->setHeaderData(TagIndex, Qt::Horizontal, tr("Tag"));
     model->setHeaderData(model->fieldIndex("op_date"),
                          Qt::Horizontal, tr("Date"));
-    model->setHeaderData(model->fieldIndex("amount"), Qt::Horizontal, tr("Amount"));
+    model->setHeaderData(model->fieldIndex("amount"), Qt::Horizontal, tr("Montant"));
     model->setHeaderData(model->fieldIndex("description"),
                          Qt::Horizontal, tr("Description"));
 
@@ -111,7 +113,7 @@ void Account::initAccount()
 
     opsView->loadModel(model);
     opsView->setBalance(_balance, _future_balance);
-    opsView->contextMenu()->addAction(EDIT_ICON, tr("Editer une opération"), this, &Account::editOperation);
+    opsView->contextMenu()->addAction(EDIT_ICON, tr("Éditer une opération"), this, &Account::editOperation);
     opsView->contextMenu()->addAction(REMOVE_ICON, tr("Supprimer une opération"), this, &Account::removeOperation);
     connect(opsView->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selectionChanged(QItemSelection)));
     connect(opsView->table(), SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editOperation()));
@@ -193,7 +195,7 @@ void Account::importOFX(const QString & filename)
 
     QFile inFile(filename);
     if(!inFile.open(QIODevice::ReadOnly)) {
-        qmbErr.setDetailedText("can't open input file");
+        qmbErr.setDetailedText(tr("Impossible d'ouvrir le fichier"));
         qmbErr.exec();
         return;
     }
@@ -215,7 +217,7 @@ void Account::importOFX(const QString & filename)
 
     QFile outFile("trimmed_ofx.ofx");
     if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        qmbErr.setDetailedText("can't open trimmed file");
+        qmbErr.setDetailedText(tr("Impossible d'ouvrir le fichier rogné"));
         qmbErr.exec();
         return;
     }
@@ -229,8 +231,8 @@ void Account::importOFX(const QString & filename)
     QFile dtd_file(QString("%1/extern/ofx160.dtd").arg(QCoreApplication::applicationDirPath()));
     if (!osx_exe.exists() || !dtd_file.exists()) {
         QString details;
-        if (!osx_exe.exists()) details += QString("can't find the file %1 \n").arg(osx_exe.fileName());
-        if (!dtd_file.exists()) details += QString("can't find the file %1 \n").arg(dtd_file.fileName());
+        if (!osx_exe.exists()) details += QString(tr("Fichier %1 introuvable.\n")).arg(osx_exe.fileName());
+        if (!dtd_file.exists()) details += QString("Fichier %1 introuvable.\n").arg(dtd_file.fileName());
         qmbErr.setDetailedText(details);
         qmbErr.exec();
         return;
@@ -243,7 +245,7 @@ void Account::importOFX(const QString & filename)
     QProcess *myProcess = new QProcess(this);
     myProcess->start(program, arguments);
     if (!myProcess->waitForFinished()) {
-        qmbErr.setDetailedText("process not finished : \n" + myProcess->readAllStandardError());
+        qmbErr.setDetailedText(tr("Conversion en xml interrompue : \n") + myProcess->readAllStandardError());
         qmbErr.exec();
         return;
     }
@@ -251,7 +253,7 @@ void Account::importOFX(const QString & filename)
     QByteArray result = myProcess->readAllStandardOutput();
     QFile xmlFile("ops.ofx");
     if(!xmlFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        qmbErr.setDetailedText("can't create xml file");
+        qmbErr.setDetailedText(tr("Impossible de créer le fichier xml."));
         qmbErr.exec();
         return;
     }
@@ -264,13 +266,13 @@ void Account::importOFX(const QString & filename)
     QDomDocument doc("ops");
     if (!xmlFile.open(QIODevice::ReadOnly))
     {
-        qmbErr.setDetailedText("can't open xml file");
+        qmbErr.setDetailedText(tr("Impossible d'ouvrir le fichier xml"));
         qmbErr.exec();
         return;
     }
     if (!doc.setContent(&xmlFile)) {
         xmlFile.close();
-        qmbErr.setDetailedText("problem at reading");
+        qmbErr.setDetailedText(tr("Erreur à la lecture du fichier xml"));
         qmbErr.exec();
         return;
     }
@@ -326,7 +328,7 @@ void Account::importOFX(const QString & filename)
 
 void Account::importFile()
 {
-    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des operations"), QDir::home().dirName(),
+    QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des opérations"), QDir::home().dirName(),
                                                     tr("Fichiers (*.ofx *.csv)"));
     if (filename.endsWith(".csv"))
         importCSV(filename);
@@ -357,7 +359,7 @@ void Account::editOperation()
     int idx = (int) opsView->table()->currentIndex().row();
 
     AddOpDialog aoDiag(idx, model);
-    aoDiag.setWindowTitle(tr("Edit an operation"));
+    aoDiag.setWindowTitle(tr("Éditer une opération"));
     aoDiag.setWindowIcon(EDIT_ICON);
 
     if (aoDiag.exec())
@@ -367,7 +369,7 @@ void Account::editOperation()
 void Account::addOperation()
 {
     AddOpDialog aoDiag(cats_model, tags_model);
-    aoDiag.setWindowTitle(tr("Add an operation"));
+    aoDiag.setWindowTitle(tr("Ajouter une opération"));
     aoDiag.setWindowIcon(ADD_ICON);
     if (aoDiag.exec()) {
 
@@ -389,8 +391,8 @@ void Account::addOperation()
 
 void Account::removeOperation()
 {
-    int ok = QMessageBox::warning(this,QStringLiteral("Supprimer les opérations sélectionnées"),
-                                  QStringLiteral("Etes-vous sûr de vouloir supprimer les opérations sélectionnées?"),
+    int ok = QMessageBox::warning(this,tr("Supprimer les opérations sélectionnées"),
+                                  tr("Etes-vous sûr de vouloir supprimer les opérations sélectionnées?"),
                                   QMessageBox::Yes,QMessageBox::No);
     if(ok == QMessageBox::No)
         return;
@@ -466,9 +468,9 @@ void Account::saveFile(bool isNewFile)
 
     if (_filepath.isEmpty() || isNewFile)
     {
-        QString title = isNewFile ? tr("Save file as") : tr("Save file");
+        QString title = isNewFile ? tr("Enregistrer le fichier sous") : tr("Enregistrer le fichier");
         saveFilename = QFileDialog::getSaveFileName(this, title, "D:/sopie/Documents/untitled.bsx",
-                                                    tr("BSX files (*.bsx)"));
+                                                    tr("fichiers BSX (*.bsx)"));
 
         if (saveFilename.isEmpty())
             return;

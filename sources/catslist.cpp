@@ -21,7 +21,7 @@ GroupList::GroupList(const QString & database, GroupType type, QSqlTableModel * 
     ui->setupUi(this);
 
     setWindowIcon(QIcon(groupIcon(type)));
-    setWindowTitle(tr("Manage ") + groupTable(type));
+    setWindowTitle(tr("Gérer ") + groupTable(type));
     setWindowModality(Qt::WindowModal);
 
     toolBar = new ToolBar;
@@ -33,7 +33,7 @@ GroupList::GroupList(const QString & database, GroupType type, QSqlTableModel * 
     connect(ui->catsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(updateActions(QItemSelection)));
 
     contextMenu = new QMenu(ui->catsView);
-    QString editTitle = type == CatType ? tr("Editer une catégorie") : tr("Editer un tag");
+    QString editTitle = type == CatType ? tr("Éditer une catégorie") : tr("Éditer un tag");
     contextMenu->addAction(EDIT_ICON, editTitle, this, &GroupList::edit);
     contextMenu->addAction(REMOVE_ICON, removeAGroup(type), this, &GroupList::remove);
     ui->catsView->setContextMenuPolicy(Qt::CustomContextMenu);

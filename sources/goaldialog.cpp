@@ -48,7 +48,7 @@ void GoalDialog::showGroup(unsigned type)
     _goal.type = (GroupType) type;
 
     if (type == CatType) {
-        ui->qcbName->setPlaceholderText(tr("Category"));
+        ui->qcbName->setPlaceholderText(tr("Catégorie"));
         ui->qcbName->setModel(catsModel);
     }
     else {

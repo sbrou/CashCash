@@ -14,25 +14,25 @@ GroupDialog::GroupDialog(GroupType type)
 
     inputLayout = new QGridLayout;
 
-    qlName = new QLabel(tr("&Name:"));
+    qlName = new QLabel(tr("&Nom :"));
     inputLayout->addWidget(qlName, 0, 0);
 
     qleName = new QLineEdit;
     qlName->setBuddy(qleName);
     inputLayout->addWidget(qleName, 0, 1);
 
-    qlColor = new QLabel(tr("&Color:"));
+    qlColor = new QLabel(tr("&Couleur :"));
     inputLayout->addWidget(qlColor, 1, 0);
 
     pixmap = new QPixmap(16,16);
-    qpbColor = new QPushButton(tr("Choose..."));
+    qpbColor = new QPushButton(tr("Choisir..."));
     qlColor->setBuddy(qpbColor);
     connect(qpbColor, SIGNAL(clicked()), this, SLOT(choose_color()));
     inputLayout->addWidget(qpbColor, 1, 1);
 
     qgbType = new QGroupBox;
-    expenses = new QRadioButton(tr("&Expenses"));
-    earnings = new QRadioButton(tr("&Earnings"));
+    expenses = new QRadioButton(tr("&Dépenses"));
+    earnings = new QRadioButton(tr("&Revenus"));
     expenses->setChecked(true);
 
     QHBoxLayout *hbox = new QHBoxLayout;
@@ -76,7 +76,7 @@ GroupDialog::~GroupDialog()
 void GroupDialog::choose_color()
 {
     const QColorDialog::ColorDialogOptions options = QFlag(QColorDialog::DontUseNativeDialog);
-    const QColor color = QColorDialog::getColor(cat_color, this, tr("Select Color"), options);
+    const QColor color = QColorDialog::getColor(cat_color, this, tr("Selectionner une couleur"), options);
 
     if (color.isValid()) {
         cat_color = color;

@@ -13,9 +13,17 @@ int main(int argc, char *argv[])
     {
         QMessageBox::critical(NULL,
                     "Unable to load database",
-                    "This demo needs the SQLITE driver"
+                    "This application needs the SQLITE driver"
                     );
         a.quit();
+    }
+
+    QTranslator qtTranslator;
+    if (qtTranslator.load(QLocale::French,
+                "qt", "_",
+                QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+    {
+        a.installTranslator(&qtTranslator);
     }
 
     QCoreApplication::setOrganizationName("SopiePersonalProjects");

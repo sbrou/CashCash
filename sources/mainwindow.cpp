@@ -60,9 +60,9 @@ void MainWindow::openFile(const QString & filename)
     if (!maybeSave())
         return;
 
-    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Open File"),
+    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Ouvrir un fichier MoulagApp"),
                                                                              "D:/sopie/Documents",
-                                                                             tr("BSX files (*.bsx)")) : filename;
+                                                                             tr("fichiers BSX (*.bsx)")) : filename;
 
     if (loadFilename.isEmpty())
         return;
@@ -112,96 +112,95 @@ void MainWindow::initFile(bool newFile, const QString & filename)
 
 void MainWindow::createActions()
 {
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QToolBar *fileToolBar = addToolBar(tr("File"));
+    QMenu *fileMenu = menuBar()->addMenu(tr("&Fichier"));
+    QToolBar *fileToolBar = addToolBar(tr("Fichier"));
     const QIcon newIcon = QIcon(":/images/images/new_file_48px.png");
-    QAction *newAct = new QAction(newIcon, tr("&New"), this);
+    QAction *newAct = new QAction(newIcon, tr("&Nouveau"), this);
     newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
+    newAct->setStatusTip(tr("Créer un nouveau compte"));
     connect(newAct, &QAction::triggered, this, &MainWindow::createFile);
     fileMenu->addAction(newAct);
     fileToolBar->addAction(newAct);
 
     const QIcon openIcon = QIcon(":/images/images/open_document_48px.png");
-    QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
+    QAction *openAct = new QAction(openIcon, tr("&Ouvrir..."), this);
     openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
+    openAct->setStatusTip(tr("Ouvrir un fichier existant"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(openFile()));
     fileMenu->addAction(openAct);
     fileToolBar->addAction(openAct);
 
     const QIcon saveIcon = QIcon(":/images/images/save_48px.png");
-    saveAct = new QAction(saveIcon, tr("&Save"), this);
+    saveAct = new QAction(saveIcon, tr("&Enregistrer"), this);
     saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save the document to disk"));
+    saveAct->setStatusTip(tr("Enregistrer le compte"));
     fileMenu->addAction(saveAct);
     fileToolBar->addAction(saveAct);
 
     const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
-    saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
+    saveAsAct = new QAction(saveAsIcon, tr("Enregistrer &Sous..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
-    saveAsAct->setStatusTip(tr("Save the document under a new name"));
+    saveAsAct->setStatusTip(tr("Enregistrer le compte sous un nouveau nom"));
     fileMenu->addAction(saveAsAct);
 
     fileMenu->addSeparator();
 
     const QIcon exitIcon = QIcon(":/images/images/close_window_48px.png");
-    QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+    QAction *exitAct = fileMenu->addAction(exitIcon, tr("Q&uitter"), this, &QWidget::close);
     exitAct->setShortcuts(QKeySequence::Quit);
-    exitAct->setStatusTip(tr("Exit the application"));
+    exitAct->setStatusTip(tr("Quitter MoulagApp"));
 
     fileToolBar->addSeparator();
 
-    addOpAct = new QAction(ADD_ICON, tr("&New Operation"), this);
-    addOpAct->setStatusTip(tr("Add an operation"));
+    addOpAct = new QAction(ADD_ICON, tr("&Nouvelle Opération"), this);
+    addOpAct->setStatusTip(tr("Ajouter une opération"));
     addOpAct->setEnabled(false);
     fileToolBar->addAction(addOpAct);
 
-    removeOpAct = new QAction(REMOVE_ICON, tr("&Delete operations"), this);
+    removeOpAct = new QAction(REMOVE_ICON, tr("&Supprimer des opérations"), this);
     removeOpAct->setEnabled(false);
-    removeOpAct->setStatusTip(tr("Delete the selected operations"));
+    removeOpAct->setStatusTip(tr("Supprimer les opérations sélectionnées"));
     fileToolBar->addAction(removeOpAct);
 
-    editOpAct = new QAction(EDIT_ICON, tr("&Edit operation"), this);
+    editOpAct = new QAction(EDIT_ICON, tr("&Éditer une opération"), this);
     editOpAct->setEnabled(false);
-    editOpAct->setStatusTip(tr("Edit the selected operation"));
+    editOpAct->setStatusTip(tr("Éditer l'opération sélectionée"));
     fileToolBar->addAction(editOpAct);
 
-    importOpAct = new QAction(QIcon(":/images/images/load_from_file_48px.png"), tr("&Import operations"), this);
-    importOpAct->setStatusTip(tr("Import operations from a ofx file"));
+    importOpAct = new QAction(QIcon(":/images/images/load_from_file_48px.png"), tr("&Importer des opérations"), this);
+    importOpAct->setStatusTip(tr("Importer des opérations"));
     importOpAct->setEnabled(false);
     fileToolBar->addAction(importOpAct);
 
     fileToolBar->addSeparator();
 
-    catAct = new QAction(QIcon(":/images/images/category_48px.png"), tr("&Manage categories"), this);
-    catAct->setStatusTip(tr("Create, edit or delete categories"));
+    catAct = new QAction(QIcon(":/images/images/category_48px.png"), tr("&Gérer les catégories"), this);
+    catAct->setStatusTip(tr("Créer, éditer ou supprimer des catégories"));
     catAct->setEnabled(false);
     fileToolBar->addAction(catAct);
 
-    tagAct = new QAction(QIcon(":/images/images/tag_window_48px.png"), tr("&Manage tags"), this);
-    tagAct->setStatusTip(tr("Create, edit or delete tags"));
+    tagAct = new QAction(QIcon(":/images/images/tag_window_48px.png"), tr("&Gérer les tags"), this);
+    tagAct->setStatusTip(tr("Créer, éditer ou supprimer des tags"));
     tagAct->setEnabled(false);
     fileToolBar->addAction(tagAct);
 
-    goalAct = new QAction(QIcon(":/images/images/goal_48px.png"), tr("&Manage goals"), this);
-    goalAct->setStatusTip(tr("Create, edit or delete budget goals"));
+    goalAct = new QAction(QIcon(":/images/images/goal_48px.png"), tr("&Gérer les objectifs"), this);
+    goalAct->setStatusTip(tr("Créer, éditer ou supprimer des objectifs"));
     goalAct->setEnabled(false);
     fileToolBar->addAction(goalAct);
 
-    rulesAct = new QAction(QIcon(":/images/images/check_rules.png"), tr("&Manage affectation rules"), this);
-    rulesAct->setStatusTip(tr("Create, edit or delete affectation rules"));
+    rulesAct = new QAction(QIcon(":/images/images/check_rules.png"), tr("&Gérer les affectations"), this);
+    rulesAct->setStatusTip(tr("Créer, éditer ou supprimer les règles d'affections automatiques"));
     rulesAct->setEnabled(false);
     fileToolBar->addAction(rulesAct);
 
-    statsAct = new QAction(QIcon(":/images/images/graph_48px.png"), tr("&Show stats"), this);
-    statsAct->setStatusTip(tr("Show statistics"));
+    statsAct = new QAction(QIcon(":/images/images/graph_48px.png"), tr("&Statistiques"), this);
+    statsAct->setStatusTip(tr("Montrer les statistiques"));
     statsAct->setEnabled(false);
     fileToolBar->addAction(statsAct);
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
-    aboutAct->setStatusTip(tr("Show the application's About box"));
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Aide"));
+    helpMenu->addAction(tr("&À propos"), this, &MainWindow::about);
 }
 
 void MainWindow::about()
@@ -217,7 +216,7 @@ bool MainWindow::maybeSave()
     if (_account != nullptr && _account->state() != Empty)
     {
         if (_account->state() == Modified) {
-            QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Sauvegarder"),
+            QMessageBox::StandardButton choice = QMessageBox::question(this, tr("Enregistrer"),
                                                                        tr("Voulez-vous enregistrer vos modifications ?"),
                                                                        QMessageBox::Save | QMessageBox::Cancel | QMessageBox::Discard, QMessageBox::Save);
             if (choice == QMessageBox::Save)

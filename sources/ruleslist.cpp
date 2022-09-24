@@ -20,7 +20,7 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     tags(mod_tags)
 {
     setWindowIcon(QIcon(":/images/images/check_rules.png"));
-    setWindowTitle("Règles d'affectations");
+    setWindowTitle(tr("Règles d'affectations automatiques"));
     setWindowModality(Qt::WindowModal);
     rulesWidget = new TableWidget(this);
 
@@ -29,13 +29,13 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     connect(rulesWidget->table()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), toolBar, SLOT(updateActions(QItemSelection)));
     rulesWidget->addToolBar(toolBar);
 
-    model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});
+    model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Catégorie"), tr("Tag")});
     rulesWidget->table()->setSelectionBehavior(QAbstractItemView::SelectRows);
     rulesWidget->table()->setSelectionMode(QAbstractItemView::SingleSelection);
     rulesWidget->table()->resizeColumnsToContents();
     rulesWidget->table()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
 
-    rulesWidget->contextMenu()->addAction(EDIT_ICON, tr("Editer la règle"), this, &RulesList::editRule);
+    rulesWidget->contextMenu()->addAction(EDIT_ICON, tr("Éditer la règle"), this, &RulesList::editRule);
     rulesWidget->contextMenu()->addAction(REMOVE_ICON, tr("Supprimer la règle"), this, &RulesList::removeRule);
 
     QHBoxLayout *hbox = new QHBoxLayout(this);

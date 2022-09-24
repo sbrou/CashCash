@@ -25,7 +25,7 @@ StatsWidget::StatsWidget(float balance, const QString & account_title, QWidget *
     ui->qcbOpType->addItems({ tr("Dépenses"), tr("Revenus"), tr("Tout") });
     connect(ui->qcbOpType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
 
-    ui->qcbGroupType->addItems({ tr("Categories"), tr("Tags") });
+    ui->qcbGroupType->addItems({ tr("Catégories"), tr("Tags") });
     connect(ui->qcbGroupType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
 
     ui->qcbPeriod->addItems({ tr("Ce Mois"), tr("Ce trimestre"), tr("Cette année"),
@@ -76,7 +76,7 @@ void StatsWidget::populateTable()
     }
 
     ui->table->setRowCount(2); // Resultat et solde
-    ui->table->setVerticalHeaderLabels({ tr("Resultats"), tr("Solde") });
+    ui->table->setVerticalHeaderLabels({ tr("Résultats"), tr("Solde") });
 
     ui->table->setColumnCount(nb_months + 2); // les mois + moyenne de l'annee + total
     QStringList verticalsLabels;
@@ -148,7 +148,9 @@ void StatsWidget::populateTable()
     addItemInTable(results_sum/nb_months, ui->table->rowCount() - 2, nb_months); // Moyenne resultats
     addItemInTable(results_sum, ui->table->rowCount() - 2, nb_months + 1); // total resultats
 
-    ui->table->setItem(ui->table->rowCount() - 1, nb_months, new QTableWidgetItem("-")); // Moyenne solde : sens ?
+    QTableWidgetItem *nonSense = new QTableWidgetItem("-");
+    nonSense->setTextAlignment(Qt::AlignCenter);
+    ui->table->setItem(ui->table->rowCount() - 1, nb_months, nonSense); // Moyenne solde : sens ?
     addItemInTable(getBalanceByDate(today), ui->table->rowCount() - 1, nb_months + 1); // Solde actuel
 }
 

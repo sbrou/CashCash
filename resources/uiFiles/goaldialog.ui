@@ -36,7 +36,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Categories</string>
+          <string>Catégories</string>
          </property>
          <property name="checked">
           <bool>true</bool>
