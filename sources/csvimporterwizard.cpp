@@ -327,7 +327,8 @@ CategoriesPage::CategoriesPage(QSqlTableModel *mod, QWidget *parent)
       cats(mod)
 {
     setTitle(tr("Associer les catégories"));
-    setSubTitle(tr("Veuiller associer les catégories du fichier CSV à celles de votre compte."));
+    setSubTitle(tr("Veuiller associer les catégories du fichier CSV à celles de votre compte.<br>"
+                   "<b>N.B.: Les affectations automatiques sont prioritaires sur les affectations de l'importation.</b>"));
 
     QScrollArea * scrollArea = new QScrollArea;
     QWidget * scrollWidget = new QWidget;
@@ -412,7 +413,8 @@ TagsPage::TagsPage(QSqlTableModel *mod, QWidget *parent)
       tags(mod)
 {
     setTitle(tr("Associer les tags"));
-    setSubTitle(tr("Veuiller associer les tags du fichier CSV à ceux de votre compte."));
+    setSubTitle(tr("Veuiller associer les tags du fichier CSV à ceux de votre compte.<br>"
+                   "<b>N.B.: Les affectations automatiques sont prioritaires sur les affectations de l'importation.</b>"));
 
     QScrollArea * scrollArea = new QScrollArea;
     QWidget * scrollWidget = new QWidget;
