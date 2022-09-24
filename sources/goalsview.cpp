@@ -130,7 +130,7 @@ void GoalsView::addGoal(Goal newGoal)
         name = query.value(1).toString();
     }
 
-    QStandardItem *nameItem = new QStandardItem(QIcon(groupIconByType(newGoal.type)),name);
+    QStandardItem *nameItem = new QStandardItem(QIcon(groupIcon(newGoal.type)),name);
     QVariant qVarGoal;
     qVarGoal.setValue(newGoal);
     nameItem->setData(qVarGoal, Qt::UserRole);

@@ -9,9 +9,8 @@ using namespace Utilities;
 
 GroupDialog::GroupDialog(GroupType type)
 {
-    setWindowIcon(QIcon(groupIconByType(type)));
-    QString groupeName(groupNameByType(type));
-    setWindowTitle(groupeName.replace(0, 1, groupeName[0].toUpper()));
+    setWindowIcon(QIcon(groupIcon(type)));
+    setWindowTitle(groupName(type));
 
     inputLayout = new QGridLayout;
 

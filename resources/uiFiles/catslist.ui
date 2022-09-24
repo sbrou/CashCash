@@ -21,7 +21,7 @@
     <layout class="QVBoxLayout" name="toolLayout"/>
    </item>
    <item>
-    <widget class="QListWidget" name="catsView"/>
+    <widget class="QListView" name="catsView"/>
    </item>
   </layout>
  </widget>

@@ -11,6 +11,7 @@ CONFIG += c++11
 INCLUDEPATH = includes/ sources/ resources/ resources/uiFiles resources/translation
 
 SOURCES += \
+    sources/groupinputdialog.cpp \
     sources/rulesdialog.cpp \
     sources/ruleslist.cpp \
     sources/account.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
     sources/sqlrelationalmodel.cpp
 
 HEADERS += \
+    includes/groupinputdialog.h \
     includes/account.h \
     includes/addopdialog.h \
     includes/catdialog.h \
@@ -62,6 +64,7 @@ HEADERS += \
     includes/sqlrelationalmodel.h
 
 FORMS += \
+    resources/uiFiles/groupinputdialog.ui \
     resources/uiFiles/catslist.ui \
     resources/uiFiles/addopdialog.ui \
     resources/uiFiles/goaldialog.ui \

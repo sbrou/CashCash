@@ -11,6 +11,7 @@
 
 #include "addopdialog.h"
 #include "catslist.h"
+#include "groupinputdialog.h"
 #include "goaldialog.h"
 #include "statswidget.h"
 #include "csvimporterwizard.h"
@@ -127,11 +128,13 @@ void Account::initAccount()
     connect(goalsView, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
     addWidget(goalsView);
 
-    catsWidget = new GroupList(CatType, cats_model, this);
+    catsWidget = new GroupList(_title, CatType, cats_model, this);
     connect(catsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
+    connect(catsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int)), this, SLOT(removeGroup(GroupType,QString,int)));
 
-    tagsWidget = new GroupList(TagType, tags_model, this);
+    tagsWidget = new GroupList(_title, TagType, tags_model, this);
     connect(tagsWidget, SIGNAL(commit()), this, SLOT(commitOnDatabase()));
+    connect(tagsWidget, SIGNAL(groupToBeRemoved(GroupType,QString,int)), this, SLOT(removeGroup(GroupType,QString,int)));
 
     rulesWidget = new RulesList(cats_model, tags_model, this);
     connect(rulesWidget, SIGNAL(changeState(AccountState)), this, SLOT(changeState(AccountState)));
@@ -401,6 +404,43 @@ void Account::removeOperation()
         model->removeRows(row,1);
     }
     commitOnDatabase();
+}
+
+void Account::removeGroup(GroupType type, const QString & name, int id)
+{
+    model->setFilter(groupCondition( type, id));
+    int rows = model->rowCount();
+
+    QString sub1, sub2;
+    if (type == CatType) {
+        sub1 = tr("La catégorie");
+        sub2 = tr("une nouvelle");
+    }
+    else
+    {
+        sub1 = tr("Le tag");
+        sub2 = tr("un nouveau");
+    }
+    QString text = tr("Attention ! %1 \"%2\" est affectée à %3 opérations. ")
+            .arg(sub1).arg(name).arg(QString::number(rows));
+    text += tr("Voulez-vous leur en attribuer ") + sub2 + " ?";
+    QMessageBox::StandardButton choice = QMessageBox::question(this, removeAGroup(type), text);
+    QSqlTableModel * groupModel = type == CatType ? cats_model : tags_model;
+    int new_group = DEFAULT_GROUP;
+    if (choice == QMessageBox::Yes) {
+        new_group = GroupInputDialog::getIndex(this, groupName(type) + tr(" de remplacement"), groupName(type), groupModel);
+    }
+
+    int fieldIndex = type == CatType ? CatIndex : TagIndex;
+    for (int r = 0; r < rows; ++r) {
+        QSqlRecord op = model->record(r);
+        op.setValue(fieldIndex, QVariant(new_group));
+        model->setRecord(r, op);
+    }
+    groupModel->removeRow(id-1);
+    commitOnDatabase();
+    opsView->resetView();
+    opsView->resizeView();
 }
 
 AccountState Account::state()

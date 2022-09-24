@@ -4,6 +4,11 @@
 
 namespace Utilities
 {
+    void capitalize(QString & string)
+    {
+        string.replace(0, 1, string[0].toUpper());
+    }
+
     int daysInMonth(int month, int year)
     {
         if (month == 2)
@@ -84,7 +89,7 @@ namespace Utilities
         }
     }
 
-    QString groupIconByType(GroupType type)
+    QString groupIcon(GroupType type)
     {
         switch (type)
         {
@@ -97,20 +102,20 @@ namespace Utilities
         }
     }
 
-    QString groupNameByType(GroupType type)
+    QString groupName(GroupType type)
     {
         switch (type)
         {
         case CatType:
-            return "category";
+            return QObject::tr("Catégorie");
         case TagType:
-            return "tag";
+            return QObject::tr("Tag");
         default:
             return "";
         }
     }
 
-    QString groupTableByType(GroupType type)
+    QString groupTable(GroupType type)
     {
         switch (type)
         {
@@ -144,6 +149,32 @@ namespace Utilities
             return SELECT_CATEGORIES;
         case TagType:
             return SELECT_TAGS;
+        default:
+            return "";
+        }
+    }
+
+    QString removeAGroup(GroupType type)
+    {
+        switch(type)
+        {
+        case CatType:
+            return QObject::tr("Supprimer une catégorie");
+        case TagType:
+            return QObject::tr("Supprimer un tag");
+        default:
+            return "";
+        }
+    }
+
+    QString removeTheGroup(GroupType type)
+    {
+        switch(type)
+        {
+        case CatType:
+            return QObject::tr("supprimer la catégorie");
+        case TagType:
+            return QObject::tr("supprimer le tag");
         default:
             return "";
         }

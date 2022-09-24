@@ -49,6 +49,7 @@ public slots:
     void addOperation();
     void editOperation();
     void removeOperation();
+    void removeGroup(GroupType, const QString&, int);
 
     void changeState(AccountState newState);
     void saveFile(bool isNewFile = false);

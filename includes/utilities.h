@@ -10,17 +10,21 @@
 
 namespace Utilities
 {
+    void capitalize(QString &);
+
     // Date functions
     int daysInMonth(int month, int year);
     QString monthName(int month);
     void getTimePeriod(TimePeriod timePeriod, QDate & beginDate, QDate & endDate);
 
     // Group functions
-    QString groupIconByType(GroupType type);
-    QString groupNameByType(GroupType type);
-    QString groupTableByType(GroupType type);
+    QString groupIcon(GroupType type);
+    QString groupName(GroupType type);
+    QString groupTable(GroupType type);
     QString groupCondition(GroupType, int id);
     QString selectGroupCmd(GroupType);
+    QString removeAGroup(GroupType);
+    QString removeTheGroup(GroupType);
 
     // Query statements functions
     QString lowerDateCondition(QDate date);

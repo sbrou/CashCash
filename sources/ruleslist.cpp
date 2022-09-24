@@ -31,7 +31,7 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
 
     model()->setHorizontalHeaderLabels({tr("Expression clé"), tr("Categorie"), tr("Tag")});
     rulesWidget->table()->setSelectionBehavior(QAbstractItemView::SelectRows);
-    rulesWidget->table()->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    rulesWidget->table()->setSelectionMode(QAbstractItemView::SingleSelection);
     rulesWidget->table()->resizeColumnsToContents();
     rulesWidget->table()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
 

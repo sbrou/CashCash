@@ -20,7 +20,7 @@ class GroupList : public QDialog
     Q_OBJECT
 
 public:
-    explicit GroupList(GroupType type, QSqlTableModel * mod, QWidget *parent = nullptr);
+    explicit GroupList(const QString& database, GroupType type, QSqlTableModel * mod, QWidget *parent);
 
 public slots:
     void customMenuRequested(QPoint pos);
@@ -28,6 +28,7 @@ public slots:
 
 signals:
     void commit();
+    void groupToBeRemoved(GroupType, const QString &, int);
 
 protected slots:
     void applyAction(Action);
@@ -41,6 +42,7 @@ private:
     QSqlTableModel *model;
     QMenu *contextMenu;
     GroupType groupType;
+    QString databaseName;
 };
 
 #endif // CATSLIST_H

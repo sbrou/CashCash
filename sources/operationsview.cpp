@@ -4,7 +4,7 @@
 #include <QSqlRelationalDelegate>
 #include <QSettings>
 
-#include "defines.h"
+#include "utilities.h"
 
 OperationsView::OperationsView()
 {
@@ -118,6 +118,13 @@ void OperationsView::loadModel(SqlRelationalTableModel * mod)
 void OperationsView::applyFilters(const QString & statement)
 {
     model->setFilter(statement);
+}
+
+void OperationsView::resetView()
+{
+    QDate begin, end;
+    Utilities::getTimePeriod(CurrentMonth, begin, end);
+    model->setFilter(Utilities::lowerDateCondition(begin) + COND_SEP + Utilities::upperDateCondition(end));
 }
 
 void OperationsView::setBalance(float balance, float future_balance)

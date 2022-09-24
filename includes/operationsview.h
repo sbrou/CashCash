@@ -30,6 +30,7 @@ public slots:
     void applyFilters(const QString &);
     void setBalance(float, float);
     void resizeView();
+    void resetView();
 
 private slots:
     void slotShowFilters(bool isVisible);
