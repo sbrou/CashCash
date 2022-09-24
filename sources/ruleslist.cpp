@@ -12,7 +12,7 @@
 #include "tablewidget.h"
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidget *parent) :
     QDialog(parent),

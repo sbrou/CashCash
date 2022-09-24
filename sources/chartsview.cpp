@@ -7,7 +7,7 @@
 
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 ChartsView::ChartsView(SqlRelationalTableModel *mod, QWidget *parent)
     : QWidget{parent}

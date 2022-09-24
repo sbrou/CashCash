@@ -2,7 +2,7 @@
 
 #include <QDate>
 
-namespace Utilities
+namespace utilities
 {
     void capitalize(QString & string)
     {

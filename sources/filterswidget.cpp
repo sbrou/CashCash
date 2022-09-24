@@ -8,7 +8,7 @@
 
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 filtersWidget::filtersWidget(QWidget *parent)
     : QWidget{parent}

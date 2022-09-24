@@ -10,7 +10,7 @@
 #include "defines.h"
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 StatsWidget::StatsWidget(float balance, const QString & account_title, QWidget *parent)
     : QWidget{parent},

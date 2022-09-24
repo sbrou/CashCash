@@ -39,7 +39,7 @@ protected slots:
 
 private:
     Ui::GroupList *ui;
-    Utilities::ToolBar *toolBar;
+    utilities::ToolBar *toolBar;
     QSqlTableModel *model;
     QMenu *contextMenu;
     GroupType groupType;

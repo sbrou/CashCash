@@ -10,7 +10,7 @@
 
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 void GoalsViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
            const QModelIndex &index ) const

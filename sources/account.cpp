@@ -19,7 +19,7 @@
 #include "initdb.h"
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 Account::Account(QWidget *parent)
     : QSplitter{parent}

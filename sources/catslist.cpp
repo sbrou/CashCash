@@ -9,7 +9,7 @@
 #include "catdialog.h"
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 GroupList::GroupList(const QString & database, GroupType type, QSqlTableModel * mod, QWidget *parent)
     : QDialog{parent},

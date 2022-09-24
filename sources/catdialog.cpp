@@ -5,7 +5,7 @@
 
 #include "utilities.h"
 
-using namespace Utilities;
+using namespace utilities;
 
 GroupDialog::GroupDialog(GroupType type)
 {

@@ -123,8 +123,8 @@ void OperationsView::applyFilters(const QString & statement)
 void OperationsView::resetView()
 {
     QDate begin, end;
-    Utilities::getTimePeriod(CurrentMonth, begin, end);
-    model->setFilter(Utilities::lowerDateCondition(begin) + COND_SEP + Utilities::upperDateCondition(end));
+    utilities::getTimePeriod(CurrentMonth, begin, end);
+    model->setFilter(utilities::lowerDateCondition(begin) + COND_SEP + utilities::upperDateCondition(end));
 }
 
 void OperationsView::setBalance(float balance, float future_balance)

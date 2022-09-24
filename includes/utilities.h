@@ -8,7 +8,7 @@
 
 #include "defines.h"
 
-namespace Utilities
+namespace utilities
 {
     void capitalize(QString &);
 
