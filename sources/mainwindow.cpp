@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle("MoulagApp");
-    setWindowIcon(QIcon(":/images/images/euro_money_48px.png"));
+    setWindowIcon(QIcon(":/images/images/euro_logo.png"));
 
     readSettings();
     createActions();
@@ -114,7 +114,7 @@ void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&Fichier"));
     QToolBar *fileToolBar = addToolBar(tr("Fichier"));
-    const QIcon newIcon = QIcon(":/images/images/new_file_48px.png");
+    const QIcon newIcon = QIcon(":/images/images/new.png");
     QAction *newAct = new QAction(newIcon, tr("&Nouveau"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Créer un nouveau compte"));
@@ -122,7 +122,7 @@ void MainWindow::createActions()
     fileMenu->addAction(newAct);
     fileToolBar->addAction(newAct);
 
-    const QIcon openIcon = QIcon(":/images/images/open_document_48px.png");
+    const QIcon openIcon = QIcon(":/images/images/open.png");
     QAction *openAct = new QAction(openIcon, tr("&Ouvrir..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Ouvrir un fichier existant"));
@@ -130,7 +130,7 @@ void MainWindow::createActions()
     fileMenu->addAction(openAct);
     fileToolBar->addAction(openAct);
 
-    const QIcon saveIcon = QIcon(":/images/images/save_48px.png");
+    const QIcon saveIcon = QIcon(":/images/images/save.png");
     saveAct = new QAction(saveIcon, tr("&Enregistrer"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Enregistrer le compte"));
@@ -145,7 +145,7 @@ void MainWindow::createActions()
 
     fileMenu->addSeparator();
 
-    const QIcon exitIcon = QIcon(":/images/images/close_window_48px.png");
+    const QIcon exitIcon = QIcon(":/images/images/cancel.png");
     QAction *exitAct = fileMenu->addAction(exitIcon, tr("Q&uitter"), this, &QWidget::close);
     exitAct->setShortcuts(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Quitter MoulagApp"));
@@ -167,34 +167,34 @@ void MainWindow::createActions()
     editOpAct->setStatusTip(tr("Éditer l'opération sélectionée"));
     fileToolBar->addAction(editOpAct);
 
-    importOpAct = new QAction(QIcon(":/images/images/load_from_file_48px.png"), tr("&Importer des opérations"), this);
+    importOpAct = new QAction(QIcon(":/images/images/upload.png"), tr("&Importer des opérations"), this);
     importOpAct->setStatusTip(tr("Importer des opérations"));
     importOpAct->setEnabled(false);
     fileToolBar->addAction(importOpAct);
 
     fileToolBar->addSeparator();
 
-    catAct = new QAction(QIcon(":/images/images/category_48px.png"), tr("&Gérer les catégories"), this);
+    catAct = new QAction(QIcon(":/images/images/category.png"), tr("&Gérer les catégories"), this);
     catAct->setStatusTip(tr("Créer, éditer ou supprimer des catégories"));
     catAct->setEnabled(false);
     fileToolBar->addAction(catAct);
 
-    tagAct = new QAction(QIcon(":/images/images/tag_window_48px.png"), tr("&Gérer les tags"), this);
+    tagAct = new QAction(QIcon(":/images/images/tag.png"), tr("&Gérer les tags"), this);
     tagAct->setStatusTip(tr("Créer, éditer ou supprimer des tags"));
     tagAct->setEnabled(false);
     fileToolBar->addAction(tagAct);
 
-    goalAct = new QAction(QIcon(":/images/images/goal_48px.png"), tr("&Gérer les objectifs"), this);
+    goalAct = new QAction(QIcon(":/images/images/target.png"), tr("&Gérer les objectifs"), this);
     goalAct->setStatusTip(tr("Créer, éditer ou supprimer des objectifs"));
     goalAct->setEnabled(false);
     fileToolBar->addAction(goalAct);
 
-    rulesAct = new QAction(QIcon(":/images/images/check_rules.png"), tr("&Gérer les affectations"), this);
+    rulesAct = new QAction(QIcon(":/images/images/ruler.png"), tr("&Gérer les affectations"), this);
     rulesAct->setStatusTip(tr("Créer, éditer ou supprimer les règles d'affections automatiques"));
     rulesAct->setEnabled(false);
     fileToolBar->addAction(rulesAct);
 
-    statsAct = new QAction(QIcon(":/images/images/graph_48px.png"), tr("&Statistiques"), this);
+    statsAct = new QAction(QIcon(":/images/images/analysis.png"), tr("&Statistiques"), this);
     statsAct->setStatusTip(tr("Montrer les statistiques"));
     statsAct->setEnabled(false);
     fileToolBar->addAction(statsAct);

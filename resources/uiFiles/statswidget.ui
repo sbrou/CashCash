@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../budget.qrc">
-    <normaloff>:/images/images/euro_money_48px.png</normaloff>:/images/images/euro_money_48px.png</iconset>
+    <normaloff>:/images/images/analysis.png</normaloff>:/images/images/analysis.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
@@ -107,7 +107,7 @@
        </property>
        <property name="icon">
         <iconset resource="../budget.qrc">
-         <normaloff>:/images/images/reset_48px.png</normaloff>:/images/images/reset_48px.png</iconset>
+         <normaloff>:/images/images/redo.png</normaloff>:/images/images/redo.png</iconset>
        </property>
       </widget>
      </item>

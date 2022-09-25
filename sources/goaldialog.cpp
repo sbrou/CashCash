@@ -18,7 +18,7 @@ GoalDialog::GoalDialog(QSqlTableModel * cats, QSqlTableModel * tags, QWidget *pa
     amValidator->setLocale(QLocale::German);
     amValidator->setBottom(0);
     ui->qleAMount->setValidator(amValidator);
-    ui->qleAMount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
+    ui->qleAMount->addAction(QIcon(":/images/images/euro.png"), QLineEdit::TrailingPosition);
 
     connect(ui->qrbCats, SIGNAL(toggled(bool)), this, SLOT(showCats(bool)));
     connect(ui->qrbTags, SIGNAL(toggled(bool)), this, SLOT(showTags(bool)));

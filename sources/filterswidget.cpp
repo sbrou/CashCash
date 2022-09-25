@@ -32,10 +32,9 @@ filtersWidget::filtersWidget(QWidget *parent)
     qleSearch = new QLineEdit(this);
     qleSearch->setPlaceholderText(tr("Rechercher"));
     qleSearch->setClearButtonEnabled(true);
-    qleSearch->addAction(QIcon(":/images/images/search_48px.png"), QLineEdit::LeadingPosition);
+    qleSearch->addAction(QIcon(":/images/images/search.png"), QLineEdit::LeadingPosition);
 
-    QPushButton *qpbSearch = new QPushButton(this);
-    qpbSearch->setText(tr("Appliquer"));
+    QPushButton *qpbSearch = new QPushButton(QIcon(":/images/images/filter.png"), tr("Appliquer"), this);
     connect(qpbSearch, SIGNAL(clicked()), this, SLOT(buildStatement()));
 
 //    qpbSearch->setStyleSheet("QPushButton { background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
@@ -47,7 +46,7 @@ filtersWidget::filtersWidget(QWidget *parent)
     qleMinAmount->setValidator(minValidator);
     qleMinAmount->setPlaceholderText(tr("Montant min"));
     qleMinAmount->setWindowIcon(QIcon(""));
-    qleMinAmount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
+    qleMinAmount->addAction(QIcon(":/images/images/euro.png"), QLineEdit::TrailingPosition);
 
     qleMaxAmount = new QLineEdit(this);
     QDoubleValidator * maxValidator = new QDoubleValidator(qleMaxAmount);
@@ -55,7 +54,7 @@ filtersWidget::filtersWidget(QWidget *parent)
     qleMaxAmount->setValidator(maxValidator);
     qleMaxAmount->setPlaceholderText(tr("Montant max"));
     qleMaxAmount->setWindowIcon(QIcon(""));
-    qleMaxAmount->addAction(QIcon(":/images/images/euro_48px.png"), QLineEdit::TrailingPosition);
+    qleMaxAmount->addAction(QIcon(":/images/images/euro.png"), QLineEdit::TrailingPosition);
 
     qcbCat = new QComboBox(this);
     qcbCat->setPlaceholderText(tr("Catégorie"));
@@ -63,7 +62,7 @@ filtersWidget::filtersWidget(QWidget *parent)
     qcbTag = new QComboBox(this);
     qcbTag->setPlaceholderText(tr("Tag"));
 
-    QPushButton *qpbReset = new QPushButton(QIcon(":/images/images/reset_48px.png"), tr("Reset"), this);
+    QPushButton *qpbReset = new QPushButton(QIcon(":/images/images/redo.png"), tr("Reset"), this);
     connect(qpbReset, SIGNAL(clicked()), this, SLOT(reset()));
 
 

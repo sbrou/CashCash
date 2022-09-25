@@ -10,9 +10,9 @@
 #define SELECT_TAGS "SELECT * FROM tags"
 #define SELECT_SUM "SELECT SUM (amount) FROM operations"
 
-#define ADD_ICON QIcon(":/images/images/add_48px.png")
-#define EDIT_ICON QIcon(":/images/images/edit_48px.png")
-#define REMOVE_ICON QIcon(":/images/images/Remove_48px.png")
+#define ADD_ICON QIcon(":/images/images/plus.png")
+#define EDIT_ICON QIcon(":/images/images/pencil.png")
+#define REMOVE_ICON QIcon(":/images/images/minus.png")
 
 #include <QMetaType>
 

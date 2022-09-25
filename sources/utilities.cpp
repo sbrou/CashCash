@@ -94,9 +94,9 @@ namespace utilities
         switch (type)
         {
         case CatType:
-            return ":/images/images/category_48px.png";
+            return ":/images/images/category.png";
         case TagType:
-            return ":/images/images/tag_window_48px.png";
+            return ":/images/images/tag.png";
         default:
             return "";
         }

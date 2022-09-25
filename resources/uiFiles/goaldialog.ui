@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Créer un objectif</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../budget.qrc">
+    <normaloff>:/images/images/target.png</normaloff>:/images/images/target.png</iconset>
+  </property>
   <property name="modal">
    <bool>true</bool>
   </property>
@@ -96,7 +100,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../budget.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

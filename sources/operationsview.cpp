@@ -73,12 +73,12 @@ void OperationsView::slotShowFilters(bool isVisible)
 {
     if (isVisible) {
         filters->show();
-        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/arrow_up.png"));
+        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/up-arrow.png"));
         qpbHideOrShowFilters->setText(tr("Cacher les filtres"));
     }
     else {
         filters->hide();
-        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/arrow_down.png"));
+        qpbHideOrShowFilters->setIcon(QIcon(":/images/images/down-arrow.png"));
         qpbHideOrShowFilters->setText(tr("Montrer les filtres"));
     }
 }

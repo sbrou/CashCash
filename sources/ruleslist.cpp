@@ -19,7 +19,7 @@ RulesList::RulesList(QSqlTableModel * mod_cats, QSqlTableModel * mod_tags, QWidg
     cats(mod_cats),
     tags(mod_tags)
 {
-    setWindowIcon(QIcon(":/images/images/check_rules.png"));
+    setWindowIcon(QIcon(":/images/images/ruler.png"));
     setWindowTitle(tr("Règles d'affectations automatiques"));
     setWindowModality(Qt::WindowModal);
     rulesWidget = new TableWidget(this);

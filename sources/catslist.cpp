@@ -21,7 +21,7 @@ GroupList::GroupList(const QString & database, GroupType type, QSqlTableModel * 
     ui->setupUi(this);
 
     setWindowIcon(QIcon(groupIcon(type)));
-    setWindowTitle(tr("Gérer ") + groupTable(type));
+    setWindowTitle(tr("Gérer les ") + groupTable(type));
     setWindowModality(Qt::WindowModal);
 
     toolBar = new ToolBar;
