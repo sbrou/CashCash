@@ -26,6 +26,7 @@ signals:
 
 private slots:
     void about();
+    void aboutQt();
     void enableAccountActions(const QString& account_title);
     void updateAccountActions(const QItemSelection& selected);
     void updateWindowTitle(bool modified);

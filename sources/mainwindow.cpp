@@ -8,6 +8,7 @@
 
 #include "welcomedialog.h"
 #include "newaccountdialog.h"
+#include "aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -200,15 +201,19 @@ void MainWindow::createActions()
     fileToolBar->addAction(statsAct);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Aide"));
-    helpMenu->addAction(tr("&À propos"), this, &MainWindow::about);
+    helpMenu->addAction(tr("&À propos de MoulagApp"), this, &MainWindow::about);
+    helpMenu->addAction(tr("&À propos de Qt"), this, &MainWindow::aboutQt);
 }
 
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> example demonstrates how to "
-               "write modern GUI applications using Qt, with a menu bar, "
-               "toolbars, and a status bar."));
+    AboutDialog about(this);
+    about.exec();
+}
+
+void MainWindow::aboutQt()
+{
+    QMessageBox::aboutQt(this);
 }
 
 bool MainWindow::maybeSave()

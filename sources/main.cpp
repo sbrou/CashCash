@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("SopiePersonalProjects");
     QCoreApplication::setApplicationName("MoulagApp");
-    QCoreApplication::setApplicationVersion("0.0.0");
+    QCoreApplication::setApplicationVersion("1.0.0");
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
