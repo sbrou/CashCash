@@ -91,3 +91,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources/budget.qrc
+
+RC_ICONS = resources/images/euro_logo.ico
