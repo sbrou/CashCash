@@ -107,7 +107,7 @@ void GoalsView::updateGoalProgress(int goalIndex, float amount)
     QStandardItem *progressItem = new QStandardItem(QString::number(100*spent/goal.max));
     QStandardItem *goalItem = new QStandardItem(QString::number(goal.max) + " €");
 
-    QBrush brush = spent < goal.max ? QBrush(Qt::black) : QBrush(Qt::red);
+    QBrush brush = spent <= goal.max ? QBrush(Qt::black) : QBrush(Qt::red);
     QStandardItem *spentItem = new QStandardItem(QString::number(spent) + " €");
     spentItem->setForeground(brush);
     QStandardItem *restItem = new QStandardItem(QString::number(goal.max-spent) + " €");
