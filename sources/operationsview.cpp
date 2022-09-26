@@ -132,12 +132,12 @@ void OperationsView::setBalance(float balance, float future_balance)
     QString bColor = balance >= 0 ? "green" : "red";
     QString fbColor = future_balance >= 0 ? "green" : "red";
 
-    qlTodayBalance->setText(tr("<font size=\"6\">Solde actuel : </font> ") +
+    qlTodayBalance->setText(tr("<font size=\"6\" face=\"calibri\">Aujourd'hui : </font> ") +
                             QString("<font color=\"%1\" size=\"8\"><b>%2€</b></font>")
                             .arg(bColor)
                             .arg(QString::number(balance)));
-    qlFutureBalance->setText(tr("<font size=\"6\">Solde futur : </font> ") +
-                             QString("<font color=\"%1\" size=\"8\"><b>%2€</b></font>")
+    qlFutureBalance->setText(tr("<font size=\"6\" face=\"calibri\"><i>Futur : </i></font> ") +
+                             QString("<font color=\"%1\" size=\"8\"><b><i>%2€</i></b></font>")
                              .arg(fbColor)
                              .arg(QString::number(future_balance)));
 }

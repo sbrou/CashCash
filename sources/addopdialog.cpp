@@ -15,6 +15,7 @@ void AddOpDialog::init(QSqlTableModel * cats, QSqlTableModel * tags)
     QDoubleValidator * amountValidator = new QDoubleValidator(ui->qleAmount);
     amountValidator->setLocale(QLocale::German);
     ui->qleAmount->setValidator(amountValidator);
+    ui->qleAmount->addAction(QIcon(":/images/images/euro.png"), QLineEdit::TrailingPosition);
 
     ui->qcbCat->setModel(cats);
     ui->qcbCat->setModelColumn(1);
