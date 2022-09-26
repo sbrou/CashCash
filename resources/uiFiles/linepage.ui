@@ -17,7 +17,7 @@
    <string>Identifier la ligne des opérations</string>
   </property>
   <property name="subTitle">
-   <string>Veuillez entrer ci-dessous le numéro de la ligne de l'entête des opérations.</string>
+   <string>Veuillez entrer ci-dessous le numéro de ligne de l'entête des opérations et le numéro de ligne de la première opération.</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

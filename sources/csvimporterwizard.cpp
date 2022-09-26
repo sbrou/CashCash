@@ -75,6 +75,8 @@ CSVImporterWizard::CSVImporterWizard(SqlRelationalTableModel * mod, const QStrin
     setOption(NoDefaultButton, true);
 
     setWindowTitle(tr("Assistant d'importation de fichier CSV"));
+    setPixmap(QWizard::LogoPixmap, QPixmap(":/images/images/euro_logo.png"));
+    setWizardStyle(QWizard::ModernStyle);
 }
 
 void CSVImporterWizard::accept()
