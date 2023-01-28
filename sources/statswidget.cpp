@@ -64,7 +64,7 @@ void StatsWidget::populateTable()
 
     int month1 = dateFrom.month();
     int month2 = dateTo.month();
-    int nb_months = month2 - month1 + 1;
+    int nb_months = month2 >= month1 ? month2 - month1 + 1 : month2 - month1 + 13;
     
     QSqlQuery query(QSqlDatabase::database(_account_name));
     query.exec(statement.get());
@@ -80,22 +80,28 @@ void StatsWidget::populateTable()
 
     ui->table->setColumnCount(nb_months + 2); // les mois + moyenne de l'annee + total
     QStringList verticalsLabels;
-    for (int i = month1; i <= month2; ++i)
-        verticalsLabels << monthName(i);
+
+    for (int i = 0; i < nb_months; ++i)
+        verticalsLabels << monthName((month1+i)%12);
     verticalsLabels << tr("Moyenne");
     verticalsLabels << tr("Total");
     ui->table->setHorizontalHeaderLabels(verticalsLabels);
 
     float results_sum = 0;
     QDate today = QDate::currentDate();
+    int yearFrom = dateFrom.year();
 
-    for (int m = month1; m <= month2; ++m)
+    for (int m = 0; m < nb_months; ++m)
     {
-        int month = m - month1;
         float month_result = 0;
 
-        QDate start = m == month1 ? dateFrom : QDate(today.year(), m, 1);
-        QDate end = m == month2 ? dateTo : QDate(today.year(), m, daysInMonth(m, today.year()));
+        int month = (month1+m)%12;
+        if (month == 0) month = 12;
+
+        int year = month1+m <= 12 ? yearFrom : yearFrom + 1;
+
+        QDate start = m == 0 ? dateFrom : QDate(year, month, 1);
+        QDate end = m == nb_months ? dateTo : QDate(year, month, daysInMonth(month, year));
 
         statement.setCommand(SELECT_SUM);
         statement.addCondition(lowerDateCondition(start));
@@ -108,7 +114,7 @@ void StatsWidget::populateTable()
             while (query.next()) {
                 float sum = query.value(0).toFloat();
                 month_result += sum;
-                it_group.value()[month] = sum;
+                it_group.value()[m] = sum;
                 it_group.value()[nb_months] += sum;
             }
             statement.clearConditions(2);
@@ -116,8 +122,8 @@ void StatsWidget::populateTable()
         }
 
         results_sum += month_result;
-        addItemInTable(month_result, 0, month); // Resultat
-        addItemInTable(getBalanceByDate(end), 1, month); // Solde
+        addItemInTable(month_result, 0, m); // Resultat
+        addItemInTable(getBalanceByDate(end), 1, m); // Solde
     }
 
     int row = 0;
@@ -168,7 +174,7 @@ float StatsWidget::getBalanceByDate(QDate date)
 void StatsWidget::addItemInTable(float amount, int row, int column)
 {
     QColor aColor = amount >= 0 ? Qt::darkGreen : Qt::darkRed;
-    QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(qAbs(amount)));
+    QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(qAbs(amount), 'f', 2));
     newItem->setForeground(QBrush(aColor));
     newItem->setTextAlignment(Qt::AlignCenter);
     ui->table->setItem(row, column, newItem);

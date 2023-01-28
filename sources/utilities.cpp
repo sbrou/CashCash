@@ -45,6 +45,7 @@ namespace utilities
         case 11:
             return QObject::tr("Novembre");
         case 12:
+        case 0:
             return QObject::tr("Décembre");
         default:
             return "";
@@ -55,24 +56,30 @@ namespace utilities
     {
         QDate today = QDate::currentDate();
         int year = today.year();
+        int yearFrom = year;
+        int yearTo = year;
         int month = today.month();
 
         int pre_month = month - 1;
-        if (pre_month == 0) pre_month = 12;
+        if (pre_month == 0) {
+            pre_month = 12;
+            --yearFrom;
+        }
 
         int three_months_before = month - 2;
-        if (three_months_before <= 0) three_months_before += 12;
+        if (three_months_before <= 0)
+            three_months_before += 12;
 
 
         switch (timePeriod)
         {
         case PreviousMonth:
-            beginDate = QDate(year, pre_month , 1);
-            endDate = QDate(year, pre_month, daysInMonth(pre_month, year));
+            beginDate = QDate(yearFrom, pre_month , 1);
+            endDate = QDate(yearFrom, pre_month, daysInMonth(pre_month, yearFrom));
             break;
         case ThreePastMonths:
-            beginDate = QDate(year, three_months_before, 1);
-            endDate = QDate(year, month, today.daysInMonth());
+            beginDate = QDate(yearFrom, three_months_before, 1);
+            endDate = QDate(yearTo, month, today.daysInMonth());
             break;
         case CurrentYear:
             beginDate = QDate(year, 1, 1);
