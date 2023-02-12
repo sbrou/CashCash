@@ -28,18 +28,18 @@ StatsWidget::StatsWidget(float balance, const QString & account_title, QWidget *
     ui->qcbGroupType->addItems({ tr("Catégories"), tr("Tags") });
     connect(ui->qcbGroupType, SIGNAL(currentIndexChanged(int)), this, SLOT(populateTable()));
 
-    ui->qcbPeriod->addItems({ tr("Ce Mois"), tr("Ce trimestre"), tr("Cette année"),
+    ui->qcbPeriod->addItems({ tr("Ce Mois"), tr("Le mois dernier"), tr("Ce trimestre"), tr("Cette année"),
                           tr("L'année dernière"), tr("Personnalisé")});
     connect(ui->qcbPeriod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTimePeriod(int)));
     getTimePeriod(CurrentMonth, dateFrom, dateTo);
 
     ui->qdeDateFrom->setDate(dateFrom);
     ui->qdeDateFrom->setEnabled(false);
-    connect(ui->qdeDateFrom, SIGNAL(dateChanged(QDate)), this, SLOT(setDateFrom(QDate)));
+    connect(ui->qdeDateFrom, SIGNAL(dateChanged(QDate)), this, SLOT(changeCustomPeriod()));
 
     ui->qdeDateTo->setDate(dateTo);
     ui->qdeDateTo->setEnabled(false);
-    connect(ui->qdeDateTo, SIGNAL(dateChanged(QDate)), this, SLOT(setDateTo(QDate)));
+    connect(ui->qdeDateTo, SIGNAL(dateChanged(QDate)), this, SLOT(changeCustomPeriod()));
 
     connect(ui->qpbRefresh, SIGNAL(clicked()), this, SLOT(populateTable()));
 
@@ -182,8 +182,8 @@ void StatsWidget::addItemInTable(float amount, int row, int column)
 
 void StatsWidget::changeTimePeriod(int index)
 {
-    ui->qdeDateFrom->setEnabled(index > 3);
-    ui->qdeDateTo->setEnabled(index > 3);
+    ui->qdeDateFrom->setEnabled(index > 4);
+    ui->qdeDateTo->setEnabled(index > 4);
 
     switch (index)
     {
@@ -191,13 +191,20 @@ void StatsWidget::changeTimePeriod(int index)
         getTimePeriod(CurrentMonth, dateFrom, dateTo);
         break;
     case 1:
+        getTimePeriod(PreviousMonth, dateFrom, dateTo);
+        break;
+    case 2:
         getTimePeriod(ThreePastMonths,dateFrom,dateTo);
         break;
-    case 2: // this year
+    case 3: // this year
         getTimePeriod(CurrentYear,dateFrom,dateTo);
         break;
-    case 3: // previous year
+    case 4: // previous year
         getTimePeriod(PreviousYear,dateFrom,dateTo);
+        break;
+    case 5: //personalized
+        dateFrom = ui->qdeDateFrom->date();
+        dateTo = ui->qdeDateTo->date();
         break;
     default:
         break;
@@ -206,14 +213,7 @@ void StatsWidget::changeTimePeriod(int index)
     populateTable();
 }
 
-void StatsWidget::setDateFrom(QDate date)
+void StatsWidget::changeCustomPeriod()
 {
-    dateFrom = date;
-    changeTimePeriod(4);
-}
-
-void StatsWidget::setDateTo(QDate date)
-{
-    dateTo = date;
-    changeTimePeriod(4);
+    changeTimePeriod(5);
 }

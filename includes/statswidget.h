@@ -23,8 +23,7 @@ public slots:
 
 private slots:
     void changeTimePeriod(int index);
-    void setDateFrom(QDate);
-    void setDateTo(QDate);
+    void changeCustomPeriod();
 
 private:
     // Méthodes

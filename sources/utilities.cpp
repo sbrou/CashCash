@@ -56,30 +56,32 @@ namespace utilities
     {
         QDate today = QDate::currentDate();
         int year = today.year();
-        int yearFrom = year;
-        int yearTo = year;
         int month = today.month();
 
         int pre_month = month - 1;
-        if (pre_month == 0) {
-            pre_month = 12;
-            --yearFrom;
-        }
-
         int three_months_before = month - 2;
-        if (three_months_before <= 0)
-            three_months_before += 12;
-
 
         switch (timePeriod)
         {
         case PreviousMonth:
-            beginDate = QDate(yearFrom, pre_month , 1);
-            endDate = QDate(yearFrom, pre_month, daysInMonth(pre_month, yearFrom));
+            if (pre_month == 0 ) {
+                beginDate = QDate(year - 1, 12 , 1);
+                endDate = QDate(year - 1, 12, 31);
+            }
+            else {
+                beginDate = QDate(year, pre_month , 1);
+                endDate = QDate(year, pre_month, daysInMonth(pre_month, year));
+            }
             break;
         case ThreePastMonths:
-            beginDate = QDate(yearFrom, three_months_before, 1);
-            endDate = QDate(yearTo, month, today.daysInMonth());
+            if (three_months_before <= 0 ) {
+                three_months_before = +12;
+                beginDate = QDate(year - 1, three_months_before , 1);
+            }
+            else {
+                beginDate = QDate(year, three_months_before , 1);
+            }
+            endDate = QDate(year, month, today.daysInMonth());
             break;
         case CurrentYear:
             beginDate = QDate(year, 1, 1);
