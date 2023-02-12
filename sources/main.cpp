@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
         a.installTranslator(&qtTranslator);
     }
 
-    QCoreApplication::setOrganizationName("SopiePersonalProjects");
-    QCoreApplication::setApplicationName("MoulagApp");
+    QCoreApplication::setOrganizationName("SopieBrouProjects");
+    QCoreApplication::setApplicationName("CashCash");
     QCoreApplication::setApplicationVersion("1.0.0");
 
     QTranslator translator;

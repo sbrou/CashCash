@@ -1,11 +1,12 @@
 #include "welcomedialog.h"
+#include <QCoreApplication>
 
 welcomeDialog::welcomeDialog(QWidget *parent) : QDialog(parent)
 {
     newFile = new QPushButton(tr("Créer un nouveau compte"), this);
     lastFile = new QPushButton(tr("Charger le dernier compte ouvert"), this);
     oldFile = new QPushButton(tr("Charger un autre compte"), this);
-    QPushButton *quitApp = new QPushButton(tr("Quitter MoulagApp"), this);
+    QPushButton *quitApp = new QPushButton(tr("Quitter ") + QCoreApplication::applicationName(), this);
 
     group = new QButtonGroup(this);
     group->addButton(newFile, 1);

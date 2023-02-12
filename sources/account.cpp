@@ -329,7 +329,7 @@ void Account::importOFX(const QString & filename)
 void Account::importFile()
 {
     QString filename = QFileDialog::getOpenFileName(nullptr,tr("Importer des opérations"), QDir::home().dirName(),
-                                                    tr("Fichiers (*.ofx *.csv)"));
+                                                    tr("Fichiers OFX (*.ofx);; Fichiers CSV (*.csv)"));
     if (filename.endsWith(".csv"))
         importCSV(filename);
     else if (filename.endsWith(".ofx"))
@@ -469,7 +469,7 @@ void Account::saveFile(bool isNewFile)
     if (_filepath.isEmpty() || isNewFile)
     {
         QString title = isNewFile ? tr("Enregistrer le fichier sous") : tr("Enregistrer le fichier");
-        saveFilename = QFileDialog::getSaveFileName(this, title, "D:/sopie/Documents/untitled.bsx",
+        saveFilename = QFileDialog::getSaveFileName(this, title, "untitled.bsx",
                                                     tr("fichiers BSX (*.bsx)"));
 
         if (saveFilename.isEmpty())

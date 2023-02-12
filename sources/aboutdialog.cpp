@@ -12,6 +12,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui->setupUi(this);
 
     ui->scrollArea->setVisible(false);
+    setWindowTitle(QString("A propos de %1").arg(QCoreApplication::applicationName()));
 
     QPushButton *qpbCredits = new QPushButton(tr("Crédits"));
     qpbCredits->setCheckable(true);
@@ -19,7 +20,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     connect(qpbCredits, SIGNAL(toggled(bool)), ui->scrollArea, SLOT(setVisible(bool)));
     ui->buttonBox->addButton(qpbCredits, QDialogButtonBox::ActionRole);
 
-    QString head = QString("<b>MoulagApp version %1</b>").arg(QCoreApplication::applicationVersion());
+    QString head = QString("<b>%1 version %2</b>").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion());
     QString qt_version = tr("Dévelopée avec ")+ QString("Qt %1").arg(QLibraryInfo::version().toString());
     QString app_sources = QString("<a href=\"https://github.com/sbrou/budget\"> %1 </a>").arg(tr("Code source"));
     ui->qlBody->setText(head + "<br>" + qt_version + "<br><br>" + app_sources);

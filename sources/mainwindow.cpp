@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setWindowTitle("MoulagApp");
+    setWindowTitle(QCoreApplication::applicationName());
     setWindowIcon(QIcon(":/images/images/euro_logo.png"));
 
     readSettings();
@@ -61,8 +61,8 @@ void MainWindow::openFile(const QString & filename)
     if (!maybeSave())
         return;
 
-    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Ouvrir un fichier MoulagApp"),
-                                                                             "D:/sopie/Documents",
+    QString loadFilename = filename.isEmpty() ? QFileDialog::getOpenFileName(this, tr("Ouvrir un fichier ") + QCoreApplication::applicationName(),
+                                                                             QString(),
                                                                              tr("fichiers BSX (*.bsx)")) : filename;
 
     if (loadFilename.isEmpty())
@@ -149,7 +149,7 @@ void MainWindow::createActions()
     const QIcon exitIcon = QIcon(":/images/images/cancel.png");
     QAction *exitAct = fileMenu->addAction(exitIcon, tr("Q&uitter"), this, &QWidget::close);
     exitAct->setShortcuts(QKeySequence::Quit);
-    exitAct->setStatusTip(tr("Quitter MoulagApp"));
+    exitAct->setStatusTip(tr("Quitter ") + QCoreApplication::applicationName());
 
     fileToolBar->addSeparator();
 
@@ -201,7 +201,7 @@ void MainWindow::createActions()
     fileToolBar->addAction(statsAct);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Aide"));
-    helpMenu->addAction(tr("&À propos de MoulagApp"), this, &MainWindow::about);
+    helpMenu->addAction(tr("&À propos de ") + QCoreApplication::applicationName(), this, &MainWindow::about);
     helpMenu->addAction(tr("&À propos de Qt"), this, &MainWindow::aboutQt);
 }
 
@@ -270,7 +270,7 @@ void MainWindow::writeSettings()
 void MainWindow::enableAccountActions(const QString& title)
 {
     if (!title.isEmpty())
-        setWindowTitle(QString("MoulagApp - %1").arg(title));
+        setWindowTitle(QCoreApplication::applicationName() + QString(" - %1").arg(title));
 
     addOpAct->setEnabled(true);
     removeOpAct->setEnabled(false);

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>A propos de MoulagApp</string>
+   <string>A propos de</string>
   </property>
   <property name="modal">
    <bool>true</bool>
